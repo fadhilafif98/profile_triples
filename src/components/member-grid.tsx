@@ -38,6 +38,8 @@ const MemberCard = React.memo(({ member, setSelectedMember }: { member: Member, 
   );
 });
 
+MemberCard.displayName = 'MemberCard';
+
 export default function MemberGrid() {
   // Define the type of the state for the selected member
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)

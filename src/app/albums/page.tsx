@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { Music } from "lucide-react"
 import { FaSpotify } from "react-icons/fa"
 
 // Album data with release dates for timeline
