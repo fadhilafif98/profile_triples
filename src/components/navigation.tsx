@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, Users, Info, Mail, Heart } from "lucide-react"
+import { Menu, X, Home, Users, Info, Heart } from "lucide-react"
 import AnimatedLogo from "./animated-logo"
 
 export default function Navigation() {

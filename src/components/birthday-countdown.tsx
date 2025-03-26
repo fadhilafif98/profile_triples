@@ -2,7 +2,6 @@
 import Particles from "react-tsparticles"
 import { tsParticles } from "tsparticles-engine";
 import { loadConfettiPreset } from "tsparticles-preset-confetti"
-import { useRef } from "react"
 import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
@@ -16,7 +15,6 @@ interface BirthdayCountdownProps {
 
 export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   const [showConfetti, setShowConfetti] = useState(false);
-  const particlesRef = useRef<any>(null);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<Member[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [timeLeft, setTimeLeft] = useState({
@@ -121,17 +119,6 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
     return () => clearInterval(timer)
   }, [calculateTimeLeft])
-
-  // Handle slider navigation
-  const nextSlide = () => {
-    if (upcomingBirthdays.length <= 1) return
-    setCurrentIndex((prevIndex) => (prevIndex === upcomingBirthdays.length - 1 ? 0 : prevIndex + 1))
-  }
-
-  const prevSlide = () => {
-    if (upcomingBirthdays.length <= 1) return
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? upcomingBirthdays.length - 1 : prevIndex - 1))
-  }
 
   // Auto-advance slider for members with same birthday
   useEffect(() => {

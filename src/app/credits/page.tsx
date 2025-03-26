@@ -1,7 +1,7 @@
 // import { Instagram, Twitter, Youtube, Facebook, Twitch, Music, Github, Linkedin, Heart, Code, Star } from "lucide-react"
 
 import AnimatedLogo from "@/components/animated-logo";
-import { FaApple, FaCode, FaDiscord, FaFacebook, FaFirefoxBrowser, FaGithub, FaGooglePlay, FaHeart, FaInstagram, FaLinkedin, FaSpotify, FaStar, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaHeart, FaInstagram, FaLinkedin, FaSpotify, FaStar, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 
 
 export default function ThankYouPage() {
@@ -115,7 +115,7 @@ export default function ThankYouPage() {
                 </h3>
                 <ul className="space-y-2 text-gray-300">
                   <li>• Modern K-pop group websites</li>
-                  <li>• Spotify's dark UI aesthetic</li>
+                  <li>• Spotify&apos;s dark UI aesthetic</li>
                   <li>• Neon cyberpunk visual elements</li>
                   <li>• Motion design principles by Framer</li>
                 </ul>
