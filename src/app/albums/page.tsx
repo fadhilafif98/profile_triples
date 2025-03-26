@@ -1,80 +1,8 @@
 "use client"
 
+import { albums } from "@/utils/albums"
 import Image from "next/image"
 import { FaSpotify } from "react-icons/fa"
-
-// Album data with release dates for timeline
-const albums = [
-  {
-    id: "access",
-    title: "<ACCESS>",
-    releaseDate: "November 9, 2022",
-    cover: "/album/album_aaa.jpg",
-    description:
-      `<ACCESS> (Hangul: 액세스) is the debut mini album by tripleS' first sub-unit, Acid Angel from Asia. With title "Generation" and B-side "Rolex"`,
-    spotifyLink: "https://open.spotify.com/album/4EdQFAwm8sQbbeEX1laj7H?si=xgS3kBzNS0aPnI2eTVGWcQ",
-  },
-  {
-    id: "assemble",
-    title: "ASSEMBLE",
-    releaseDate: "February 13, 2023",
-    cover: "/album/album_assamble_10.jpg",
-    description:
-      `Debut mini album by tripleS featuring the first ten revealed members. With Title ”Rising”, B-side “Colorful” and “Beam”`,
-    spotifyLink: "https://open.spotify.com/album/6lCXOBwO98PfkbR32dsxrp?si=2dOFI_R5S-OKBMhmPU_VjQ",
-  },
-  {
-    id: "aesthetic",
-    title: "<AESTHETIC>,",
-    releaseDate: "May 4, 2023",
-    cover: "/album/3_kre_aesthetic.jpg",
-    description: "<AESTHETIC>, which reinterprets the sensibility of Y2K with the music taste of 2023",
-    spotifyLink: "https://open.spotify.com/album/6ZOfnNRe1tp5tQpdkdDfCy?si=gUa7wmakTvC5KEyji-t39A",
-  },
-  {
-    id: "velvet-noir-ep",
-    title: "Velvet Noir EP",
-    releaseDate: "July 2024",
-    cover: "/album/4_acid_eyes_cherry_gene.jpg",
-    description:
-      "Smooth R&B and soul music with sophisticated harmonies and emotional depth from our Velvet Noir sub-unit.",
-    spotifyLink: "https://spotify.com",
-  },
-  {
-    id: "neon-pulse-ep",
-    title: "Neon Pulse EP",
-    releaseDate: "June 2024",
-    cover: "/album/5_kre_touch+.jpg",
-    description: "Hard-hitting hip-hop tracks with bold lyrics and street style from our Neon Pulse sub-unit.",
-    spotifyLink: "https://spotify.com",
-  },
-  {
-    id: "aurora-ep",
-    title: "Aurora EP",
-    releaseDate: "May 2024",
-    cover: "/album/6_LOVElution_MUHAN.jpg",
-    description: "Ethereal pop music with dreamy melodies and atmospheric production from our Aurora sub-unit.",
-    spotifyLink: "https://spotify.com",
-  },
-  {
-    id: "stellar-maknae-ep",
-    title: "Stellar Maknae EP",
-    releaseDate: "April 2024",
-    cover: "/album/7_EVOLution_Mujuk.jpg",
-    description:
-      "Bright, energetic pop songs and playful concepts from our youngest members in the Stellar Maknae sub-unit.",
-    spotifyLink: "https://spotify.com",
-  },
-  {
-    id: "first-light",
-    title: "First Light",
-    releaseDate: "November 2023",
-    cover: "/album/8_aria_door.jpg",
-    description:
-      "Our debut album that introduced Stellar 24 to the world, featuring our signature blend of futuristic sounds.",
-    spotifyLink: "https://spotify.com",
-  },
-].reverse()
 
 export default function AlbumsPage() {
   return (

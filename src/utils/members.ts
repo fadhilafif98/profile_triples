@@ -7,7 +7,9 @@ export interface Member {
     nationality: string;
     mbti: string;
     representativeEmoji: string;
-    gif?: string
+    gif?: string;
+    nextBirthday?: Date
+    daysUntil?: number
   }
   
   // Static data for members

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, Users, Info, Mail } from "lucide-react"
+import { Menu, X, Home, Users, Info, Mail, Heart } from "lucide-react"
 import AnimatedLogo from "./animated-logo"
 
 export default function Navigation() {
@@ -26,7 +26,7 @@ export default function Navigation() {
     { name: "About", href: "/about", icon: <Info className="h-5 w-5" /> },
     { name: "Members", href: "/members", icon: <Users className="h-5 w-5" /> },
     { name: "Sub-Units", href: "/sub-units", icon: <Users className="h-5 w-5 opacity-70" /> },
-    { name: "Contact", href: "/contact", icon: <Mail className="h-5 w-5" /> },
+    { name: "Credits", href: "/credits", icon: <Heart className="h-5 w-5" /> },
   ]
 
   return (
@@ -92,7 +92,7 @@ export default function Navigation() {
 
               <div className="mt-auto">
                 <div className="border-t border-gray-800 pt-6 pb-4">
-                  <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Stellar 24</p>
+                  <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} tripleS</p>
                 </div>
               </div>
             </div>

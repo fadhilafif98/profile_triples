@@ -2,6 +2,8 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
 import SpotifyEmbed from "@/components/spotify-embed"
+import BirthdayCountdown from "@/components/birthday-countdown"
+import { members } from "@/utils/members"
 
 export default function Home() {
   return (
@@ -181,6 +183,10 @@ export default function Home() {
             </Link>
           </div>
         </div>
+      </section>
+      {/* Birthday Countdown Section */}
+      <section className="flex flex-col justify-center items-center bg-gradient-to-br from-black to-gray-700">
+        <BirthdayCountdown members={Object.values(members)} />
       </section>
     </div>
   )

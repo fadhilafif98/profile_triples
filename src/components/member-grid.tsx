@@ -22,6 +22,7 @@ const MemberCard = React.memo(({ member, setSelectedMember }: { member: Member, 
           width={500} 
           height={800} 
           className="object-cover"
+          priority
         />
         <img
           src={`https://i.giphy.com/media/v1.${member.gif}`}
@@ -80,7 +81,7 @@ export default function MemberGrid() {
               </button>
 
               <div className="grid md:grid-cols-2">
-                <div className="relative h-80 md:h-full">
+                <div className="relative h-full overflow-hidden">
                   <Image
                     src={`https://i.imgur.com/${selectedMember.image}`}
                     alt={selectedMember.name}
