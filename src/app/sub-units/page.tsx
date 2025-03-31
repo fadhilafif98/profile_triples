@@ -26,7 +26,7 @@ const subUnits = [
     id: 3,
     name: "ACID EYES",
     members: ["SeoYeon", "HyeRin", "JiWoo", "ChaeYeon", "YooYeon", "SooMin", "NaKyoung", "YuBin"],
-    concept: "collaboration sub-unit",
+    concept: "Collaboration Sub-unit",
     description:
       "ACID EYES (Hangul: 애시드아이즈) is the first collaboration sub-unit of tripleS, consisting of all members from the units, Acid Angel from Asia and +(KR)ystal Eyes.",
     image: "/sub-units/sub_unit_ACID_EYES.jpg",
@@ -80,9 +80,9 @@ const subUnits = [
     id: 9,
     name: "Vision@ry Vision",
     members: ["HyeRin", "YooYeon", "NaKyoung", "YuBin", "Kaede", "Kotone", "YeonJi", "Nien", "SoHyun", "Xinyu", "Lynn", "JiYeon"],
-    concept: "Fresh & Youthful",
+    concept: "Dance Unit",
     description:
-      "Stellar Maknae represents the youngest members with bright, energetic pop songs and playful concepts. This sub-unit brings fresh energy and youthful charm with catchy hooks and vibrant performances.",
+      "Visionary Vision (Stylized as Vision@ry Vision or tripleS VV) is tripleS' eighth sub-unit, and the first dance-orientated unit.",
     image: "/sub-units/sub_unit_Visionary_Vision.jpg",
   },
   {

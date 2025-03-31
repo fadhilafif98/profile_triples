@@ -28,7 +28,7 @@ export const albums: Album[] = [
     },
     {
         id: "aesthetic",
-        title: "<AESTHETIC>,",
+        title: "<AESTHETIC>",
         releaseDate: "May 4, 2023",
         cover: "/album/3_kre_aesthetic.jpg",
         description:

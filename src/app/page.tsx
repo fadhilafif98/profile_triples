@@ -12,7 +12,7 @@ export default function Home() {
       <div className="relative h-screen flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/home/triples_home.jpg"
+            src="/home/triples_home_2.jpg"
             alt="Background"
             fill
             className="object-cover opacity-40"
@@ -50,7 +50,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
               <h3 className="text-xl font-semibold mb-3 text-pink-400">Latest Album</h3>
-              <p className="text-gray-400 mb-4">Our newest release &quot;Cosmic Harmony&quot; is breaking all records.</p>
+              <p className="text-gray-400 mb-4">Our newest release &quot;Performante&quot; is breaking all records.</p>
               <Link href="/about" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
                 Learn more <ArrowRight className="h-4 w-4" />
               </Link>
@@ -58,7 +58,7 @@ export default function Home() {
 
             <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
               <h3 className="text-xl font-semibold mb-3 text-pink-400">World Tour</h3>
-              <p className="text-gray-400 mb-4">Join us on our &quot;Stellar Voyage&quot; world tour starting next month.</p>
+              <p className="text-gray-400 mb-4">Join us on our &quot;tripleS Voyage&quot; world tour starting next month.</p>
               <Link href="/about" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
                 See dates <ArrowRight className="h-4 w-4" />
               </Link>
@@ -185,7 +185,12 @@ export default function Home() {
         </div>
       </section>
       {/* Birthday Countdown Section */}
-      <section className="flex flex-col justify-center items-center bg-gradient-to-br from-black to-gray-700">
+      <section className="mt-2">
+        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+            Next Events
+          </span>
+        </h2>
         <BirthdayCountdown members={Object.values(members)} />
       </section>
     </div>
