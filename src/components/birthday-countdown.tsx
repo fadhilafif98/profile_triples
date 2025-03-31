@@ -26,14 +26,14 @@ interface MemberWithBirthdayInfo extends Member {
 const generateBirthdayMessage = (member: Member): string => {
   const messages = [
     `Happy Birthday to our amazing ${member.role}, ${member.name}! 🎉 Wishing you a day filled with joy and love!`,
-    `Today we celebrate ${member.name}'s special day! 🎂 Thank you for bringing your incredible talent to Stellar 24!`,
+    `Today we celebrate ${member.name}'s special day! 🎂 Thank you for bringing your incredible talent to tripleS`,
     `It's ${member.name}'s birthday! 🎈 Our ${member.role} is one year wiser and even more amazing!`,
     `Happy Birthday, ${member.name}! 💖 Your passion and dedication inspire us all!`,
     `Celebrating the birth of our wonderful ${member.role}, ${member.name}! 🌟 May your day be as bright as your future!`,
     `Sending birthday wishes to ${member.name}! 🥳 Your energy and talent make our group shine brighter!`,
     `Happy Birthday to our beloved ${member.name}! 💝 May your day be as special as you are to us!`,
     `It's time to celebrate ${member.name}'s birthday! 🎊 Thank you for sharing your gifts with the world!`,
-    `Wishing a fantastic birthday to ${member.name}! 🌈 Your presence in Stellar 24 brings us so much joy!`,
+    `Wishing a fantastic birthday to ${member.name}! 🌈 Your presence in tripleS brings us so much joy!`,
     `Happy Birthday, ${member.name}! 🎵 May your day be filled with beautiful music and memories!`,
   ]
 
