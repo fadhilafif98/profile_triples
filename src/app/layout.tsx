@@ -5,6 +5,8 @@ import { Space_Grotesk } from "next/font/google"
 import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
 import LayoutWrapper from "@/components/layout-wrapper"
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -26,7 +28,11 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <SmoothScroll>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <LayoutWrapper>
+              {children}
+              <Analytics />
+              <SpeedInsights />
+            </LayoutWrapper>
           </SmoothScroll>
         </ThemeProvider>
       </body>
