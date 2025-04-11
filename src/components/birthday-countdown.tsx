@@ -413,7 +413,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-center">
             {/* Member image */}
             <motion.div
-              className="relative w-64 h-64 md:w-80 md:h-80 rounded-sm overflow-hidden border-4 border-pink-500 shadow-lg shadow-purple-500/30"
+              className="relative w-64 h-64 md:w-80 md:h-80 rounded-sm overflow-hidden border-4 border-pink-500 shadow-lg shadow-purple-500/30 bg-gradient-to-b from-[#e6351f] via-red-700 to-red-800"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
@@ -423,6 +423,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                 src={`https://i.imgur.com/${displayMember.image}`}
                 alt={displayMember.name}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"
               />
 

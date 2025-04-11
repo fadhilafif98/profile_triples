@@ -67,7 +67,7 @@ export default function Home() {
             <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
               <h3 className="text-xl font-semibold mb-3 text-pink-400">Fan Community</h3>
               <p className="text-gray-400 mb-4">Join our growing community of fans from around the world.</p>
-              <Link href="/contact" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
+              <Link href="/credits" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
                 Join now <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -84,6 +84,7 @@ export default function Home() {
             alt="Stage lights"
             fill
             loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
           />
         </div>
@@ -134,6 +135,7 @@ export default function Home() {
                 alt="tripleS Hatch!"
                 fill
                 loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
@@ -149,6 +151,7 @@ export default function Home() {
                 alt="Velvet Noir"
                 fill
                 loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
@@ -164,6 +167,7 @@ export default function Home() {
                 alt="Neon Pulse"
                 fill
                 loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>

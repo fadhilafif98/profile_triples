@@ -27,7 +27,7 @@ export default function AboutPage() {
               src="/about/triples_about.jpg"
               alt="tripleS 24 Group Photo"
               fill
-              className="object-fit"
+              className="object-scale-down"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-purple-600/30 to-transparent"></div>
           </div>
