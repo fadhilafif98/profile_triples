@@ -37,7 +37,7 @@ export default function NotFound() {
         </h1>
         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Page Not Found</h2>
         <p className="text-lg text-gray-300 mb-10 max-w-xl mx-auto">
-          Oops! Looks like you've wandered off the stage. The page you're looking for has either been moved or doesn't
+          Oops! Looks like you&apos;ve wandered off the stage. The page you&apos;re looking for has either been moved or doesn&apos;t
           exist.
         </p>
       </div>
@@ -172,7 +172,7 @@ export default function NotFound() {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.6 }}>
           <p className="text-lg text-gray-300 mb-10 max-w-xl mx-auto">
-            Oops! Looks like you've wandered off the stage. The page you're looking for has either been moved or doesn't
+            Oops! Looks like you&apos;ve wandered off the stage. The page you&apos;re looking for has either been moved or doesn&apos;t
             exist.
           </p>
         </motion.div>
