@@ -2,8 +2,9 @@
 
 import React, { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X, ArrowUpRight } from "lucide-react"
 import { Member, members } from '../utils/members'
 
 
@@ -34,6 +35,14 @@ const MemberCard = React.memo(({ member, setSelectedMember }: { member: Member, 
           <h3 className="text-white font-semibold">{member.name}</h3>
           <p className="text-pink-400 text-sm">{member.role}</p>
         </div>
+        {/* View Profile button visible on hover */}
+        <Link
+          href={`/members/${member.slug}`}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs bg-black/60 backdrop-blur-sm border border-white/20 text-white rounded-full px-3 py-1.5 hover:bg-purple-600/80 hover:border-purple-400"
+        >
+          Profile <ArrowUpRight className="h-3 w-3" />
+        </Link>
       </div>
     </motion.div>
   );
@@ -118,6 +127,15 @@ export default function MemberGrid() {
                     <div>
                       <h3 className="text-xl font-semibold text-white mb-2">Representative Emoji</h3>
                       <p className="text-gray-300">{selectedMember.representativeEmoji}</p>
+                    </div>
+
+                    <div className="pt-4">
+                      <Link
+                        href={`/members/${selectedMember.slug}`}
+                        className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 px-5 py-2.5 rounded-full text-white text-sm font-medium hover:opacity-90 transition-all"
+                      >
+                        View Full Profile <ArrowUpRight className="h-4 w-4" />
+                      </Link>
                     </div>
                   </div>
                 </div>

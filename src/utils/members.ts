@@ -1,6 +1,7 @@
 export interface Member {
     id: number;
     name: string;
+    slug: string;
     role: string;
     image: string;
     birthday: string;
@@ -11,12 +12,24 @@ export interface Member {
     nextBirthday?: Date
     daysUntil?: number
   }
+
+export function getMemberBySlug(slug: string): Member | undefined {
+  return Object.values(members).find((m) => m.slug === slug);
+}
+
+export function getRelatedMembers(member: Member, count = 4): Member[] {
+  return Object.values(members)
+    .filter((m) => m.id !== member.id)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, count);
+}
   
   // Static data for members
 export const members: { [key: string]: Member } = {
     member1: {
         id: 1,
         name: "Yoon Seo-yeon",
+        slug: "yoon-seo-yeon",
         role: "Vocalist",
         image: "2f3S1Da.jpg",
         birthday: "2003-08-06",
@@ -28,6 +41,7 @@ export const members: { [key: string]: Member } = {
     member2: {
         id: 2,
         name: "Jeong Hye-rin",
+        slug: "jeong-hye-rin",
         role: "Main Dancer",
         image: "sOwU7z1.jpg",
         birthday: "2007-04-12",
@@ -39,6 +53,7 @@ export const members: { [key: string]: Member } = {
     member3: {
         id: 3,
         name: "Lee Ji-woo",
+        slug: "lee-ji-woo",
         role: "Main Vocalist",
         image: "ZxGkzJG.jpg",
         birthday: "2005-10-24",
@@ -50,6 +65,7 @@ export const members: { [key: string]: Member } = {
     member4: {
         id: 4,
         name: "Kim Chae-yeon",
+        slug: "kim-chae-yeon",
         role: "Vocalist",
         image: "JVh2TIf.jpg",
         birthday: "2004-12-04",
@@ -61,6 +77,7 @@ export const members: { [key: string]: Member } = {
     member5: {
         id: 5,
         name: "Kim Yoo-yeon",
+        slug: "kim-yoo-yeon",
         role: "Leader, Visual",
         image: "F16eeZf.jpg",
         birthday: "2001-02-09",
@@ -72,6 +89,7 @@ export const members: { [key: string]: Member } = {
     member6: {
         id: 6,
         name: "Kim Soo-min",
+        slug: "kim-soo-min",
         role: "Sub-vocalist",
         image: "S6zFUaq.jpg",
         birthday: "2007-10-03",
@@ -83,6 +101,7 @@ export const members: { [key: string]: Member } = {
     member7: {
         id: 7,
         name: "Kim Na-kyoung",
+        slug: "kim-na-kyoung",
         role: "Vocalist, Dancer",
         image: "mVi4uVH.jpg",
         birthday: "2002-10-13",
@@ -94,6 +113,7 @@ export const members: { [key: string]: Member } = {
     member8: {
         id: 8,
         name: "Gong Yu-bin",
+        slug: "gong-yu-bin",
         role: "Main Dancer, Visual",
         image: "FVazfJd.jpg",
         birthday: "2005-02-03",
@@ -105,6 +125,7 @@ export const members: { [key: string]: Member } = {
     member9: {
         id: 9,
         name: "Kaede",
+        slug: "kaede",
         role: "Main Dancer, Vocalist",
         image: "t1HeORy.jpg",
         birthday: "2005-12-20",
@@ -116,6 +137,7 @@ export const members: { [key: string]: Member } = {
     member10: {
         id: 10,
         name: "Seo Da-hyun",
+        slug: "seo-da-hyun",
         role: "Main Vocalist",
         image: "vIB6yTK.jpg",
         birthday: "2003-01-08",
@@ -127,6 +149,7 @@ export const members: { [key: string]: Member } = {
     member11: {
         id: 11,
         name: "Kotone",
+        slug: "kotone",
         role: "Main Dancer, Rapper",
         image: "dcR0vQk.jpg",
         birthday: "2004-03-10",
@@ -138,6 +161,7 @@ export const members: { [key: string]: Member } = {
     member12: {
         id: 12,
         name: "Kwak Yeon-ji",
+        slug: "kwak-yeon-ji",
         role: "Dancer, Rapper",
         image: "sTNB8Oc.jpg",
         birthday: "2008-01-08",
@@ -149,6 +173,7 @@ export const members: { [key: string]: Member } = {
     member13: {
         id: 13,
         name: "Nien",
+        slug: "nien",
         role: "Rapper, Sub-vocalist",
         image: "hYmtHFJ.jpg",
         birthday: "2003-06-02",
@@ -160,6 +185,7 @@ export const members: { [key: string]: Member } = {
     member14: {
         id: 14,
         name: "Park So-hyun",
+        slug: "park-so-hyun",
         role: "Dancer, Producer",
         image: "zuV96u3.jpg",
         birthday: "2002-10-13",
@@ -171,6 +197,7 @@ export const members: { [key: string]: Member } = {
     member15: {
         id: 15,
         name: "Xinyu",
+        slug: "xinyu",
         role: "Vocalist, Visual",
         image: "heHBK3f.jpg",
         birthday: "2002-05-25",
@@ -182,6 +209,7 @@ export const members: { [key: string]: Member } = {
     member16: {
         id: 16,
         name: "Mayu",
+        slug: "mayu",
         role: "Lead Vocalist",
         image: "agsA1G4.jpg",
         birthday: "2002-05-12",
@@ -193,6 +221,7 @@ export const members: { [key: string]: Member } = {
     member17: {
         id: 17,
         name: "Lynn",
+        slug: "lynn",
         role: "Main Dancer",
         image: "YJImhRr.jpg",
         birthday: "2006-04-12",
@@ -204,6 +233,7 @@ export const members: { [key: string]: Member } = {
     member18: {
         id: 18,
         name: "JooBin",
+        slug: "joobin",
         role: "Visual",
         image: "AIK4qGq.jpg",
         birthday: "2009-01-16",
@@ -215,6 +245,7 @@ export const members: { [key: string]: Member } = {
     member19: {
         id: 19,
         name: "Jeong Ha-yeon",
+        slug: "jeong-ha-yeon",
         role: "Dancer, Vocalist",
         image: "eU56zIP.jpg",
         birthday: "2007-08-01",
@@ -226,6 +257,7 @@ export const members: { [key: string]: Member } = {
     member20: {
         id: 20,
         name: "Park Shi-on",
+        slug: "park-shi-on",
         role: "Main Vocalist",
         image: "JCN0ei8.jpg",
         birthday: "2006-04-03",
@@ -237,6 +269,7 @@ export const members: { [key: string]: Member } = {
     member21: {
         id: 21,
         name: "Kim Chae-won",
+        slug: "kim-chae-won",
         role: "Vocalist",
         image: "c72pbgr.jpg",
         birthday: "2007-05-02",
@@ -248,6 +281,7 @@ export const members: { [key: string]: Member } = {
     member22: {
         id: 22,
         name: "Sullin",
+        slug: "sullin",
         role: "Sub-vocalist",
         image: "yyxL7oK.jpg",
         birthday: "2006-11-30",
@@ -259,6 +293,7 @@ export const members: { [key: string]: Member } = {
     member23: {
         id: 23,
         name: "SeoAh",
+        slug: "seoah",
         role: "Maknae",
         image: "ksk4bgp.jpg",
         birthday: "2010-06-11",
@@ -270,6 +305,7 @@ export const members: { [key: string]: Member } = {
     member24: {
         id: 24,
         name: "JiYeon",
+        slug: "jiyeon",
         role: "Dancer, Vocalist",
         image: "hdAz2xc.jpg",
         birthday: "2004-02-13",
