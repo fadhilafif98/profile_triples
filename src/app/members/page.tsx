@@ -1,4 +1,32 @@
+import type { Metadata } from "next"
 import MemberGrid from "@/components/member-grid"
+
+export const metadata: Metadata = {
+  title: "tripleS Members Profile | The Idol of All Possibilities",
+  description: "Browse the profile database for all 24 members of tripleS (트리플에스). Get details on birthdays, zodiac signs, MBTI, nationalities, and roles.",
+  openGraph: {
+    title: "tripleS Members Profile | The Idol of All Possibilities",
+    description: "Browse the profile database for all 24 members of tripleS (트리플에스). Get details on birthdays, zodiac signs, MBTI, nationalities, and roles.",
+    url: "https://profile-triples.vercel.app/members",
+    siteName: "tripleS Profile DB",
+    images: [
+      {
+        url: "https://i.imgur.com/vHqYhWc.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "tripleS Group Photo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "tripleS Members Profile | The Idol of All Possibilities",
+    description: "Browse the profile database for all 24 members of tripleS (트리플에스).",
+    images: ["https://i.imgur.com/vHqYhWc.jpeg"],
+  },
+}
 
 export default function MembersPage() {
   return (

@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .aider*
+
+# AI coding assistant rules & configs (local, not for repo)
+.clinerules/
+.cursor/
+.windsurf/
+.opencode/
+.github/copilot-instructions.md
+AGENTS.md

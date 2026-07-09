@@ -20,14 +20,14 @@ const MemberCard = React.memo(({ member, setSelectedMember }: { member: Member, 
         <Image 
           src={`https://i.imgur.com/${member.image}`}
           alt={member.name} 
-          width={500} 
-          height={800} 
+          fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
           className="object-cover"
-          priority
         />
         <img
           src={`https://i.giphy.com/media/v1.${member.gif}`}
-          alt="GIF"
+          alt={`${member.name} gif preview`}
+          loading="lazy"
           className="absolute inset-0 object-cover w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>

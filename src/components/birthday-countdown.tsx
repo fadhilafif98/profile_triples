@@ -5,6 +5,7 @@ import { tsParticles } from "tsparticles-engine"
 import { loadConfettiPreset } from "tsparticles-preset-confetti"
 import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Cake, Calendar, Gift, PartyPopper, Star, Heart, RefreshCcw, RefreshCwOff } from "lucide-react"
 import type { Member } from "@/utils/members"
@@ -59,8 +60,10 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
   // Function to calculate upcoming birthdays and check for recent birthdays
   const calculateUpcomingBirthdays = useCallback(() => {
-    const today = new Date()
-    const currentYear = today.getFullYear()
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    // Strip time so all date comparisons are day-accurate
+    const today = new Date(currentYear, now.getMonth(), now.getDate())
 
     // Create a list of members with their upcoming birthday dates
     const membersWithBirthdayDates = members
@@ -70,31 +73,29 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
         const birthdateMonth = Number.parseInt(birthdateComponents[1]) - 1 // Month is 0-indexed in JS Date
         const birthdateDay = Number.parseInt(birthdateComponents[2])
 
-        // Create this year's birthday date
+        // Create this year's birthday date (midnight, same as today baseline)
         let nextBirthday = new Date(currentYear, birthdateMonth, birthdateDay)
 
-        // Check if today is their birthday
-        const isTodayBirthday =
-          nextBirthday.getDate() === today.getDate() &&
-          nextBirthday.getMonth() === today.getMonth() &&
-          nextBirthday.getFullYear() === today.getFullYear()
+        // Check if today is their birthday (both are midnight-based, safe to compare)
+        const isTodayBirthday = nextBirthday.getTime() === today.getTime()
 
         // If the birthday has already passed this year, use next year's date
         if (nextBirthday < today && !isTodayBirthday) {
           nextBirthday = new Date(currentYear + 1, birthdateMonth, birthdateDay)
         }
 
-        // Calculate days until birthday
-        const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        // Days until birthday: both are midnight-based so division is exact
+        const daysUntil = Math.round((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
-        // Check if today is within 7 days after their birthday
+        // Last birthday: if today is their birthday, lastBirthday = today; else this year's (already-passed) date
         const lastBirthday = new Date(nextBirthday)
         if (!isTodayBirthday) {
           lastBirthday.setFullYear(lastBirthday.getFullYear() - 1)
         }
 
-        const daysSinceBirthday = Math.ceil((today.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24))
-        const isRecentBirthday = (daysSinceBirthday >= 0 && daysSinceBirthday <= 7) || isTodayBirthday
+        // Use floor so today = 0 days since, yesterday = 1, etc.
+        const daysSinceBirthday = Math.floor((today.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24))
+        const isRecentBirthday = daysSinceBirthday >= 0 && daysSinceBirthday <= 7
 
         // Generate a unique birthday message for this member
         const birthdayMessage = generateBirthdayMessage(member)
@@ -160,28 +161,38 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
       return
     }
 
-    const birthday = new Date(currentMember.nextBirthday ?? "")
-    const difference = birthday.getTime() - now.getTime()
+    if (!currentMember.nextBirthday) return
 
-    if (difference <= 0) {
+    // Count down to end of birthday (midnight the next day), not midnight of the birthday
+    const birthdayEnd = new Date(currentMember.nextBirthday)
+    birthdayEnd.setDate(birthdayEnd.getDate() + 1) // end of birthday day
+    const difference = birthdayEnd.getTime() - now.getTime()
+
+    if (currentMember.isTodayBirthday || difference <= 0) {
       // It's their birthday! Show confetti and recalculate
-      setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 5000) // Confetti for 5 seconds
+      if (!showConfetti) {
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 5000) // Confetti for 5 seconds
+      }
 
       // Set birthday mode and message
       setIsBirthdayMode(true)
       setViewingUpcoming(false)
 
-      // Recalculate upcoming birthdays
-      setUpcomingBirthdays(calculateUpcomingBirthdays())
+      // Recalculate upcoming birthdays only when the day rolls over
+      if (difference <= 0) {
+        setUpcomingBirthdays(calculateUpcomingBirthdays())
+      }
       return
     }
 
+    // Countdown to next birthday midnight
+    const toMidnight = currentMember.nextBirthday.getTime() - now.getTime()
     setTimeLeft({
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-      minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-      seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      days: Math.floor(toMidnight / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((toMidnight % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+      minutes: Math.floor((toMidnight % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((toMidnight % (1000 * 60)) / 1000),
     })
   }, [upcomingBirthdays, currentIndex, calculateUpcomingBirthdays, isBirthdayMode, showConfetti, viewingUpcoming])
 
@@ -340,6 +351,12 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
   // Format birthday date
   const birthday = new Date(displayMember.nextBirthday!)
+  
+  // For past recent birthdays in celebration mode, display this year's date and age
+  if (isBirthdayMode && !viewingUpcoming && displayMember.isRecentBirthday && !displayMember.isTodayBirthday) {
+    birthday.setFullYear(birthday.getFullYear() - 1)
+  }
+
   const formattedDate = birthday.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -363,7 +380,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   const currentBirthdayMessage = displayMember.birthdayMessage || generateBirthdayMessage(displayMember)
 
   // Calculate days since birthday for celebration mode
-  const daysSinceBirthdayText = displayMember.isTodayBirthday
+  const daysSinceBirthdayText = displayMember.isTodayBirthday || displayMember.daysSinceBirthday === 0
     ? "Today"
     : displayMember.daysSinceBirthday === 1
       ? "Yesterday"
@@ -419,6 +436,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
               transition={{ duration: 0.5 }}
               key={`${displayMember.id}-${isBirthdayMode ? "celebration" : "upcoming"}-${isBirthdayMode && !viewingUpcoming ? celebrationIndex : currentIndex}`}
             >
+              <Link href={`/members/${displayMember.slug}`} className="absolute inset-0 z-20 cursor-pointer" aria-label={`View ${displayMember.name}'s profile`} />
               <Image
                 src={`https://i.imgur.com/${displayMember.image}`}
                 alt={displayMember.name}
@@ -476,9 +494,11 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
-                      {displayMember.name}
-                    </h3>
+                    <Link href={`/members/${displayMember.slug}`} className="hover:opacity-80 transition-opacity inline-block">
+                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
+                        {displayMember.name}
+                      </h3>
+                    </Link>
 
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
                       <Calendar className="h-5 w-5 text-pink-400" />

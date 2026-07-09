@@ -1,8 +1,33 @@
-// import { Instagram, Twitter, Youtube, Facebook, Twitch, Music, Github, Linkedin, Heart, Code, Star } from "lucide-react"
-
+import type { Metadata } from "next"
 import AnimatedLogo from "@/components/animated-logo";
 import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaHeart, FaInstagram, FaLinkedin, FaSpotify, FaStar, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 
+export const metadata: Metadata = {
+  title: "Credits & Links | tripleS Fan Directory",
+  description: "Connect with tripleS (트리플에스) on social media, streaming platforms, and app stores. View credits for this fan-made website project.",
+  openGraph: {
+    title: "Credits & Links | tripleS Fan Directory",
+    description: "Connect with tripleS (트리플에스) on social media, streaming platforms, and app stores. View credits for this fan-made website project.",
+    url: "https://profile-triples.vercel.app/credits",
+    siteName: "tripleS Profile DB",
+    images: [
+      {
+        url: "https://i.imgur.com/vHqYhWc.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "tripleS Group Photo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Credits & Links | tripleS Fan Directory",
+    description: "Connect with tripleS (트리플에스) on social media, streaming platforms, and app stores.",
+    images: ["https://i.imgur.com/vHqYhWc.jpeg"],
+  },
+}
 
 export default function ThankYouPage() {
   return (

@@ -1,9 +1,37 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
 import SpotifyEmbed from "@/components/spotify-embed"
 import BirthdayCountdown from "@/components/birthday-countdown"
 import { members } from "@/utils/members"
+
+export const metadata: Metadata = {
+  title: "tripleS | Fanmade Website",
+  description: "Explore tripleS (트리플에스), the 24-member decentralized K-pop girl group. View member profiles, sub-units, discography, and upcoming events.",
+  openGraph: {
+    title: "tripleS | Fanmade Website",
+    description: "Explore tripleS (트리플에스), the 24-member decentralized K-pop girl group. View member profiles, sub-units, discography, and upcoming events.",
+    url: "https://profile-triples.vercel.app",
+    siteName: "tripleS Profile DB",
+    images: [
+      {
+        url: "https://i.imgur.com/vHqYhWc.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "tripleS Group Photo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "tripleS | Official Fan Directory & Profile Database",
+    description: "Explore tripleS (트리플에스), the 24-member decentralized K-pop girl group.",
+    images: ["https://i.imgur.com/vHqYhWc.jpeg"],
+  },
+}
 
 export default function Home() {
   return (

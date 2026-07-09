@@ -1,35 +1,54 @@
-# Fanmade Website for Girl Group Triples
+# TripleS Fan Site 🌸
 
-Welcome to the fanmade website project for the girl group Triples! This website is built using **Next.js** to provide a fast, responsive user experience with a visually appealing and dynamic layout. Inside, you’ll find various details about the members of Triples, their albums, and their latest releases.
+Welcome to the fan-made website project for the girl group **TripleS** (tripleS). Built with **Next.js** for high performance, dynamic layouts, and a modern, premium user experience.
 
-## Features
+---
 
-- **Member Profiles**: A dedicated page for each member of Triples featuring their biography, photos, and fun facts.
-- **Sub-units**: A journey sub-units Triples members for fans to enjoy.
-- **Album & Song List**: A list of albums and songs released by Triples, with links to listen to or purchase them.
-- **Latest News**: Updates and news about the group's activities and new projects.
-- **Fast Performance**: Thanks to Next.js, the website has excellent performance, fast loading times, and is fully mobile-friendly.
+## ✨ Features
 
-## Technologies Used
+*   **Member Profiles** – Bios, photos, and fun facts for each member.
+*   **Sub-units (Syracuse/DIMENSION)** – Explore the unique subunit structure and journeys.
+*   **Discography** – Album and song listings with streaming/purchase links.
+*   **Latest News** – Live updates on group activities and future dimensions.
+*   **Performance First** – Optimized via Next.js with responsive layouts.
 
-- **Next.js**: A React framework for building static and dynamic websites.
-- **React**: JavaScript library for building user interfaces.
-- **CSS Modules**: For styling individual components.
+---
 
-## Installation
+## 🛠️ Tech Stack
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/triples-fanmade-website.git
+*   **Framework:** [Next.js](https://nextjs.org/) (React)
+*   **Styling:** CSS Modules (Vanilla CSS)
+*   **Icons:** Lucide React (if applicable) / Custom SVGs
 
-2. Navigate into the project directory:
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Ensure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
+
+### Setup Instructions
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/triples-fanmade-website.git
+    ```
+
+2.  **Navigate to directory:**
+    ```bash
     cd triples-fanmade-website
+    ```
 
-3. Install dependencies:
+3.  **Install dependencies:**
+    ```bash
     npm install
+    ```
 
-4. Start the development server:
+4.  **Run development server:**
+    ```bash
     npm run dev
+    ```
 
-5. Open the website in your browser:
-    http://localhost:3000
+5.  **Open in browser:**
+    Go to [http://localhost:3000](http://localhost:3000) to view the application.
