@@ -126,53 +126,59 @@ export const metadata: Metadata = {
 
 export default function SubUnitsPage() {
   return (
-    <div className="bg-black text-white pt-20 pb-20">
+    <div className="bg-[#050505] text-white pt-24 pb-28 selection:bg-white selection:text-black">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-          Sub-Units
-        </h1>
+        {/* Header */}
+        <div className="mb-16">
+          <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ GRAVITY & COMBINATIONS ]</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            Sub-Units & Dimensions
+          </h1>
+          <p className="text-base md:text-lg text-zinc-400 mt-4 max-w-3xl leading-relaxed">
+            tripleS operates through dynamic subunit formations (Dimensions) created through fan-participatory Grand Gravity events. Each Dimension debuts with unique concepts, music styles, and member configurations.
+          </p>
+        </div>
 
-        <p className="text-lg text-gray-300 mb-12 max-w-3xl">
-          tripleS features specialized sub-units that showcase different musical styles and concepts. Each sub-unit
-          highlights the unique talents and personalities of its members while exploring diverse genres and performance
-          styles.
-        </p>
-
+        {/* Sub-Units List */}
         <div className="space-y-24">
           {subUnits.map((unit, index) => (
             <div
               key={unit.id}
-              className={`grid grid-cols-1 ${index % 2 === 0 ? "lg:grid-cols-[1fr_1.2fr]" : "lg:grid-cols-[1.2fr_1fr]"} gap-8 lg:gap-12 items-center`}
+              className={`grid grid-cols-1 ${index % 2 === 0 ? "lg:grid-cols-[1fr_1.2fr]" : "lg:grid-cols-[1.2fr_1fr]"} gap-8 lg:gap-14 items-center p-8 rounded-3xl border border-zinc-800/80 bg-zinc-900/30`}
             >
               <div className={`${index % 2 !== 0 && "lg:order-2"}`}>
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
-                  <div className="relative">
-                    <Image
-                      src={unit.image || "/placeholder.svg"}
-                      alt={unit.name}
-                      width={600}
-                      height={400}
-                      className="rounded-lg object-cover w-full aspect-video"
-                    />
+                <div className="relative group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">
+                  <Image
+                    src={unit.image || "/placeholder.svg"}
+                    alt={unit.name}
+                    width={600}
+                    height={400}
+                    className="rounded-2xl object-cover w-full aspect-video transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  <div className="absolute top-4 left-4">
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-zinc-300">
+                      DIMENSION #{String(unit.id).padStart(2, "0")}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className={`${index % 2 !== 0 && "lg:order-1"}`}>
-                <div className="inline-block rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-1 text-sm mb-4">
+              <div className={`${index % 2 !== 0 && "lg:order-1"} space-y-5`}>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-800/80 border border-zinc-700 text-xs font-mono uppercase tracking-wider text-zinc-300">
                   {unit.concept}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">{unit.name}</h2>
-                <p className="text-gray-300 mb-6">{unit.description}</p>
 
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-3 text-pink-400">Members</h3>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">{unit.name}</h2>
+                <p className="text-zinc-400 text-sm md:text-base leading-relaxed">{unit.description}</p>
+
+                <div className="pt-2">
+                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 block mb-3">Unit Members</span>
                   <div className="flex flex-wrap gap-2">
                     {unit.members.map((member, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 bg-gray-800 rounded-full text-sm text-white hover:bg-purple-600 transition-colors cursor-pointer"
+                        className="px-3 py-1 bg-zinc-800/60 border border-zinc-700/80 rounded-full text-xs font-medium text-zinc-300 hover:bg-white hover:text-black transition-colors"
                       >
                         {member}
                       </span>
@@ -180,28 +186,31 @@ export default function SubUnitsPage() {
                   </div>
                 </div>
 
-                <Link
-                  href={`/members`}
-                  className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                  View member profiles <ArrowRight className="h-4 w-4" />
-                </Link>
+                <div className="pt-2">
+                  <Link
+                    href={`/members`}
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-wider font-semibold text-white hover:text-zinc-300 transition-colors"
+                  >
+                    View member profiles <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-20 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-white">Special Collaborations</h2>
-          <p className="text-gray-300 mb-8 max-w-3xl mx-auto">
-            Beyond our established sub-units, tripleS members frequently form special project groups for unique
-            collaborations and limited releases. Stay tuned for upcoming projects!
+        {/* Footer Callout */}
+        <div className="mt-24 p-10 rounded-3xl border border-zinc-800 bg-zinc-900/40 text-center max-w-4xl mx-auto">
+          <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ PARTICIPATION ]</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Join Next Grand Gravity</h2>
+          <p className="text-zinc-400 text-sm md:text-base mb-8 max-w-2xl mx-auto leading-relaxed">
+            New Dimensions are continually voted on by WAVs across the world via COMO voting on Cosmo. Stay connected to cast your vote for upcoming unit line-ups.
           </p>
           <Link
             href="/about"
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 rounded-full text-white font-medium hover:opacity-90 transition-all"
+            className="inline-flex items-center justify-center gap-2 bg-white text-black px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-zinc-200 transition-all tracking-wide"
           >
-            Learn More About <span className="font-bold">tripleS</span> <ArrowRight className="h-5 w-5" />
+            Learn How Gravity Works <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

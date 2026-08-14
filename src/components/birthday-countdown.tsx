@@ -481,7 +481,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                   </h2>
                 ) : (
                   <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center justify-center md:justify-start gap-2">
-                    <Cake className="h-6 w-6 text-pink-400" />
+                    <Cake className="h-5 w-5 text-zinc-400" />
                     Upcoming Birthday
                   </h2>
                 )}
@@ -495,50 +495,50 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                     transition={{ duration: 0.3 }}
                   >
                     <Link href={`/members/${displayMember.slug}`} className="hover:opacity-80 transition-opacity inline-block">
-                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
+                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 tracking-tight">
                         {displayMember.name}
                       </h3>
                     </Link>
 
                     <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
-                      <Calendar className="h-5 w-5 text-pink-400" />
-                      <p className="text-lg text-gray-300">
-                        {formattedDate} <span className="text-pink-400">({nextAge} International age)</span>
+                      <Calendar className="h-4 w-4 text-zinc-400" />
+                      <p className="text-sm md:text-base text-zinc-300">
+                        {formattedDate} <span className="text-zinc-400">({nextAge} International age)</span>
                         {isBirthdayMode && !viewingUpcoming && !displayMember.isTodayBirthday && (
-                          <span className="ml-2 text-yellow-400">({daysSinceBirthdayText})</span>
+                          <span className="ml-2 text-zinc-300">({daysSinceBirthdayText})</span>
                         )}
                       </p>
                     </div>
 
-                    <p className="text-gray-300 mb-6 max-w-xl mx-auto md:mx-0">{displayMember.role}</p>
+                    <p className="text-zinc-400 text-sm mb-6 max-w-xl mx-auto md:mx-0 font-mono">{displayMember.role}</p>
 
                     {/* Birthday message or countdown */}
                     {isBirthdayMode && !viewingUpcoming ? (
                       <motion.div
-                        className="max-w-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 p-4 rounded-lg border border-pink-500/30 mb-6"
+                        className="max-w-2xl bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800 mb-6"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
                       >
-                        <p className="text-xl text-white">{currentBirthdayMessage}</p>
+                        <p className="text-lg text-white">{currentBirthdayMessage}</p>
                       </motion.div>
                     ) : (
-                      <div className="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto md:mx-0">
-                        <div className="bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg border border-purple-500/30">
-                          <div className="text-3xl md:text-4xl font-bold text-white">{timeLeft.days}</div>
-                          <div className="text-xs text-gray-400">Days</div>
+                      <div className="grid grid-cols-4 gap-2 md:gap-3 max-w-md mx-auto md:mx-0">
+                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
+                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.days}</div>
+                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Days</div>
                         </div>
-                        <div className="bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg border border-purple-500/30">
-                          <div className="text-3xl md:text-4xl font-bold text-white">{timeLeft.hours}</div>
-                          <div className="text-xs text-gray-400">Hours</div>
+                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
+                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.hours}</div>
+                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Hours</div>
                         </div>
-                        <div className="bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg border border-purple-500/30">
-                          <div className="text-3xl md:text-4xl font-bold text-white">{timeLeft.minutes}</div>
-                          <div className="text-xs text-gray-400">Minutes</div>
+                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
+                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.minutes}</div>
+                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Mins</div>
                         </div>
-                        <div className="bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg border border-purple-500/30">
-                          <div className="text-3xl md:text-4xl font-bold text-white">{timeLeft.seconds}</div>
-                          <div className="text-xs text-gray-400">Seconds</div>
+                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
+                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.seconds}</div>
+                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Secs</div>
                         </div>
                       </div>
                     )}

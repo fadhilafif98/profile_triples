@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import AnimatedLogo from "@/components/animated-logo";
-import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaHeart, FaInstagram, FaLinkedin, FaSpotify, FaStar, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaInstagram, FaLinkedin, FaSpotify, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 
 export const metadata: Metadata = {
   title: "Credits & Links | tripleS Fan Directory",
@@ -31,82 +31,90 @@ export const metadata: Metadata = {
 
 export default function ThankYouPage() {
   return (
-    <div className="bg-black text-white pt-20 pb-20">
+    <div className="bg-[#050505] text-white pt-24 pb-28 selection:bg-white selection:text-black">
       <div className="max-w-6xl mx-auto px-4">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            Thank You For Visiting
+          <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ DIRECTORY & CREDITS ]</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            Official Channels & Credits
           </h1>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            We appreciate your support and interest in <span className="font-bold">tripleS</span>. Connect with tripleS on social media to stay updated with
-            tripleS latest news, releases, and events.
+          <p className="text-sm md:text-base text-zinc-400 max-w-2xl mx-auto mt-4 leading-relaxed">
+            Direct gateways to tripleS official channels, COSMO application, music streaming, and project architecture details.
           </p>
         </div>
 
-        {/* Social Media Grid */}
+        {/* Official Channels Grid */}
         <div className="mb-20">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-pink-400">Connect With tripleS</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">Official tripleS Links</h2>
+            <span className="text-xs font-mono text-zinc-500">[ MODHAUS OFFICIAL ]</span>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {[
               {
                 name: "Instagram",
-                icon: <FaInstagram className="h-8 w-8" />,
+                handle: "@triplescosmos",
+                icon: <FaInstagram className="h-6 w-6" />,
                 url: "https://www.instagram.com/triplescosmos/",
-                color: "from-purple-500 to-pink-500",
               },
               {
-                name: "Twitter",
-                icon: <FaTwitter className="h-8 w-8" />,
+                name: "X (Twitter)",
+                handle: "@triplescosmos",
+                icon: <FaTwitter className="h-6 w-6" />,
                 url: "https://twitter.com/triplescosmos",
-                color: "from-blue-400 to-blue-600",
               },
               {
                 name: "YouTube",
-                icon: <FaYoutube className="h-8 w-8" />,
+                handle: "@triplescosmos",
+                icon: <FaYoutube className="h-6 w-6" />,
                 url: "https://www.youtube.com/@triplescosmos",
-                color: "from-red-500 to-red-700",
               },
               {
-                name: "Official Website",
-                icon: <AnimatedLogo
-                        width={40}
-                        height={40}
-                        strokeColor="white"
-                        strokeWidth={15}
-                        duration={2000}
-                        loop={false}
-                      />,
+                name: "Official Site",
+                handle: "triplescosmos.com",
+                icon: (
+                  <AnimatedLogo
+                    width={32}
+                    height={32}
+                    strokeColor="#ffffff"
+                    strokeWidth={180}
+                    duration={2000}
+                    loop={false}
+                  />
+                ),
                 url: "https://www.triplescosmos.com/",
-                color: "from-blue-600 to-blue-800",
               },
               {
                 name: "Spotify",
-                icon: <FaSpotify className="h-8 w-8" />,
+                handle: "tripleS",
+                icon: <FaSpotify className="h-6 w-6" />,
                 url: "https://open.spotify.com/artist/5Z71xE9prhpHrqL5thVMyK",
-                color: "from-green-500 to-green-700",
               },
               {
                 name: "Discord",
-                icon: <FaDiscord className="h-8 w-8" />,
+                handle: "tripleS Community",
+                icon: <FaDiscord className="h-6 w-6" />,
                 url: "https://discord.gg/triplescosmos",
-                color: "from-purple-600 to-purple-800",
               },
               {
                 name: "TikTok",
-                icon: <FaTiktok className="h-8 w-8" />,
+                handle: "@triplescosmos",
+                icon: <FaTiktok className="h-6 w-6" />,
                 url: "https://www.tiktok.com/@triplescosmos",
-                color: "from-gray-700 to-gray-900",
               },
               {
-                name: "cosmo",
-                icon: (<div className="flex flex-row gap-2 justify-between items-center">
-                <FaGooglePlay className="h-7 w-7" />
-                <span>/</span>
-                <FaApple className="h-8 w-8" />
-                </div>),
+                name: "COSMO App",
+                handle: "App Store / Play Store",
+                icon: (
+                  <div className="flex flex-row gap-2 justify-between items-center">
+                    <FaGooglePlay className="h-5 w-5" />
+                    <span>/</span>
+                    <FaApple className="h-5 w-5" />
+                  </div>
+                ),
                 url: "https://bit.ly/4hQegaj",
-                color: "from-black to-orange-500",
               },
             ].map((social, index) => (
               <a
@@ -114,89 +122,58 @@ export default function ThankYouPage() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${social.color} p-6 flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20`}
+                className="group p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800/50 transition-all flex flex-col justify-between min-h-[130px]"
               >
-                <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors duration-300"></div>
-                <div className="relative z-10 text-white">{social.icon}</div>
-                <span className="relative z-10 text-white font-medium">{social.name}</span>
+                <div className="text-zinc-300 group-hover:text-white transition-colors">{social.icon}</div>
+                <div>
+                  <h3 className="text-sm font-bold text-white group-hover:text-zinc-200">{social.name}</h3>
+                  <p className="text-xs text-zinc-400 font-mono mt-0.5">{social.handle}</p>
+                </div>
               </a>
             ))}
           </div>
         </div>
 
         {/* Website Credits */}
-        <div className="bg-gray-900/60 rounded-xl border border-purple-500/20 p-8 md:p-10">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-pink-400 flex items-center justify-center gap-2">
-            <FaCode className="h-6 w-6" />
-            Website Credits
-          </h2>
+        <div className="bg-zinc-900/30 rounded-3xl border border-zinc-800 p-8 md:p-12">
+          <div className="flex items-center gap-3 mb-8">
+            <FaCode className="h-5 w-5 text-zinc-400" />
+            <h2 className="text-2xl font-bold text-white tracking-tight">Project Architecture & Credits</h2>
+          </div>
 
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-800/60 p-6 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-semibold mb-3 text-white flex items-center gap-2">
-                  <FaStar className="h-5 w-5 text-yellow-400" />
-                  Design Inspiration
-                </h3>
-                <ul className="space-y-2 text-gray-300">
-                  <li>• Modern K-pop group websites</li>
-                  <li>• Spotify&apos;s dark UI aesthetic</li>
-                  <li>• Neon cyberpunk visual elements</li>
-                  <li>• Motion design principles by Framer</li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-800/60 p-6 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-semibold mb-3 text-white flex items-center gap-2">
-                  <FaStar className="h-5 w-5 text-yellow-400" />
-                  Technologies Used
-                </h3>
-                <ul className="space-y-2 text-gray-300">
-                  <li>• Next.js 14 with App Router</li>
-                  <li>• Tailwind CSS for styling</li>
-                  <li>• Framer Motion for animations</li>
-                  <li>• Lucide & React for icons</li>
-                  <li>• Vercel for deployment</li>
-                </ul>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div className="bg-zinc-950/60 p-6 rounded-2xl border border-zinc-800/80">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">[ STACK ]</span>
+              <h3 className="text-lg font-semibold my-2 text-white">Technology Stack</h3>
+              <ul className="space-y-1.5 text-zinc-400 text-sm">
+                <li>• Next.js App Router (React 19)</li>
+                <li>• Tailwind CSS & Custom Design System</li>
+                <li>• Framer Motion for Transitions</li>
+                <li>• Vercel Edge Analytics & Speed Insights</li>
+              </ul>
             </div>
 
-            <div className="bg-gray-800/60 p-6 rounded-lg border border-gray-700">
-              <h3 className="text-xl font-semibold mb-3 text-white flex items-center gap-2">
-                <FaStar className="h-5 w-5 text-yellow-400" />
-                Special Thanks
-              </h3>
-              <p className="text-gray-300 mb-4">
-                This website was created as a demonstration project showcasing modern web development techniques and
-                design principles for music artist websites. Special thanks to:
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-700">
-                  <h4 className="font-medium text-white mb-1">Kpop Profiles and tripleS Fandom</h4>
-                  <p className="text-gray-400 text-sm">For providing references and data for this website</p>
-                </div>
-                <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-700">
-                  <h4 className="font-medium text-white mb-1">Design Contributors</h4>
-                  <p className="text-gray-400 text-sm">For the visual direction and UI/UX guidance</p>
-                </div>
-                <div className="bg-gray-900/80 p-4 rounded-lg border border-gray-700">
-                  <h4 className="font-medium text-white mb-1">Open Source Community</h4>
-                  <p className="text-gray-400 text-sm">For the amazing tools and libraries that power this site</p>
-                </div>
-              </div>
+            <div className="bg-zinc-950/60 p-6 rounded-2xl border border-zinc-800/80">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">[ DATA ]</span>
+              <h3 className="text-lg font-semibold my-2 text-white">Information Sources</h3>
+              <ul className="space-y-1.5 text-zinc-400 text-sm">
+                <li>• MODHAUS official releases and Cosmo logs</li>
+                <li>• tripleS Fandom Wiki & KpopProfiles references</li>
+                <li>• Official Spotify and YouTube metadata</li>
+                <li>• Community WAV archives</li>
+              </ul>
             </div>
           </div>
 
-          <div className="mt-10 text-center">
-            <p className="flex items-center justify-center gap-2 text-gray-400">
-              Made with <FaHeart className="h-4 w-4 text-pink-500 animate-pulse" /> for music fans everywhere
-            </p>
-            <div className="mt-4 flex justify-center gap-4">
+          <div className="border-t border-zinc-800/80 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-400">
+            <p>Fan-made tribute project dedicated to tripleS & WAV.</p>
+            <div className="flex items-center gap-4">
               <a
                 href="https://github.com/fadhilafif98"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-zinc-400 hover:text-white transition-colors"
+                aria-label="GitHub"
               >
                 <FaGithub className="h-5 w-5" />
               </a>
@@ -204,7 +181,8 @@ export default function ThankYouPage() {
                 href="https://linkedin.com/in/fadhil-afif-al-qadri/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-zinc-400 hover:text-white transition-colors"
+                aria-label="LinkedIn"
               >
                 <FaLinkedin className="h-5 w-5" />
               </a>

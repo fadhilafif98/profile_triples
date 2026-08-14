@@ -14,12 +14,12 @@ interface AnimatedLogoProps {
 }
 
 export default function AnimatedLogo({
-  width = 40,
-  height = 40,
+  width = 48,
+  height = 48,
   className = "",
-  strokeWidth = 30,
-  strokeColor = "#000000",
-  loop = true,
+  strokeWidth = 180,
+  strokeColor = "#ffffff",
+  loop = false,
   duration = 2000,
 }: AnimatedLogoProps) {
   const logoRef = useRef<SVGSVGElement>(null)
@@ -33,22 +33,24 @@ export default function AnimatedLogo({
       anime({
         targets: paths,
         strokeDashoffset: [anime.setDashoffset, 0],
-        easing: "easeInOutSine",
+        easing: "easeInOutCubic",
         duration: duration,
-        delay: (el, i) => i * 250,
-        direction: "alternate",
+        delay: (el, i) => i * 200,
+        direction: loop ? "alternate" : "normal",
         loop: loop,
       })
     }
   }, [duration, loop])
 
   return (
-    <svg ref={logoRef} width={width} height={height} viewBox="0 0 800 800" className={className}>
+    <svg ref={logoRef} width={width} height={height} viewBox="0 0 800 800" className={`shrink-0 ${className}`}>
       <g
         transform="translate(0.000000,800.000000) scale(0.100000,-0.100000)"
         fill="none"
         stroke={strokeColor}
         strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         <path
           d="M3950 6776 c-8 -8 -159 -96 -335 -196 -176 -100 -333 -191 -350 -201

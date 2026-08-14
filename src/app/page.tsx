@@ -35,195 +35,237 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="relative bg-black text-white overflow-hidden">
+    <div className="relative bg-[#050505] text-white selection:bg-white selection:text-black">
       {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center">
+      <section className="relative min-h-[92vh] flex items-center justify-center border-b border-zinc-800/80">
         <div className="absolute inset-0 z-0">
           <Image
             src="/home/triples_home_2.jpg"
-            alt="Background"
+            alt="tripleS Group"
             fill
-            className="object-cover opacity-40"
+            className="object-cover opacity-35"
             priority
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/80" />
         </div>
 
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent text-white font-pretendard">
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-24">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/15 bg-white/5 backdrop-blur-md mb-6 text-xs uppercase tracking-widest text-zinc-300">
+            <span>MODHAUS</span>
+            <span className="w-1 h-1 rounded-full bg-zinc-400"></span>
+            <span>24 Members</span>
+            <span className="w-1 h-1 rounded-full bg-zinc-400"></span>
+            <span>Decentralized Idol</span>
+          </div>
+
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter mb-4 font-pretendard">
             tripleS
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-gray-300">the idol of all possibilities</p>
-          <Link
-            href="/members"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 rounded-full text-white font-medium hover:opacity-90 transition-all"
-          >
-            Meet the Members <ArrowRight className="h-5 w-5" />
-          </Link>
+          <p className="text-lg md:text-2xl text-zinc-300 tracking-wide font-light max-w-2xl mx-auto mb-10">
+            The Idol of All Possibilities
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/members"
+              className="inline-flex items-center gap-2 bg-white text-black px-7 py-3.5 rounded-full font-semibold hover:bg-zinc-200 transition-all text-sm tracking-wide"
+            >
+              Explore Members (S1–S24) <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/sub-units"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 px-7 py-3.5 rounded-full text-white font-medium transition-all text-sm tracking-wide backdrop-blur-sm"
+            >
+              Dimensions
+            </Link>
+          </div>
         </div>
+      </section>
 
-        {/* Animated Accent Lines */}
-        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-purple-500 to-pink-600"></div>
-        <div className="absolute top-0 right-0 w-[2px] h-full bg-gradient-to-b from-purple-500 to-pink-600"></div>
-      </div>
-
-      {/* Preview Section */}
-      <section className="py-20 px-4">
+      {/* Concept Architecture / Highlights */}
+      <section className="py-24 px-4 border-b border-zinc-800/80">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-              Experience the Future
-            </span>
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ SYSTEM & CONCEPT ]</p>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+                How tripleS Operates
+              </h2>
+            </div>
+            <p className="text-zinc-400 text-sm max-w-md">
+              A dynamic idol structure powered by fan governance, continuous unit creation, and digital collectibles.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
-              <h3 className="text-xl font-semibold mb-3 text-pink-400">Latest Album</h3>
-              <p className="text-gray-400 mb-4">Our newest release &quot;Performante&quot; is breaking all records.</p>
-              <Link href="/about" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
-                Learn more <ArrowRight className="h-4 w-4" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-zinc-900/40 p-8 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-800 text-zinc-300">01 / SYSTEM</span>
+                <h3 className="text-xl font-bold mt-4 mb-2 text-white">Gravity & Voting</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                  Fans participate in decision-making through Gravity events on the Cosmo app, voting for title tracks and member unit rosters.
+                </p>
+              </div>
+              <Link href="/about" className="text-xs uppercase tracking-wider font-semibold text-white inline-flex items-center gap-1 hover:text-zinc-300">
+                Learn concept <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
-              <h3 className="text-xl font-semibold mb-3 text-pink-400">World Tour</h3>
-              <p className="text-gray-400 mb-4">Join us on our &quot;tripleS Voyage&quot; world tour starting next month.</p>
-              <Link href="/about" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
-                See dates <ArrowRight className="h-4 w-4" />
+            <div className="bg-zinc-900/40 p-8 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-800 text-zinc-300">02 / COLLECTIBLES</span>
+                <h3 className="text-xl font-bold mt-4 mb-2 text-white">Digital Objekts</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                  Exclusive photocards minted digitally and physically, granting COMO utility tokens used in official Gravity governance.
+                </p>
+              </div>
+              <Link href="/about" className="text-xs uppercase tracking-wider font-semibold text-white inline-flex items-center gap-1 hover:text-zinc-300">
+                Objekt details <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            <div className="bg-gray-900/60 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/50 transition-all">
-              <h3 className="text-xl font-semibold mb-3 text-pink-400">Fan Community</h3>
-              <p className="text-gray-400 mb-4">Join our growing community of fans from around the world.</p>
-              <Link href="/credits" className="text-purple-400 inline-flex items-center gap-1 hover:text-purple-300">
-                Join now <ArrowRight className="h-4 w-4" />
+            <div className="bg-zinc-900/40 p-8 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-800 text-zinc-300">03 / DIMENSIONS</span>
+                <h3 className="text-xl font-bold mt-4 mb-2 text-white">Recreated Units</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                  From Acid Angel from Asia and EVOLution to Vision@ry Vision and ∞! (Hatch!), units evolve with unique concepts each season.
+                </p>
+              </div>
+              <Link href="/sub-units" className="text-xs uppercase tracking-wider font-semibold text-white inline-flex items-center gap-1 hover:text-zinc-300">
+                View all units <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Album Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
-        {/* Background stage lights effect */}
-        <div className="absolute inset-0 z-0 opacity-30">
-          <Image
-            src="/home/triples_hatchi.jpg"
-            alt="Stage lights"
-            fill
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover"
-          />
-        </div>
-
+      {/* Album / Discography Section */}
+      <section className="py-24 px-4 border-b border-zinc-800/80 relative overflow-hidden bg-zinc-950/60">
         <div className="max-w-7xl mx-auto relative z-10">
-          <h2 className="text-5xl md:text-6xl font-bold mb-16 text-center uppercase tracking-wider">Latest Release</h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
-              <button className="bg-black/60 text-white hover:bg-black/80 transition-colors py-4 px-8 w-full md:w-auto text-lg font-medium uppercase tracking-wider border border-gray-700">
-                Play on other platforms
-              </button>
+              <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ DISCOGRAPHY ]</p>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight uppercase">Music Archive</h2>
             </div>
-
-            <div>
-              <SpotifyEmbed/>
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-16">
             <Link
               href="/albums"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-600/20 border border-purple-500/30 px-6 py-3 rounded-full text-white font-medium hover:bg-gradient-to-r hover:from-purple-500/30 hover:to-pink-600/30 transition-all"
+              className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-zinc-300 hover:text-white transition-colors"
             >
-              View All Albums <ArrowRight className="h-5 w-5" />
+              All Releases <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 space-y-6">
+              <div className="p-8 rounded-2xl border border-zinc-800 bg-zinc-900/30">
+                <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Featured Release</span>
+                <h3 className="text-2xl md:text-3xl font-bold mt-2 mb-3 text-white">ASSEMBLE24</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                  The historic first full-length album featuring all 24 members together, led by the title track &quot;Girls Never Die&quot;.
+                </p>
+                <div className="flex gap-3">
+                  <Link
+                    href="/albums"
+                    className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-zinc-200 transition-all"
+                  >
+                    View Tracklist
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <SpotifyEmbed />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Sub-Units Preview Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-black">
+      <section className="py-24 px-4 border-b border-zinc-800/80">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-              Our Sub-Units
-            </span>
-          </h2>
-          <p className="text-gray-300 text-center mb-12 max-w-3xl mx-auto">
-            Discover the diverse musical styles and concepts of our specialized sub-units, each showcasing unique
-            talents and artistic directions.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="relative group h-64 overflow-hidden rounded-lg">
-              <Image
-                src="/sub-units/sub_unit_hatchi.jpg"
-                alt="tripleS Hatch!"
-                fill
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="text-xl font-bold text-white">∞! (Hatch!)</h3>
-                <p className="text-pink-400">Japanese sub-unit</p>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ ACTIVE UNITS ]</p>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+                Featured Dimensions
+              </h2>
             </div>
-
-            <div className="relative group h-64 overflow-hidden rounded-lg">
-              <Image
-                src="/sub-units/sub_unit_Visionary_Vision.jpg"
-                alt="Velvet Noir"
-                fill
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="text-xl font-bold text-white">Vision@ry Vision</h3>
-                <p className="text-pink-400">Dance sub-unit</p>
-              </div>
-            </div>
-
-            <div className="relative group h-64 overflow-hidden rounded-lg">
-              <Image
-                src="/sub-units/sub_unit_Glow.jpg"
-                alt="Neon Pulse"
-                fill
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="text-xl font-bold text-white">Glow</h3>
-                <p className="text-pink-400">tripleS sub-unit last 4 members</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mt-10">
             <Link
               href="/sub-units"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-600/20 border border-purple-500/30 px-6 py-3 rounded-full text-white font-medium hover:bg-gradient-to-r hover:from-purple-500/30 hover:to-pink-600/30 transition-all"
+              className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-zinc-300 hover:text-white transition-colors"
             >
-              Explore All Sub-Units <ArrowRight className="h-5 w-5" />
+              Browse All Dimensions <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="relative group h-80 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
+              <Image
+                src="/sub-units/sub_unit_hatchi.jpg"
+                alt="tripleS ∞! (Hatch!)"
+                fill
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Japan Dimension</span>
+                <h3 className="text-2xl font-bold text-white mt-1">∞! (Hatch!)</h3>
+                <p className="text-zinc-300 text-xs mt-1">First Japanese debut unit</p>
+              </div>
+            </div>
+
+            <div className="relative group h-80 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
+              <Image
+                src="/sub-units/sub_unit_Visionary_Vision.jpg"
+                alt="tripleS Vision@ry Vision"
+                fill
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Dance Dimension</span>
+                <h3 className="text-2xl font-bold text-white mt-1">Vision@ry Vision</h3>
+                <p className="text-zinc-300 text-xs mt-1">High-performance 12-member unit</p>
+              </div>
+            </div>
+
+            <div className="relative group h-80 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
+              <Image
+                src="/sub-units/sub_unit_Glow.jpg"
+                alt="tripleS Glow"
+                fill
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <span className="text-xs font-mono text-zinc-400 uppercase tracking-widest">S21–S24 Dimension</span>
+                <h3 className="text-2xl font-bold text-white mt-1">Glow</h3>
+                <p className="text-zinc-300 text-xs mt-1">Debut unit of the final 4 members</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
       {/* Birthday Countdown Section */}
-      <section className="mt-2">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            Next Events
-          </span>
-        </h2>
-        <BirthdayCountdown members={Object.values(members)} />
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs uppercase tracking-widest text-zinc-400 mb-2 font-mono">[ CALENDAR ]</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+              Upcoming Member Birthdays
+            </h2>
+          </div>
+          <BirthdayCountdown members={Object.values(members)} />
+        </div>
       </section>
     </div>
   )

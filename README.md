@@ -1,54 +1,51 @@
-# TripleS Fan Site 🌸
+# tripleS Profile & Fan Directory
 
-Welcome to the fan-made website project for the girl group **TripleS** (tripleS). Built with **Next.js** for high performance, dynamic layouts, and a modern, premium user experience.
+An interactive directory and archive for the 24-member decentralized K-pop girl group **tripleS** (트리플에스), built with Next.js App Router, Tailwind CSS, and Framer Motion.
 
----
-
-## ✨ Features
-
-*   **Member Profiles** – Bios, photos, and fun facts for each member.
-*   **Sub-units (Syracuse/DIMENSION)** – Explore the unique subunit structure and journeys.
-*   **Discography** – Album and song listings with streaming/purchase links.
-*   **Latest News** – Live updates on group activities and future dimensions.
-*   **Performance First** – Optimized via Next.js with responsive layouts.
+Live: [profile-triples.vercel.app](https://profile-triples.vercel.app)
 
 ---
 
-## 🛠️ Tech Stack
+## Overview
 
-*   **Framework:** [Next.js](https://nextjs.org/) (React)
-*   **Styling:** CSS Modules (Vanilla CSS)
-*   **Icons:** Lucide React (if applicable) / Custom SVGs
+tripleS is a 24-member group under MODHAUS operating under a decentralized model where fans (WAV) vote on subunits (Dimensions), title tracks, and content via Grand Gravity on the COSMO application.
+
+This project serves as a fan archive providing:
+- **Member Directory (S1–S24)**: Full profile cards, member details, S-numbers, and birthdays.
+- **Dimensions Archive**: Record of all seasonal subunits from Acid Angel from Asia to Vision@ry Vision and ∞! (Hatch!).
+- **Discography & Media**: Album tracklists with integrated Spotify streaming previews.
+- **Birthday Tracker**: Real-time member birthday countdown and calendar.
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router, React 19)
+- **Styling**: Tailwind CSS & Custom Design System
+- **Animation**: Framer Motion, Lenis Smooth Scroll
+- **Icons**: Lucide React, React Icons
+- **Deployment & Analytics**: Vercel Edge, Speed Insights, Next Sitemap
+
+---
+
+## Getting Started
 
 ### Prerequisites
+Node.js 18.17+ or newer.
 
-Ensure you have [Node.js](https://nodejs.org/) installed (v18+ recommended).
+### Installation
 
-### Setup Instructions
+```bash
+git clone https://github.com/fadhilafif98/profile_triples.git
+cd profile_triples
+npm install
+npm run dev
+```
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/triples-fanmade-website.git
-    ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-2.  **Navigate to directory:**
-    ```bash
-    cd triples-fanmade-website
-    ```
+---
 
-3.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+## Disclaimer
 
-4.  **Run development server:**
-    ```bash
-    npm run dev
-    ```
-
-5.  **Open in browser:**
-    Go to [http://localhost:3000](http://localhost:3000) to view the application.
+This is a non-commercial fan-made project created for educational and community tribute purposes. All images, media, and trademarks belong to **MODHAUS** and **tripleS**.

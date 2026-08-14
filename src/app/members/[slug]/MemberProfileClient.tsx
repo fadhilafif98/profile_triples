@@ -69,17 +69,13 @@ const mbtiDescriptions: Record<string, { title: string; traits: string[] }> = {
 // ─── stat pill ───────────────────────────────────────────────────────────────
 function StatPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 hover:border-purple-500/40 transition-all group cursor-default"
-    >
-      <span className="text-purple-400 group-hover:text-pink-400 transition-colors">{icon}</span>
+    <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-5 py-4 hover:border-zinc-700 transition-all cursor-default">
+      <span className="text-zinc-400">{icon}</span>
       <div>
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{label}</p>
-        <p className="text-white font-semibold">{value}</p>
+        <p className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">{label}</p>
+        <p className="text-white font-semibold text-sm md:text-base">{value}</p>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -109,18 +105,18 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   const next = idx < sorted.length - 1 ? sorted[idx + 1] : null
 
   if (!mounted) {
-    return <div className="min-h-screen bg-black" />
+    return <div className="min-h-screen bg-[#050505]" />
   }
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-8 md:py-16">
+    <div className="min-h-screen bg-[#050505] text-white px-4 py-8 md:py-16 selection:bg-white selection:text-black">
       {/* Back button */}
       <div className="max-w-6xl mx-auto mb-8">
         <Link
           href="/members"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white bg-white/5 border border-white/10 rounded-full px-4 py-2 transition-all hover:border-purple-500/50"
+          className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-400 hover:text-white bg-zinc-900/60 border border-zinc-800 rounded-full px-4 py-2 transition-all hover:border-zinc-600"
         >
-          <ArrowLeft className="h-4 w-4" /> All Members
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Directory
         </Link>
       </div>
 
@@ -130,11 +126,11 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="md:col-span-5 lg:col-span-4 space-y-6 md:sticky md:top-8 h-fit"
         >
           {/* Main Photo with GIF overlay */}
-          <div className="relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border border-white/10 group bg-white/5">
+          <div className="relative aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl border border-zinc-800 group bg-zinc-950">
             <Image
               src={`https://i.imgur.com/${member.image}`}
               alt={member.name}
@@ -145,20 +141,27 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {member.gif && (
               <img
                 src={`https://i.giphy.com/media/v1.${member.gif}`}
-                alt={`${member.name} gif animation`}
+                alt={`${member.name} preview`}
                 className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
+            
+            <div className="absolute top-4 left-4 z-10">
+              <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md border border-white/10 text-white">
+                S{member.id}
+              </span>
+            </div>
+
             <div className="absolute bottom-6 left-6 right-6">
-              <span className="text-xs uppercase tracking-widest text-pink-400 font-medium">
-                tripleS Member #{member.id}
+              <span className="text-xs uppercase tracking-widest text-zinc-400 font-mono">
+                tripleS &bull; S{member.id}
               </span>
               <h1 className="text-3xl font-extrabold tracking-tight mt-1 flex items-center gap-2">
                 {member.name}
                 <span className="text-xl">{member.representativeEmoji}</span>
               </h1>
-              <p className="text-pink-300 font-medium mt-1">{member.role}</p>
+              <p className="text-zinc-400 font-mono text-sm mt-1">{member.role}</p>
             </div>
           </div>
 
@@ -167,25 +170,25 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {prev ? (
               <Link
                 href={`/members/${prev.slug}`}
-                className="flex-1 flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 rounded-2xl p-4 transition-all group"
+                className="flex-1 flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-4 transition-all group"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                <ArrowLeft className="h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
                 <div className="min-w-0">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Prev</p>
-                  <p className="font-semibold text-sm truncate">{prev.name}</p>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">S{prev.id}</p>
+                  <p className="font-semibold text-sm text-zinc-300 group-hover:text-white truncate">{prev.name}</p>
                 </div>
               </Link>
             ) : <div className="flex-1" />}
             {next ? (
               <Link
                 href={`/members/${next.slug}`}
-                className="flex-1 flex items-center justify-end gap-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 rounded-2xl p-4 transition-all group text-right"
+                className="flex-1 flex items-center justify-end gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-4 transition-all group text-right"
               >
                 <div className="min-w-0">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">Next</p>
-                  <p className="font-semibold text-sm truncate">{next.name}</p>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">S{next.id}</p>
+                  <p className="font-semibold text-sm text-zinc-300 group-hover:text-white truncate">{next.name}</p>
                 </div>
-                <ArrowLeft className="h-5 w-5 text-gray-400 group-hover:text-purple-400 transition-colors rotate-180" />
+                <ArrowLeft className="h-4 w-4 text-zinc-500 group-hover:text-white transition-colors rotate-180" />
               </Link>
             ) : <div className="flex-1" />}
           </div>
@@ -193,64 +196,60 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
         {/* Right Column: Detailed Info & Stats */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
           className="md:col-span-7 lg:col-span-8 space-y-8"
         >
           {/* Stat Pills Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatPill icon={<Calendar className="h-5 w-5" />} label="Birthday" value={formatBirthday(member.birthday)} />
-            <StatPill icon={<Star className="h-5 w-5" />} label="Age" value={`${getAge(member.birthday)} years old`} />
-            <StatPill icon={<Globe className="h-5 w-5" />} label="Nationality" value={member.nationality} />
-            <StatPill icon={<Sparkles className="h-5 w-5" />} label="MBTI" value={member.mbti} />
+            <StatPill icon={<Calendar className="h-4 w-4" />} label="Birthday" value={formatBirthday(member.birthday)} />
+            <StatPill icon={<Star className="h-4 w-4" />} label="Age" value={`${getAge(member.birthday)} yrs`} />
+            <StatPill icon={<Globe className="h-4 w-4" />} label="Nationality" value={member.nationality} />
+            <StatPill icon={<Sparkles className="h-4 w-4" />} label="MBTI" value={member.mbti} />
           </div>
 
           {/* Birthday Countdown */}
-          <motion.div
-            whileHover={{ y: -4 }}
-            className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-950/40 via-purple-900/10 to-transparent p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
-          >
-            <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="text-center sm:text-left">
-              <p className="text-xs uppercase tracking-widest text-purple-300 mb-1">Next Birthday</p>
-              <p className="text-gray-400 text-sm">
-                Zodiac: <span className="font-semibold text-purple-200">{getZodiac(member.birthday)}</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 block mb-1">[ BIRTHDAY TRACKER ]</span>
+              <p className="text-zinc-400 text-sm">
+                Zodiac Sign: <span className="font-medium text-white">{getZodiac(member.birthday)}</span>
               </p>
             </div>
             <div className="text-center sm:text-right">
-              <span className="text-5xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+              <span className="text-5xl md:text-6xl font-black text-white tracking-tight">
                 {daysUntil}
               </span>
-              <p className="text-xs text-gray-400 mt-1">
-                {daysUntil === 1 ? "day to go! 🎂" : daysUntil === 0 ? "Today is the day! 🎉🎂" : "days to go 🎂"}
+              <p className="text-xs font-mono text-zinc-400 mt-1">
+                {daysUntil === 1 ? "day to go" : daysUntil === 0 ? "Birthday today 🎉" : "days until birthday"}
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Personality / MBTI */}
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 space-y-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="text-purple-400">✦</span> Personality
-            </h2>
+          <div className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 md:p-8 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white tracking-tight">MBTI Classification</h2>
+              <span className="text-xs font-mono text-zinc-500">[ PERSONALITY ]</span>
+            </div>
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               <div className="shrink-0">
-                <span className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+                <span className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
                   {member.mbti}
                 </span>
-                <p className="text-pink-300 font-semibold text-sm mt-1">{mbtiInfo.title}</p>
+                <p className="text-zinc-400 font-mono text-sm mt-1">{mbtiInfo.title}</p>
               </div>
               <div className="flex-1">
-                <p className="text-gray-400 text-xs mb-2">Key traits</p>
+                <p className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-2">Key traits</p>
                 <div className="flex flex-wrap gap-2">
                   {mbtiInfo.traits.map((t) => (
-                    <motion.span
+                    <span
                       key={t}
-                      whileHover={{ scale: 1.05 }}
-                      className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-xs text-purple-200"
+                      className="px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs font-medium text-zinc-300"
                     >
                       {t}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -260,52 +259,52 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
           {/* GIF Showcase */}
           {member.gif && (
             <div className="space-y-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <span className="text-pink-400">✦</span> Moments
-              </h2>
-              <div className="rounded-3xl overflow-hidden border border-pink-500/20 shadow-xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-white tracking-tight">Highlight Animation</h2>
+                <span className="text-xs font-mono text-zinc-500">[ MOMENTS ]</span>
+              </div>
+              <div className="rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-xl">
                 <img
                   src={`https://i.giphy.com/media/v1.${member.gif}`}
-                  alt={`${member.name} gif animation`}
+                  alt={`${member.name} moment`}
                   className="w-full h-auto block"
                 />
               </div>
             </div>
           )}
 
-          {/* Related / Also check out */}
+          {/* Related / Other Members */}
           <div className="space-y-4 pt-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="text-pink-400">✦</span> Also check out
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white tracking-tight">Other tripleS Members</h2>
+              <span className="text-xs font-mono text-zinc-500">[ EXPLORE ]</span>
+            </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-              {related.map((m, i) => (
-                <motion.div
+              {related.map((m) => (
+                <Link
                   key={m.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
+                  href={`/members/${m.slug}`}
+                  className="group block rounded-2xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-all bg-zinc-900/40"
                 >
-                  <Link
-                    href={`/members/${m.slug}`}
-                    className="group block rounded-2xl overflow-hidden border border-white/5 hover:border-purple-500/30 transition-all bg-white/5"
-                  >
-                    <div className="relative aspect-[3/4]">
-                      <Image
-                        src={`https://i.imgur.com/${m.image}`}
-                        alt={`${m.name} group preview`}
-                        fill
-                        sizes="(max-width: 640px) 33vw, 16vw"
-                        className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
-                        <p className="text-[10px] font-semibold text-white truncate">{m.name}</p>
-                      </div>
+                  <div className="relative aspect-[3/4]">
+                    <Image
+                      src={`https://i.imgur.com/${m.image}`}
+                      alt={m.name}
+                      fill
+                      sizes="(max-width: 640px) 33vw, 16vw"
+                      className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                    <div className="absolute top-1.5 left-1.5">
+                      <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-black/70 text-zinc-300">
+                        S{m.id}
+                      </span>
                     </div>
-                  </Link>
-                </motion.div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
+                      <p className="text-[11px] font-medium text-white truncate">{m.name}</p>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
