@@ -41,8 +41,8 @@ export default function AboutPage() {
         </div>
 
         {/* Profile Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20">
-          <div className="lg:col-span-7 space-y-6 text-zinc-300 text-base md:text-lg leading-relaxed">
+        <div className="space-y-10 mb-20">
+          <div className="space-y-6 text-zinc-300 text-base md:text-lg leading-relaxed max-w-4xl">
             <p>
               <strong className="text-white">tripleS</strong> (트리플에스 / トリプルS; also known as Social Sonyo Seoul) is a 24-member South Korean girl group founded under MODHAUS.
             </p>
@@ -53,17 +53,22 @@ export default function AboutPage() {
               tripleS began member reveals on May 1, 2022. The initial 10-member unit debuted on February 13, 2023 with <em className="text-zinc-200">ASSEMBLE</em>, followed by the landmark OT24 full-group assemble on May 8, 2024 with <em className="text-zinc-200">ASSEMBLE24</em>.
             </p>
           </div>
-          <div className="lg:col-span-5 relative h-[420px] rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/40">
-            <Image
-              src="/about/triples_about.jpg"
-              alt="tripleS 24 Group"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-300">ASSEMBLE24 Era</span>
+
+          {/* Full uncropped 24-member photo */}
+          <div className="relative rounded-3xl overflow-hidden border border-zinc-800 bg-black shadow-2xl">
+            <div className="relative w-full aspect-[3/2]">
+              <Image
+                src="/about/triples_about.jpg"
+                alt="tripleS 24 Members Complete Assembly"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1200px) 100vw, 1152px"
+                priority
+              />
+            </div>
+            <div className="p-4 sm:p-5 border-t border-zinc-800/80 bg-zinc-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-300">[ OT24 COMPLETE ASSEMBLY &bull; S1–S24 ]</span>
+              <span className="text-xs font-mono text-zinc-500">ASSEMBLE24 Era Live Stage</span>
             </div>
           </div>
         </div>
