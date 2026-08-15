@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, Users, Info, Heart, Disc3 } from "lucide-react"
+import { Menu, X, Home, Users, Info, Heart, Disc3, Sparkles } from "lucide-react"
 import AnimatedLogo from "./animated-logo"
 import { ThemePillToggle } from "./theme-toggle"
 
@@ -29,6 +29,7 @@ export default function Navigation() {
     { name: "About", href: "/about", icon: <Info className="h-5 w-5" /> },
     { name: "Members", href: "/members", icon: <Users className="h-5 w-5" /> },
     { name: "Sub-Units", href: "/sub-units", icon: <Users className="h-5 w-5 opacity-70" /> },
+    { name: "Objekts", href: "/objekts", icon: <Sparkles className="h-5 w-5" /> },
     { name: "Albums", href: "/albums", icon: <Disc3 className="h-5 w-5" /> },
     { name: "Credits", href: "/credits", icon: <Heart className="h-5 w-5" /> },
   ]

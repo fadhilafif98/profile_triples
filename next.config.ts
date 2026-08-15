@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'resources.cosmo.fans',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.cosmo.fans',
+      },
+      {
+        protocol: 'https',
         hostname: '*.cosmo.fans',
       },
       {
@@ -32,6 +40,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'static.wikia.nocookie.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'huggingface.co',
       },
     ],
   },

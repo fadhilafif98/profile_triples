@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Play, ExternalLink } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Play, ExternalLink, Sparkles, ArrowRight } from "lucide-react"
 import { members, getMemberBySlug, Member } from "@/utils/members"
 
 // ─── Sub-Unit Data Map for Dimension Section ─────────────────────────────────
@@ -548,9 +548,19 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   )}
                 </h1>
 
-                <p className="text-xs sm:text-sm font-mono text-zinc-500 dark:text-zinc-400 mt-2">
-                  {member.role} &bull; {member.nationality}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
+                  <p className="text-xs sm:text-sm font-mono text-zinc-500 dark:text-zinc-400">
+                    {member.role} &bull; {member.nationality}
+                  </p>
+                  <Link
+                    href={`/objekts?member=${encodeURIComponent(member.name)}`}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-800 dark:text-zinc-200 transition-all hover:scale-105 shadow-sm w-fit"
+                  >
+                    <Sparkles className="h-3 w-3 text-amber-500" />
+                    <span>View {member.name}&apos;s Objekts</span>
+                    <ArrowRight className="h-3 w-3 opacity-60" />
+                  </Link>
+                </div>
               </div>
 
               <div>

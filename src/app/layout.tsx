@@ -6,6 +6,7 @@ import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
+import BackToTop from "@/components/back-to-top"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -29,10 +30,11 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <SmoothScroll>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen overflow-x-hidden">
               <Navigation />
               <main className="flex-grow">{children}</main>
               <Footer />
+              <BackToTop />
             </div>
             <Analytics />
             <SpeedInsights />

@@ -136,8 +136,8 @@ export default function Home() {
                   Exclusive photocards minted digitally and physically, granting COMO utility tokens used in official Gravity governance.
                 </p>
               </div>
-              <Link href="/about" className="text-xs uppercase tracking-wider font-semibold text-zinc-900 dark:text-white inline-flex items-center gap-1 hover:text-zinc-600 dark:hover:text-zinc-300">
-                Objekt details <ArrowRight className="h-3.5 w-3.5" />
+              <Link href="/objekts" className="text-xs uppercase tracking-wider font-semibold text-zinc-900 dark:text-white inline-flex items-center gap-1 hover:text-zinc-600 dark:hover:text-zinc-300">
+                Explore Objekts Vault <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
