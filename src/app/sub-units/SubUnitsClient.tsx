@@ -4,8 +4,8 @@ import { useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Search, Sparkles, Filter, Layers, LayoutGrid, List } from "lucide-react"
-import { subUnits, SubUnit } from "@/utils/sub-units"
+import { ArrowRight, Search, Sparkles, Layers, LayoutGrid, List } from "lucide-react"
+import { subUnits } from "@/utils/sub-units"
 
 type CategoryFilter = "All" | "Main Dimension" | "msnz Project" | "Special & Genre" | "Introductory" | "Japan"
 

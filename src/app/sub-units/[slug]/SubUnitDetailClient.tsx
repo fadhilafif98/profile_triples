@@ -15,7 +15,6 @@ import {
   Disc3,
   ExternalLink,
   Users,
-  Radio,
   Music2,
 } from "lucide-react"
 import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"

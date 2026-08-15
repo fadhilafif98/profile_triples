@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Play, Sparkles, ExternalLink } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Play, ExternalLink } from "lucide-react"
 import { members, getMemberBySlug, Member } from "@/utils/members"
 
 // ─── Sub-Unit Data Map for Dimension Section ─────────────────────────────────
@@ -319,10 +319,37 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   const member = getMemberBySlug(slug)
   const [mounted, setMounted] = useState(false)
   const [activePhoto, setActivePhoto] = useState<string | null>(null)
+  const [dimensionPage, setDimensionPage] = useState(0)
+  const [hasMoved, setHasMoved] = useState(false)
+
+  // More tripleS Slider Drag State & Auto-Center
+  const memberSliderRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Keep window at the top on member change
+  useEffect(() => {
+    if (mounted) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+    }
+  }, [mounted, member?.id])
+
+  // Auto-center active member in slider horizontally without moving window
+  useEffect(() => {
+    if (memberSliderRef.current && mounted) {
+      const slider = memberSliderRef.current
+      const activeEl = slider.querySelector<HTMLElement>('[data-active="true"]')
+      if (activeEl) {
+        const targetScroll = activeEl.offsetLeft - (slider.clientWidth / 2) + (activeEl.clientWidth / 2)
+        slider.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" })
+      }
+    }
+  }, [mounted, member?.id])
 
   if (!member) return null
 
@@ -348,8 +375,6 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
     })
     .filter((u, index, self): u is typeof unitInfoMap[string] => Boolean(u) && self.findIndex(t => t?.title === u?.title) === index)
 
-  // Dimension Swiper State (Max 3 per slide)
-  const [dimensionPage, setDimensionPage] = useState(0)
   const dimensionPageSize = 3
   const totalDimensionPages = Math.max(1, Math.ceil(matchedUnits.length / dimensionPageSize))
 
@@ -357,13 +382,6 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
     dimensionPage * dimensionPageSize,
     (dimensionPage + 1) * dimensionPageSize
   )
-
-  // More tripleS Slider Drag State & Auto-Center
-  const memberSliderRef = useRef<HTMLDivElement>(null)
-  const isDraggingRef = useRef(false)
-  const startXRef = useRef(0)
-  const scrollLeftRef = useRef(0)
-  const [hasMoved, setHasMoved] = useState(false)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!memberSliderRef.current) return
@@ -393,25 +411,6 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       memberSliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
     }
   }
-
-  // Keep window at the top on member change
-  useEffect(() => {
-    if (mounted) {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
-    }
-  }, [mounted, member.id])
-
-  // Auto-center active member in slider horizontally without moving window
-  useEffect(() => {
-    if (memberSliderRef.current && mounted) {
-      const slider = memberSliderRef.current
-      const activeEl = slider.querySelector<HTMLElement>('[data-active="true"]')
-      if (activeEl) {
-        const targetScroll = activeEl.offsetLeft - (slider.clientWidth / 2) + (activeEl.clientWidth / 2)
-        slider.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" })
-      }
-    }
-  }, [mounted, member.id])
 
   if (!mounted) {
     return <div className="min-h-screen bg-[#000000]" />
