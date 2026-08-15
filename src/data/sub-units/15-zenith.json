@@ -1,0 +1,20 @@
+{
+  "id": 15,
+  "slug": "zenith",
+  "name": "Zenith (msnz)",
+  "hangul": "제니스",
+  "category": "msnz Project",
+  "era": "msnz Planetary Quad",
+  "members": [
+    "S3 JiWoo",
+    "S6 SooMin",
+    "S8 YuBin",
+    "S12 YeonJi",
+    "S18 JooBin",
+    "S19 HaYeon (Leader)"
+  ],
+  "concept": "Peak Horizon, Harmonious Symphony",
+  "debutRelease": "Beyond Beauty (Nov 24, 2025)",
+  "description": "The apex unit of the msnz quad-dimension, delivering soaring vocal harmonies and synchronized power choreography representing the highest celestial point.",
+  "image": "/sub-units/sub_unit_Zenith.jpg"
+}

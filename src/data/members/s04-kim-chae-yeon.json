@@ -1,0 +1,32 @@
+{
+  "id": 4,
+  "name": "ChaeYeon",
+  "birthName": "Kim Chae-yeon",
+  "hangul": "채연",
+  "birthNameHangul": "김채연",
+  "slug": "kim-chae-yeon",
+  "role": "Vocalist, Dancer",
+  "image": "JVh2TIf.jpg",
+  "birthday": "2004-12-04",
+  "birthplace": "Seoul, South Korea",
+  "nationality": "South Korean",
+  "bloodType": "B",
+  "height": "170 cm",
+  "mbti": "ESFP",
+  "representativeEmoji": "🍑 (Peach)",
+  "subUnits": [
+    "+(KR)ystal Eyes",
+    "ACID EYES",
+    "EVOLution",
+    "Aria",
+    "∞! (Hatchi!)",
+    "sun"
+  ],
+  "revealDate": "2022-06-22",
+  "funFacts": [
+    "Revealed as S4 on June 22, 2022",
+    "Former member of CutieL and Busters",
+    "Longtime MC of EBS children's show 'Tok! Tok! Boni Hani'"
+  ],
+  "gif": "Y2lkPTc5MGI3NjExczQ3M2tsbDNnNW02eHRvYjdxNWJoM243dzMzMzhpOXF5b3l5YzhkbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7N6nxs23t4SJzTr5El/giphy.gif"
+}

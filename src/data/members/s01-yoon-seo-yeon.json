@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "SeoYeon",
+  "birthName": "Yoon Seo-yeon",
+  "hangul": "서연",
+  "birthNameHangul": "윤서연",
+  "slug": "yoon-seo-yeon",
+  "role": "Leader, Vocalist",
+  "image": "2f3S1Da.jpg",
+  "birthday": "2003-08-06",
+  "birthplace": "Daejeon, South Korea",
+  "nationality": "South Korean",
+  "bloodType": "B",
+  "height": "160 cm",
+  "mbti": "ISFP",
+  "representativeEmoji": "🐶 (Puppy) / 🐹 (Hamster)",
+  "subUnits": [
+    "+(KR)ystal Eyes",
+    "ACID EYES",
+    "LOVElution",
+    "neptune"
+  ],
+  "revealDate": "2022-05-01",
+  "funFacts": [
+    "First member revealed (S1) on May 1, 2022",
+    "Recruited through Instagram DM without prior idol trainee experience",
+    "Elected official leader for ASSEMBLE24 & ASSEMBLE25 via Grand Gravity"
+  ],
+  "gif": "Y2lkPTc5MGI3NjExZGpxbm9lMGxtOXFua2I5aGp0eXcyYTh3b3dxMWt5emU5MzVocmg1ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cW9hS5al3lUuPvblI6/giphy.gif"
+}

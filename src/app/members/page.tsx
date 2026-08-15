@@ -30,16 +30,17 @@ export const metadata: Metadata = {
 
 export default function MembersPage() {
   return (
-    <div className="bg-black text-white pt-20 pb-20">
+    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors min-h-screen">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-          Meet <span className="text-white">tripleS</span> Members
-        </h1>
-
-        <p className="text-lg text-gray-300 mb-12 max-w-3xl">
-          tripleS brings together a dynamic group of talented girls from Seoul, each contributing their own unique style, skills, and personality to create a collective sound and powerful performances. 
-          Click on a member to learn more about their story and artistry.
-        </p>
+        <div className="mb-14">
+          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ DIRECTORY S1–S24 ]</p>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-pretendard">
+            Member Profiles
+          </h1>
+          <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-4 max-w-3xl leading-relaxed">
+            The complete 24-member roster of tripleS. Filter by S-number, nationality, sub-unit history, and MBTI types.
+          </p>
+        </div>
 
         <MemberGrid />
       </div>
