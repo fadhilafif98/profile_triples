@@ -60,7 +60,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
     if (!unit) return []
     const unitNameClean = unit.name.toLowerCase().split(" (")[0]
     return allAlbums.filter((album) => {
-      const aUnit = album.unit.toLowerCase()
+      const aUnit = (album.unit || "").toLowerCase()
       if (unit.slug === "acid-angel-from-asia") return aUnit.includes("acid angel") || album.id === "01-access"
       if (unit.slug === "krystal-eyes") return aUnit.includes("krystal") || album.id === "03-aesthetic" || album.id === "04-touch"
       if (unit.slug === "acid-eyes") return aUnit.includes("acid eyes") || album.id === "05-cherry-gene"
