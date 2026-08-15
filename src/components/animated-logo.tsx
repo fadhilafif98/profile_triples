@@ -18,7 +18,7 @@ export default function AnimatedLogo({
   height = 48,
   className = "",
   strokeWidth = 180,
-  strokeColor = "#ffffff",
+  strokeColor = "currentColor",
   loop = false,
   duration = 2000,
 }: AnimatedLogoProps) {

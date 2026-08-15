@@ -1,0 +1,20 @@
+{
+  "id": 12,
+  "slug": "moon",
+  "name": "Moon (msnz)",
+  "hangul": "문",
+  "category": "msnz Project",
+  "era": "msnz Planetary Quad",
+  "members": [
+    "S9 Kaede",
+    "S14 SoHyun",
+    "S17 Lynn",
+    "S20 ShiOn",
+    "S22 Sullin (Leader)",
+    "S24 JiYeon"
+  ],
+  "concept": "Celestial, Dreamy Pop",
+  "debutRelease": "Beyond Beauty (Nov 24, 2025)",
+  "description": "One of four elemental units formed under the msnz (misonyeojeu) Grand Gravity project. Led by S22 Sullin, Moon expresses deep mystical melodies and nocturnal elegance.",
+  "image": "/sub-units/sub_unit_Moon_v2.jpg"
+}

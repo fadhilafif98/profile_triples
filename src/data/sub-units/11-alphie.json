@@ -1,0 +1,22 @@
+{
+  "id": 11,
+  "slug": "alphie",
+  "name": "Alphie",
+  "hangul": "알피",
+  "category": "Special & Genre",
+  "era": "Grand Gravity",
+  "members": [
+    "S5 YooYeon (Leader)",
+    "S11 Kotone",
+    "S13 Nien",
+    "S17 Lynn",
+    "S19 HaYeon",
+    "S20 ShiOn",
+    "S21 ChaeWon",
+    "S24 JiYeon"
+  ],
+  "concept": "Electro-Pop & Dynamic Fusion",
+  "debutRelease": "Alpha Dimension Formation",
+  "description": "An 8-member sub-unit formed via fan Grand Gravity voting, combining top vocalists and dancers across S-ranks to pioneer fresh electronic and stage-driven concepts.",
+  "image": "/sub-units/sub_unit_Alphie.jpg"
+}

@@ -1,0 +1,20 @@
+{
+  "id": 13,
+  "slug": "sun",
+  "name": "Sun (msnz)",
+  "hangul": "선",
+  "category": "msnz Project",
+  "era": "msnz Planetary Quad",
+  "members": [
+    "S2 HyeRin",
+    "S4 ChaeYeon",
+    "S5 YooYeon",
+    "S15 Xinyu (Leader)",
+    "S16 Mayu",
+    "S21 ChaeWon"
+  ],
+  "concept": "Radiant, High-Energy Daytime Pop",
+  "debutRelease": "Beyond Beauty (Nov 24, 2025)",
+  "description": "The radiant solar unit of the msnz project, fronted by leader S15 Xinyu. Sun delivers vibrant energy, catchy hooks, and sunny upbeat performances.",
+  "image": "/sub-units/sub_unit_Sun.jpg"
+}

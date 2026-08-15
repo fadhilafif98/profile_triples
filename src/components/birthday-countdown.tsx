@@ -1,632 +1,545 @@
 "use client"
 
-import Particles from "react-tsparticles"
-import { tsParticles } from "tsparticles-engine"
-import { loadConfettiPreset } from "tsparticles-preset-confetti"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { Cake, Calendar, Gift, PartyPopper, Star, Heart, RefreshCcw, RefreshCwOff } from "lucide-react"
+import { RefreshCcw, RefreshCwOff, ArrowRight, Cake, Sparkles } from "lucide-react"
 import type { Member } from "@/utils/members"
 
 interface BirthdayCountdownProps {
   members: Member[]
 }
 
-interface MemberWithBirthdayInfo extends Member {
-  nextBirthday?: Date
-  daysUntil?: number
-  isRecentBirthday?: boolean
-  daysSinceBirthday?: number
-  isTodayBirthday?: boolean
-  birthdayMessage?: string
+interface MemberBirthdayMeta extends Member {
+  nextBirthday: Date
+  daysUntil: number
+  isToday: boolean
+  isRecent: boolean
+  daysSince: number
+  turningAge: number
+  formattedDate: string
+  birthMonth: number
+  birthDay: number
 }
 
-// Function to generate a unique birthday message for each member
-const generateBirthdayMessage = (member: Member): string => {
+// 8 lightweight GPU-accelerated Stardust particles (zero CPU overhead for mobile)
+const STARDUST_PARTICLES = [
+  { left: "12%", top: "75%", size: "text-xs", delay: 0, duration: 4.2 },
+  { left: "28%", top: "65%", size: "text-[10px]", delay: 1.4, duration: 4.8 },
+  { left: "48%", top: "80%", size: "text-sm", delay: 0.6, duration: 3.9 },
+  { left: "68%", top: "70%", size: "text-xs", delay: 2.2, duration: 4.5 },
+  { left: "82%", top: "75%", size: "text-sm", delay: 1.1, duration: 4.6 },
+  { left: "92%", top: "60%", size: "text-[10px]", delay: 2.7, duration: 3.7 },
+  { left: "22%", top: "35%", size: "text-xs", delay: 3.1, duration: 4.1 },
+  { left: "78%", top: "30%", size: "text-xs", delay: 1.8, duration: 4.3 },
+]
+
+function CosmicStardust() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl z-0" aria-hidden="true">
+      {STARDUST_PARTICLES.map((p, i) => (
+        <motion.span
+          key={i}
+          initial={{ y: 0, opacity: 0, scale: 0.6 }}
+          animate={{
+            y: [-10, -65],
+            opacity: [0, 0.85, 0],
+            scale: [0.6, 1.1, 0.7],
+            rotate: [0, 45, 90],
+          }}
+          transition={{
+            duration: p.duration,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: "easeInOut",
+          }}
+          style={{ left: p.left, top: p.top }}
+          className={`absolute text-amber-400 dark:text-amber-300 select-none ${p.size}`}
+        >
+          ✦
+        </motion.span>
+      ))}
+    </div>
+  )
+}
+
+// Generate consistent celebration message
+const getBirthdayMessage = (member: Member): string => {
   const messages = [
-    `Happy Birthday to our amazing ${member.role}, ${member.name}! 🎉 Wishing you a day filled with joy and love!`,
-    `Today we celebrate ${member.name}'s special day! 🎂 Thank you for bringing your incredible talent to tripleS`,
-    `It's ${member.name}'s birthday! 🎈 Our ${member.role} is one year wiser and even more amazing!`,
-    `Happy Birthday, ${member.name}! 💖 Your passion and dedication inspire us all!`,
-    `Celebrating the birth of our wonderful ${member.role}, ${member.name}! 🌟 May your day be as bright as your future!`,
-    `Sending birthday wishes to ${member.name}! 🥳 Your energy and talent make our group shine brighter!`,
-    `Happy Birthday to our beloved ${member.name}! 💝 May your day be as special as you are to us!`,
-    `It's time to celebrate ${member.name}'s birthday! 🎊 Thank you for sharing your gifts with the world!`,
-    `Wishing a fantastic birthday to ${member.name}! 🌈 Your presence in tripleS brings us so much joy!`,
-    `Happy Birthday, ${member.name}! 🎵 May your day be filled with beautiful music and memories!`,
+    `Happy Birthday to our incredible ${member.role || "member"}, ${member.name}! 🎉 Wishing you boundless joy, good health, and memorable moments!`,
+    `Today we celebrate ${member.name}'s special day! 🎂 Thank you for illuminating tripleS with your talent and charm!`,
+    `It's ${member.name}'s birthday! 🎈 May your new year be as radiant and inspiring as your stage performances!`,
+    `Happy Birthday, ${member.name}! 💖 Your hard work and dedication continue to inspire WAV all around the world!`,
+    `Celebrating the birth of our wonderful ${member.name}! 🌟 Here's to another unforgettable year in the cosmos!`,
   ]
-
-  // Use the member's ID to select a consistent message for each member
-  const messageIndex = member.id % messages.length
-  return messages[messageIndex]
+  return messages[member.id % messages.length]
 }
 
-export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [upcomingBirthdays, setUpcomingBirthdays] = useState<MemberWithBirthdayInfo[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  })
-  const [isBirthdayMode, setIsBirthdayMode] = useState(false)
-  const [celebrationIndex, setCelebrationIndex] = useState(0)
-  const [viewingUpcoming, setViewingUpcoming] = useState(false)
-  const [autoRotateEnabled, setAutoRotateEnabled] = useState(true)
+// Compute deterministic birthday metadata for a member
+const computeBirthdayMeta = (member: Member, now: Date): MemberBirthdayMeta | null => {
+  if (!member.birthday) return null
+  const [bYear, bMonth, bDay] = member.birthday.split("-").map(Number)
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  const todayMidnight = new Date(currentYear, now.getMonth(), now.getDate())
 
-  // Function to calculate upcoming birthdays and check for recent birthdays
-  const calculateUpcomingBirthdays = useCallback(() => {
-    const now = new Date()
-    const currentYear = now.getFullYear()
-    // Strip time so all date comparisons are day-accurate
-    const today = new Date(currentYear, now.getMonth(), now.getDate())
+  const thisYearBirthday = new Date(currentYear, bMonth - 1, bDay)
+  const isToday = thisYearBirthday.getTime() === todayMidnight.getTime()
+  const hasPassedThisYear = thisYearBirthday < todayMidnight && !isToday
+  const isThisMonth = bMonth === currentMonth
 
-    // Create a list of members with their upcoming birthday dates
-    const membersWithBirthdayDates = members
-      .filter((member) => member.birthday) // Filter out members without birthday
-      .map((member) => {
-        const birthdateComponents = member.birthday.split("-")
-        const birthdateMonth = Number.parseInt(birthdateComponents[1]) - 1 // Month is 0-indexed in JS Date
-        const birthdateDay = Number.parseInt(birthdateComponents[2])
-
-        // Create this year's birthday date (midnight, same as today baseline)
-        let nextBirthday = new Date(currentYear, birthdateMonth, birthdateDay)
-
-        // Check if today is their birthday (both are midnight-based, safe to compare)
-        const isTodayBirthday = nextBirthday.getTime() === today.getTime()
-
-        // If the birthday has already passed this year, use next year's date
-        if (nextBirthday < today && !isTodayBirthday) {
-          nextBirthday = new Date(currentYear + 1, birthdateMonth, birthdateDay)
-        }
-
-        // Days until birthday: both are midnight-based so division is exact
-        const daysUntil = Math.round((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-
-        // Last birthday: if today is their birthday, lastBirthday = today; else this year's (already-passed) date
-        const lastBirthday = new Date(nextBirthday)
-        if (!isTodayBirthday) {
-          lastBirthday.setFullYear(lastBirthday.getFullYear() - 1)
-        }
-
-        // Use floor so today = 0 days since, yesterday = 1, etc.
-        const daysSinceBirthday = Math.floor((today.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24))
-        const isRecentBirthday = daysSinceBirthday >= 0 && daysSinceBirthday <= 7
-
-        // Generate a unique birthday message for this member
-        const birthdayMessage = generateBirthdayMessage(member)
-
-        return {
-          ...member,
-          nextBirthday,
-          daysUntil,
-          isRecentBirthday,
-          isTodayBirthday,
-          daysSinceBirthday: isRecentBirthday ? daysSinceBirthday : -1,
-          birthdayMessage,
-        }
-      })
-
-    // First, check if any member has had a birthday within the last 7 days
-    const recentBirthdays = membersWithBirthdayDates.filter((member) => member.isRecentBirthday)
-
-    // Sort recent birthdays by how recent they are (most recent first)
-    // Today's birthdays should be first
-    recentBirthdays.sort((a, b) => {
-      if (a.isTodayBirthday && !b.isTodayBirthday) return -1
-      if (!a.isTodayBirthday && b.isTodayBirthday) return 1
-      return a.daysSinceBirthday! - b.daysSinceBirthday!
-    })
-
-    // Sort upcoming birthdays
-    const upcomingBirthdaysOnly = membersWithBirthdayDates
-      .filter((m) => !m.isRecentBirthday)
-      .sort((a, b) => a.daysUntil! - b.daysUntil!)
-
-    if (recentBirthdays.length > 0) {
-      // If there are recent birthdays, set birthday mode
-      setIsBirthdayMode(true)
-      setCelebrationIndex(0)
-
-      // Return the recent birthdays first, then the upcoming ones
-      return [...recentBirthdays, ...upcomingBirthdaysOnly]
-    } else {
-      // If no recent birthdays, turn off birthday mode
-      setIsBirthdayMode(false)
-      setViewingUpcoming(false)
-
-      // Return upcoming birthdays
-      return upcomingBirthdaysOnly
-    }
-  }, [members])
-
-  // Calculate countdown to the next birthday
-  const calculateTimeLeft = useCallback(() => {
-    if (upcomingBirthdays.length === 0) return
-
-    const now = new Date()
-    const currentMember = upcomingBirthdays[currentIndex]
-
-    // If we're in birthday mode and not viewing upcoming, don't update the countdown
-    if (isBirthdayMode && !viewingUpcoming && currentMember.isRecentBirthday) {
-      // Show confetti only once when entering birthday mode
-      if (!showConfetti && currentMember.isTodayBirthday) {
-        setShowConfetti(true)
-        setTimeout(() => setShowConfetti(false), 5000) // Confetti for 5 seconds
-      }
-      return
-    }
-
-    if (!currentMember.nextBirthday) return
-
-    // Count down to end of birthday (midnight the next day), not midnight of the birthday
-    const birthdayEnd = new Date(currentMember.nextBirthday)
-    birthdayEnd.setDate(birthdayEnd.getDate() + 1) // end of birthday day
-    const difference = birthdayEnd.getTime() - now.getTime()
-
-    if (currentMember.isTodayBirthday || difference <= 0) {
-      // It's their birthday! Show confetti and recalculate
-      if (!showConfetti) {
-        setShowConfetti(true)
-        setTimeout(() => setShowConfetti(false), 5000) // Confetti for 5 seconds
-      }
-
-      // Set birthday mode and message
-      setIsBirthdayMode(true)
-      setViewingUpcoming(false)
-
-      // Recalculate upcoming birthdays only when the day rolls over
-      if (difference <= 0) {
-        setUpcomingBirthdays(calculateUpcomingBirthdays())
-      }
-      return
-    }
-
-    // Countdown to next birthday midnight
-    const toMidnight = currentMember.nextBirthday.getTime() - now.getTime()
-    setTimeLeft({
-      days: Math.floor(toMidnight / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((toMidnight % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-      minutes: Math.floor((toMidnight % (1000 * 60 * 60)) / (1000 * 60)),
-      seconds: Math.floor((toMidnight % (1000 * 60)) / 1000),
-    })
-  }, [upcomingBirthdays, currentIndex, calculateUpcomingBirthdays, isBirthdayMode, showConfetti, viewingUpcoming])
-
-  // Initialize upcoming birthdays
-  useEffect(() => {
-    const birthdays = calculateUpcomingBirthdays()
-    setUpcomingBirthdays(birthdays)
-
-    // If there's a birthday celebration, set the current index to the first non-celebration member
-    if (birthdays.some((member) => member.isRecentBirthday)) {
-      const celebrationMembers = birthdays.filter((member) => member.isRecentBirthday)
-      const firstUpcomingIndex = birthdays.findIndex((member) => !member.isRecentBirthday)
-
-      if (firstUpcomingIndex !== -1) {
-        setCurrentIndex(firstUpcomingIndex)
-      }
-
-      setCelebrationIndex(0) // Start with the first celebration member
-
-      // If any member has a birthday today, show confetti
-      if (celebrationMembers.some((member) => member.isTodayBirthday)) {
-        setShowConfetti(true)
-        setTimeout(() => setShowConfetti(false), 5000) // Confetti for 5 seconds
-      }
-    }
-  }, [calculateUpcomingBirthdays])
-
-  // Initialize tsParticles
-  useEffect(() => {
-    loadConfettiPreset(tsParticles)
-  }, [])
-
-  // Update countdown timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      calculateTimeLeft()
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [calculateTimeLeft])
-
-  // Auto-advance slider for members with same birthday
-  useEffect(() => {
-    if (upcomingBirthdays.length <= 1 || !autoRotateEnabled) return
-
-    // If in birthday mode and not viewing upcoming, auto-advance between celebration members
-    if (isBirthdayMode && !viewingUpcoming) {
-      const celebrationMembers = upcomingBirthdays.filter((member) => member.isRecentBirthday)
-
-      if (celebrationMembers.length > 1) {
-        const timer = setInterval(() => {
-          setCelebrationIndex((prevIndex) => {
-            const nextIndex = prevIndex + 1
-            return nextIndex < celebrationMembers.length ? nextIndex : 0
-          })
-        }, 7000) // Longer time to read the birthday messages
-
-        return () => clearInterval(timer)
-      }
-
-      return
-    }
-
-    // Check if there are multiple members with the same birthday
-    const currentBirthday = upcomingBirthdays[currentIndex]?.nextBirthday?.toDateString()
-    const sameDay = upcomingBirthdays.filter((member) => member.nextBirthday?.toDateString() === currentBirthday)
-
-    if (sameDay.length > 1) {
-      const timer = setInterval(() => {
-        // Only advance within the same birthday group
-        const nextIndex = currentIndex + 1
-        if (
-          nextIndex < upcomingBirthdays.length &&
-          upcomingBirthdays[nextIndex].nextBirthday?.toDateString() === currentBirthday
-        ) {
-          setCurrentIndex(nextIndex)
-        } else {
-          // Find the first member with this birthday
-          const firstIndex = upcomingBirthdays.findIndex(
-            (member) => member.nextBirthday?.toDateString() === currentBirthday,
-          )
-          setCurrentIndex(firstIndex)
-        }
-      }, 5000)
-
-      return () => clearInterval(timer)
-    }
-  }, [upcomingBirthdays, currentIndex, isBirthdayMode, viewingUpcoming, autoRotateEnabled])
-
-  // Recalculate birthdays every day to check for new birthdays
-  useEffect(() => {
-    const checkForNewBirthdays = () => {
-      setUpcomingBirthdays(calculateUpcomingBirthdays())
-    }
-
-    // Check at midnight every day
-    const now = new Date()
-    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-    tomorrow.setHours(0, 0, 0, 0)
-    const timeUntilMidnight = tomorrow.getTime() - now.getTime()
-
-    const midnightTimer = setTimeout(checkForNewBirthdays, timeUntilMidnight)
-
-    return () => clearTimeout(midnightTimer)
-  }, [calculateUpcomingBirthdays])
-
-  // Function to navigate to upcoming birthdays
-  const showUpcomingBirthdays = () => {
-    setViewingUpcoming(true)
+  let nextBirthday = thisYearBirthday
+  if (hasPassedThisYear) {
+    nextBirthday = new Date(currentYear + 1, bMonth - 1, bDay)
   }
 
-  // Function to return to celebration mode
-  const showCelebration = () => {
-    setViewingUpcoming(false)
-  }
-
-  // Toggle auto-rotation
-  const toggleAutoRotate = () => {
-    setAutoRotateEnabled(!autoRotateEnabled)
-  }
-
-  // Handle edge case: no birthdays
-  if (upcomingBirthdays.length === 0) {
-    return (
-      <div className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-black py-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">No Birthdays Available</h2>
-          <p className="text-gray-300">Please add member birthdays to see the countdown.</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Get the current member to display
-  let displayMember: MemberWithBirthdayInfo
-
-  if (isBirthdayMode && !viewingUpcoming) {
-    // In celebration mode, show the celebrating member
-    const celebrationMembers = upcomingBirthdays.filter((member) => member.isRecentBirthday)
-    displayMember = celebrationMembers[celebrationIndex]
-  } else {
-    // Show the upcoming birthday member
-    displayMember = upcomingBirthdays[currentIndex]
-  }
-
-  // Handle edge case: invalid member
-  if (!displayMember) {
-    // Fallback to the first member if something went wrong
-    displayMember = upcomingBirthdays[0]
-    if (isBirthdayMode && !viewingUpcoming) {
-      setCelebrationIndex(0)
-    } else {
-      setCurrentIndex(0)
-    }
-  }
-
-  // Format birthday date
-  const birthday = new Date(displayMember.nextBirthday!)
+  const daysUntil = isToday ? 0 : Math.round((nextBirthday.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24))
   
-  // For past recent birthdays in celebration mode, display this year's date and age
-  if (isBirthdayMode && !viewingUpcoming && displayMember.isRecentBirthday && !displayMember.isTodayBirthday) {
-    birthday.setFullYear(birthday.getFullYear() - 1)
+  const lastBirthday = new Date(nextBirthday)
+  if (!isToday) {
+    lastBirthday.setFullYear(lastBirthday.getFullYear() - 1)
   }
+  const daysSince = Math.floor((todayMidnight.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24))
+  const isRecent = daysSince >= 0 && daysSince <= 7
 
-  const formattedDate = birthday.toLocaleDateString("en-US", {
+  const displayDate = (isThisMonth && hasPassedThisYear) ? thisYearBirthday : nextBirthday
+  const turningAge = displayDate.getFullYear() - bYear
+  const formattedDate = displayDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
   })
 
-  // Calculate age on next birthday
-  const birthYear = Number.parseInt(displayMember.birthday.split("-")[0])
-  const nextAge = birthday.getFullYear() - birthYear
+  return {
+    ...member,
+    nextBirthday,
+    daysUntil,
+    isToday,
+    isRecent,
+    daysSince,
+    turningAge,
+    formattedDate,
+    birthMonth: bMonth,
+    birthDay: bDay,
+    isThisMonth,
+    hasPassedThisYear,
+  }
+}
 
-  // Check if there are multiple members with the same birthday
-  const sameDayMembers = upcomingBirthdays.filter(
-    (member) => member.nextBirthday?.toDateString() === displayMember.nextBirthday?.toDateString(),
-  )
-  const hasSameDayMembers = sameDayMembers.length > 1
+export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null)
+  const [viewCelebration, setViewCelebration] = useState(true)
+  const [autoRotate, setAutoRotate] = useState(true)
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
-  // Count how many celebration birthdays we have
-  const celebrationCount = upcomingBirthdays.filter((member) => member.isRecentBirthday).length
+  const now = useMemo(() => new Date(), [])
+  const currentMonthName = useMemo(() => {
+    return now.toLocaleDateString("en-US", { month: "long" })
+  }, [now])
 
-  // Get the birthday message for the current member
-  const currentBirthdayMessage = displayMember.birthdayMessage || generateBirthdayMessage(displayMember)
+  // Process all members sorted by closest upcoming birthday
+  const processedMembers = useMemo(() => {
+    const nowDate = new Date()
+    return members
+      .map((m) => computeBirthdayMeta(m, nowDate))
+      .filter((m): m is MemberBirthdayMeta => m !== null)
+      .sort((a, b) => a.daysUntil - b.daysUntil)
+  }, [members])
 
-  // Calculate days since birthday for celebration mode
-  const daysSinceBirthdayText = displayMember.isTodayBirthday || displayMember.daysSinceBirthday === 0
-    ? "Today"
-    : displayMember.daysSinceBirthday === 1
-      ? "Yesterday"
-      : `${displayMember.daysSinceBirthday} days ago`
+  // Active birthday members (today)
+  const todayMembers = useMemo(() => {
+    return processedMembers.filter((m) => m.isToday)
+  }, [processedMembers])
+
+  // This current month's celebrants
+  const currentMonthCelebrants = useMemo(() => {
+    return processedMembers
+      .filter((m) => m.isThisMonth)
+      .sort((a, b) => a.birthDay - b.birthDay)
+  }, [processedMembers])
+
+  // Imminent upcoming birthdays (<= 30 days ahead and not passed this month)
+  const imminentUpcoming = useMemo(() => {
+    return processedMembers
+      .filter((m) => m.daysUntil > 0 && m.daysUntil <= 30)
+      .sort((a, b) => a.daysUntil - b.daysUntil)
+  }, [processedMembers])
+
+  // Combined Active Pipeline Queue
+  const pipelineQueue = useMemo(() => {
+    const list = [...currentMonthCelebrants]
+    imminentUpcoming.forEach((imm) => {
+      if (!list.some((item) => item.id === imm.id)) {
+        list.push(imm)
+      }
+    })
+    if (list.length === 0) return processedMembers.slice(0, 4)
+    return list
+  }, [currentMonthCelebrants, imminentUpcoming, processedMembers])
+
+  // Determine active member
+  const activeMember = useMemo(() => {
+    if (selectedMemberId !== null) {
+      const found = processedMembers.find((m) => m.id === selectedMemberId)
+      if (found) return found
+    }
+    if (todayMembers.length > 0 && viewCelebration) return todayMembers[0]
+    if (imminentUpcoming.length > 0) return imminentUpcoming[0]
+    if (currentMonthCelebrants.length > 0) return currentMonthCelebrants[0]
+    return processedMembers[0]
+  }, [selectedMemberId, todayMembers, viewCelebration, imminentUpcoming, currentMonthCelebrants, processedMembers])
+
+  // Timer countdown updater
+  const updateCountdown = useCallback(() => {
+    if (!activeMember) return
+    const nowDate = new Date()
+    const target = new Date(activeMember.nextBirthday)
+    const diff = target.getTime() - nowDate.getTime()
+
+    if (diff <= 0 || activeMember.isToday) {
+      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+      return
+    }
+
+    setTimeLeft({
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+      minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((diff % (1000 * 60)) / 1000),
+    })
+  }, [activeMember])
+
+  useEffect(() => {
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 1000)
+    return () => clearInterval(interval)
+  }, [updateCountdown])
+
+  // Auto-rotate within active pipeline queue
+  useEffect(() => {
+    if (!autoRotate || pipelineQueue.length <= 1) return
+    const timer = setInterval(() => {
+      setSelectedMemberId((prev) => {
+        const currentIdx = pipelineQueue.findIndex((m) => m.id === (prev ?? activeMember?.id))
+        const nextIdx = (currentIdx + 1) % pipelineQueue.length
+        return pipelineQueue[nextIdx].id
+      })
+    }, 8000)
+    return () => clearInterval(timer)
+  }, [autoRotate, pipelineQueue, activeMember])
+
+  if (!activeMember) return null
+
+  const countdownUnits = [
+    { label: "Days", value: timeLeft.days },
+    { label: "Hours", value: timeLeft.hours },
+    { label: "Mins", value: timeLeft.minutes },
+    { label: "Secs", value: timeLeft.seconds },
+  ]
+
+  const isTodayCelebrating = activeMember.isToday
+  const isThisMonthPassed = activeMember.isThisMonth && activeMember.hasPassedThisYear && !activeMember.isToday
+  const isCountdownActive = activeMember.daysUntil > 0 && activeMember.daysUntil <= 30 && !isThisMonthPassed
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-black to-gray-900">
-      <div className="relative z-10 px-4 py-12 md:py-16 lg:py-20">
-        <div className="max-w-7xl mx-auto">
-          {/* Mode switcher - only show if in birthday mode */}
-          {isBirthdayMode && (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-              <div className="inline-flex rounded-md shadow-sm" role="group">
-                <button
-                  onClick={showCelebration}
-                  className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-                    !viewingUpcoming ? "bg-pink-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
-                  aria-current={!viewingUpcoming ? "page" : undefined}
-                >
-                  <Cake className="inline-block w-4 h-4 mr-2" />
-                  Birthday Celebration
-                </button>
-                <button
-                  onClick={showUpcomingBirthdays}
-                  className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-                    viewingUpcoming ? "bg-pink-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
-                  aria-current={viewingUpcoming ? "page" : undefined}
-                >
-                  <Calendar className="inline-block w-4 h-4 mr-2" />
-                  Upcoming Birthdays
-                </button>
-              </div>
+    <div className="relative overflow-hidden w-full">
+      <div className="max-w-5xl mx-auto">
+        <div className={`relative rounded-3xl border transition-all duration-500 overflow-hidden ${
+          isTodayCelebrating
+            ? "border-amber-300/70 dark:border-amber-500/30 bg-gradient-to-b from-amber-50/40 via-white/80 to-white/90 dark:from-amber-950/10 dark:via-zinc-900/60 dark:to-zinc-900/40 shadow-xl dark:shadow-2xl"
+            : "border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 shadow-lg dark:shadow-2xl"
+        } backdrop-blur-md p-6 sm:p-10`}>
+          
+          {isTodayCelebrating && <CosmicStardust />}
 
-              <button
-                onClick={toggleAutoRotate}
-                className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center ${
-                  autoRotateEnabled ? "bg-green-600 text-white" : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                }`}
-              >
-                <span>{autoRotateEnabled ? <RefreshCcw className="inline-block w-4 h-4" /> : <RefreshCwOff className="inline-block w-4 h-4" />}</span>
-              </button>
-            </div>
-          )}
-
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-center">
-            {/* Member image */}
-            <motion.div
-              className="relative w-64 h-64 md:w-80 md:h-80 rounded-sm overflow-hidden border-4 border-pink-500 shadow-lg shadow-purple-500/30 bg-gradient-to-b from-[#e6351f] via-red-700 to-red-800"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              key={`${displayMember.id}-${isBirthdayMode ? "celebration" : "upcoming"}-${isBirthdayMode && !viewingUpcoming ? celebrationIndex : currentIndex}`}
-            >
-              <Link href={`/members/${displayMember.slug}`} className="absolute inset-0 z-20 cursor-pointer" aria-label={`View ${displayMember.name}'s profile`} />
-              <Image
-                src={`https://i.imgur.com/${displayMember.image}`}
-                alt={displayMember.name}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover"
-              />
-
-              {/* Birthday decorations when in birthday mode and showing celebration */}
-              {isBirthdayMode && !viewingUpcoming && (
-                <>
-                  <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-2 left-2 transform -rotate-12">
-                      <PartyPopper className="h-8 w-8 text-yellow-400" />
-                    </div>
-                    <div className="absolute top-2 right-2 transform rotate-12">
-                      <Gift className="h-8 w-8 text-pink-400" />
-                    </div>
-                    <div className="absolute bottom-2 left-2 transform rotate-12">
-                      <Star className="h-8 w-8 text-yellow-400" />
-                    </div>
-                    <div className="absolute bottom-2 right-2 transform -rotate-12">
-                      <Heart className="h-8 w-8 text-pink-400" />
-                    </div>
-                  </div>
-                </>
-              )}
-            </motion.div>
-
-            {/* Countdown and info */}
-            <div className="flex-1 max-w-2xl text-center md:text-left">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 items-center">
+            
+            {/* ── Left Column: Member Portrait Card ── */}
+            <div className="md:col-span-5 flex justify-center">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                key={`${displayMember.id}-info-${isBirthdayMode ? "celebration" : "upcoming"}-${isBirthdayMode && !viewingUpcoming ? celebrationIndex : currentIndex}`}
+                key={`photo-${activeMember.id}`}
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="relative aspect-[3/4] w-full max-w-[280px] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 shadow-md dark:shadow-2xl group"
               >
-                {isBirthdayMode && !viewingUpcoming ? (
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center justify-center md:justify-start gap-2">
-                    <Cake className="h-6 w-6 text-pink-400" />
-                    {displayMember.isTodayBirthday ? "Happy Birthday Today!" : "Birthday Celebration!"}
-                  </h2>
-                ) : (
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center justify-center md:justify-start gap-2">
-                    <Cake className="h-5 w-5 text-zinc-400" />
-                    Upcoming Birthday
-                  </h2>
-                )}
+                <Link
+                  href={`/members/${activeMember.slug}`}
+                  className="absolute inset-0 z-20"
+                  aria-label={`View ${activeMember.name}'s profile`}
+                />
+                <Image
+                  src={`https://i.imgur.com/${activeMember.image}`}
+                  alt={activeMember.name}
+                  fill
+                  sizes="(max-width: 768px) 280px, 320px"
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
 
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${displayMember.id}-content-${isBirthdayMode ? "celebration" : "upcoming"}-${isBirthdayMode && !viewingUpcoming ? celebrationIndex : currentIndex}`}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.3 }}
+                {/* Top Outline S# Badge & Emoji Pill */}
+                <div className="absolute top-3 left-3.5 flex items-center gap-2.5 z-10">
+                  <span
+                    className="text-2xl sm:text-3xl font-black tracking-tighter text-transparent select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+                    style={{ WebkitTextStroke: "1.8px rgba(255, 255, 255, 0.95)" }}
                   >
-                    <Link href={`/members/${displayMember.slug}`} className="hover:opacity-80 transition-opacity inline-block">
-                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-2 tracking-tight">
-                        {displayMember.name}
-                      </h3>
-                    </Link>
+                    S{activeMember.id}
+                  </span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-zinc-700/80 text-zinc-200 shadow-md">
+                    {activeMember.representativeEmoji}
+                  </span>
+                </div>
 
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
-                      <Calendar className="h-4 w-4 text-zinc-400" />
-                      <p className="text-sm md:text-base text-zinc-300">
-                        {formattedDate} <span className="text-zinc-400">({nextAge} International age)</span>
-                        {isBirthdayMode && !viewingUpcoming && !displayMember.isTodayBirthday && (
-                          <span className="ml-2 text-zinc-300">({daysSinceBirthdayText})</span>
-                        )}
-                      </p>
-                    </div>
-
-                    <p className="text-zinc-400 text-sm mb-6 max-w-xl mx-auto md:mx-0 font-mono">{displayMember.role}</p>
-
-                    {/* Birthday message or countdown */}
-                    {isBirthdayMode && !viewingUpcoming ? (
-                      <motion.div
-                        className="max-w-2xl bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800 mb-6"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <p className="text-lg text-white">{currentBirthdayMessage}</p>
-                      </motion.div>
-                    ) : (
-                      <div className="grid grid-cols-4 gap-2 md:gap-3 max-w-md mx-auto md:mx-0">
-                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
-                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.days}</div>
-                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Days</div>
-                        </div>
-                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
-                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.hours}</div>
-                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Hours</div>
-                        </div>
-                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
-                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.minutes}</div>
-                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Mins</div>
-                        </div>
-                        <div className="bg-zinc-900/60 backdrop-blur-sm p-3.5 rounded-2xl border border-zinc-800 text-center">
-                          <div className="text-2xl md:text-3xl font-extrabold text-white">{timeLeft.seconds}</div>
-                          <div className="text-[10px] font-mono text-zinc-500 uppercase mt-0.5">Secs</div>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                {/* Bottom Role & CTA */}
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-zinc-300 z-10">
+                  <span className="truncate max-w-[150px]">{activeMember.role}</span>
+                  <span className="text-zinc-400 group-hover:text-white transition-colors flex items-center gap-1 font-semibold">
+                    Dossier <ArrowRight className="h-3 w-3" />
+                  </span>
+                </div>
               </motion.div>
             </div>
-          </div>
 
-          {/* Navigation controls */}
-          <div className="flex justify-center mt-8 gap-4">
-            {/* Navigation for celebration mode */}
-            {isBirthdayMode && !viewingUpcoming && (
-              <div className="flex items-center gap-4">
-                {celebrationCount > 1 ? 
-                  <>
-                    <div className="flex gap-2">
-                      {upcomingBirthdays
-                        .filter((member) => member.isRecentBirthday)
-                        .map((_, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setCelebrationIndex(index)}
-                            className={`w-2 h-2 rounded-full ${celebrationIndex === index ? "bg-pink-500" : "bg-gray-600"}`}
-                            aria-label={`Go to celebrating member ${index + 1}`}
-                          />
-                        ))}
-                    </div>
-                  </> : 
-                  <>
-                    <div className="flex gap-2 w-2 h-2"/>
-                  </>
-                }
-              </div>
-            )}
+            {/* ── Right Column: Info & Adaptive Display ── */}
+            <div className="md:col-span-7 flex flex-col justify-between text-center md:text-left space-y-6">
+              
+              {/* Static Anchor Header with Smooth Internal Text Morphing */}
+              <div>
+                {/* Top Status Badge & Controls */}
+                <div className="flex flex-wrap items-center justify-center md:justify-between gap-3 mb-3">
+                  <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider shadow-sm border transition-all ${
+                    isTodayCelebrating
+                      ? "bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-600/60 text-amber-800 dark:text-amber-300 font-bold"
+                      : isCountdownActive
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                        : "bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300"
+                  }`}>
+                    {isTodayCelebrating ? (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" style={{ animationDuration: "6s" }} />
+                        <span>TODAY&apos;S BIRTHDAY CELEBRATION</span>
+                      </>
+                    ) : isCountdownActive ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>COUNTDOWN ACTIVE &bull; D-{activeMember.daysUntil}</span>
+                      </>
+                    ) : isThisMonthPassed ? (
+                      <>
+                        <span className="text-amber-500">🌟</span>
+                        <span>{currentMonthName.toUpperCase()} CELEBRANT</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
+                        <span>UPCOMING &bull; D-{activeMember.daysUntil}</span>
+                      </>
+                    )}
+                  </div>
 
-            {/* Navigation for upcoming birthdays */}
-            {(!isBirthdayMode || viewingUpcoming) && (
-              <div className="flex items-center gap-4">
-                {/* Dots for same-day members */}
-                {hasSameDayMembers ? 
-                  <div className="flex gap-2">
-                    {sameDayMembers.map((_, index) => (
+                  {/* Controls */}
+                  <div className="flex items-center gap-2">
+                    {todayMembers.length > 0 && (
                       <button
-                        key={index}
-                        onClick={() => setCurrentIndex(upcomingBirthdays.indexOf(sameDayMembers[index]))}
-                        className={`w-2 h-2 rounded-full ${
-                          upcomingBirthdays.indexOf(sameDayMembers[index]) === currentIndex
-                            ? "bg-pink-500"
-                            : "bg-gray-600"
-                        }`}
-                        aria-label={`Go to member ${index + 1}`}
-                      />
-                    ))}
-                  </div> :
-                  <div className="flex gap-2 w-2 h-2"/>
-                }
-              </div>
-            )}
-          </div>
+                        onClick={() => {
+                          setSelectedMemberId(todayMembers[0].id)
+                          setViewCelebration(true)
+                        }}
+                        className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300 transition-colors shadow-sm"
+                      >
+                        Today&apos;s Star
+                      </button>
+                    )}
 
-          {/* Status indicator */}
-          <div className="flex justify-center mt-6">
-            <div className="text-sm text-gray-400">
-              {isBirthdayMode && !viewingUpcoming ? (
-                <span>
-                  Showing {celebrationIndex + 1} of {celebrationCount} celebration{celebrationCount > 1 ? "s" : ""}
-                </span>
-              ) : (
-                <span>
-                  Showing upcoming birthday
-                  {upcomingBirthdays.length > 1 ? "s" : ""}
-                </span>
-              )}
+                    <button
+                      onClick={() => setAutoRotate(!autoRotate)}
+                      title={autoRotate ? "Pause auto-rotate" : "Resume auto-rotate"}
+                      className={`p-1.5 rounded-full border transition-all shadow-sm ${
+                        autoRotate
+                          ? "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white"
+                          : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
+                      }`}
+                      aria-label="Toggle auto-rotate"
+                    >
+                      {autoRotate ? <RefreshCcw className="h-3.5 w-3.5" /> : <RefreshCwOff className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Animated Member Title & Info Reveal */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={`header-${activeMember.id}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight font-pretendard flex flex-wrap items-baseline justify-center md:justify-start gap-2.5">
+                      <span>{activeMember.name}</span>
+                      {activeMember.hangul && (
+                        <span className="text-lg sm:text-2xl font-normal text-zinc-500 dark:text-zinc-500 font-mono">
+                          ({activeMember.hangul})
+                        </span>
+                      )}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm font-mono text-zinc-600 dark:text-zinc-400 mt-2 flex flex-wrap items-center justify-center md:justify-start gap-2">
+                      <span>{activeMember.formattedDate}</span>
+                      <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
+                      <span>{isThisMonthPassed ? "Turned" : activeMember.isToday ? "Turning" : "Turns"} {activeMember.turningAge} y.o</span>
+                      <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
+                      <span className="text-zinc-800 dark:text-zinc-300 font-medium">{activeMember.nationality}</span>
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* ── Fixed Identical-Height Switcher with Smooth Slide/Fade (h-94px) ── */}
+              <div className="h-[88px] sm:h-[94px]">
+                <AnimatePresence mode="wait" initial={false}>
+                  {isTodayCelebrating ? (
+                    <motion.div
+                      key={`today-${activeMember.id}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="h-full rounded-2xl bg-white/90 dark:bg-zinc-950/90 border border-amber-200/80 dark:border-amber-900/40 px-4 sm:px-5 py-3 shadow-sm dark:shadow-inner text-left flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                          <Cake className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          <span className="truncate">HAPPY {activeMember.name.toUpperCase()} DAY!</span>
+                        </div>
+                        <p className="text-xs sm:text-[13px] text-zinc-700 dark:text-zinc-300 leading-tight font-pretendard line-clamp-2">
+                          &ldquo;{getBirthdayMessage(activeMember)}&rdquo;
+                        </p>
+                      </div>
+                      <Link
+                        href={`/members/${activeMember.slug}`}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-md"
+                      >
+                        <span>Dossier</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </motion.div>
+                  ) : isCountdownActive ? (
+                    <motion.div
+                      key={`countdown-${activeMember.id}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="h-full w-full"
+                    >
+                      <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5 h-full max-w-md mx-auto md:mx-0">
+                        {countdownUnits.map((unit) => (
+                          <div
+                            key={unit.label}
+                            className="h-full rounded-2xl bg-zinc-100/90 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800/80 text-center shadow-sm dark:shadow-md hover:-translate-y-0.5 transition-transform flex flex-col items-center justify-center py-1.5"
+                          >
+                            <div className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white font-mono tracking-tight leading-none">
+                              {unit.value}
+                            </div>
+                            <div className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-1">
+                              {unit.label}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={`star-${activeMember.id}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                      className="h-full rounded-2xl bg-zinc-100/80 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-3 shadow-sm text-left flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                          <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          <span>{currentMonthName.toUpperCase()} BIRTHDAY STAR</span>
+                        </div>
+                        <p className="text-xs sm:text-[13px] text-zinc-700 dark:text-zinc-300 leading-tight font-pretendard line-clamp-2">
+                          Celebrated on {activeMember.formattedDate} &bull; Turned {activeMember.turningAge} years old.
+                        </p>
+                      </div>
+                      <Link
+                        href={`/members/${activeMember.slug}`}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-md"
+                      >
+                        <span>Dossier</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* ── Active Pipeline Queue with Spring Sliding Active Pill Indicator ── */}
+              <div className="pt-3.5 sm:pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
+                    [ {currentMonthName.toUpperCase()} STARS &bull; H-30 RADAR ]
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 flex-nowrap justify-start">
+                  {pipelineQueue.map((m) => {
+                    const isSelected = m.id === activeMember.id
+                    const isPassedStar = m.isThisMonth && m.hasPassedThisYear && !m.isToday
+                    const isImminent = m.daysUntil > 0 && m.daysUntil <= 30 && !isPassedStar
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          setSelectedMemberId(m.id)
+                          setViewCelebration(false)
+                        }}
+                        className={`shrink-0 relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full border text-[11px] sm:text-xs font-mono transition-colors ${
+                          isSelected
+                            ? "border-transparent"
+                            : "bg-zinc-100 dark:bg-zinc-950/70 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600"
+                        }`}
+                      >
+                        {/* Smooth Spring Gliding Capsule Pill */}
+                        {isSelected && (
+                          <motion.div
+                            layoutId="active-birthday-pill-indicator"
+                            className="absolute inset-0 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black shadow-md z-0"
+                            transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                          />
+                        )}
+
+                        <span className={`relative z-10 text-[10px] ${isSelected ? "text-zinc-300 dark:text-zinc-600 font-bold" : "opacity-75"}`}>
+                          S{m.id}
+                        </span>
+                        <span className={`relative z-10 font-semibold ${isSelected ? "text-white dark:text-black" : ""}`}>
+                          {m.name}
+                        </span>
+                        <span className={`relative z-10 text-[10px] ${
+                          isSelected
+                            ? "text-zinc-300 dark:text-zinc-700 font-medium"
+                            : isImminent
+                              ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                              : "text-zinc-500"
+                        }`}>
+                          {m.isToday ? "🎂 Today!" : isPassedStar ? `${currentMonthName.slice(0, 3)} ${m.birthDay} 🌟` : `D-${m.daysUntil}`}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
-
-      {/* Confetti effect */}
-      {showConfetti && (
-        <Particles
-          options={{
-            preset: "confetti",
-            fullScreen: { enable: true },
-          }}
-        />
-      )}
     </div>
   )
 }

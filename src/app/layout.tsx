@@ -4,7 +4,8 @@ import type { Metadata } from "next"
 import { Space_Grotesk } from "next/font/google"
 import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
-import LayoutWrapper from "@/components/layout-wrapper"
+import Navigation from "@/components/navigation"
+import Footer from "@/components/footer"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -24,15 +25,17 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${spaceGrotesk.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <SmoothScroll>
-            <LayoutWrapper>
-              {children}
-              <Analytics />
-              <SpeedInsights />
-            </LayoutWrapper>
+            <div className="flex flex-col min-h-screen">
+              <Navigation />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
+            <Analytics />
+            <SpeedInsights />
           </SmoothScroll>
         </ThemeProvider>
       </body>
