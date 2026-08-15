@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, Disc3, Sparkles } from "lucide-react"
+import { ArrowRight, Disc3 } from "lucide-react"
 import Image from "next/image"
 import SpotifyEmbed from "@/components/spotify-embed"
 import BirthdayCountdown from "@/components/birthday-countdown"

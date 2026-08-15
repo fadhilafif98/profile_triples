@@ -21,6 +21,8 @@ interface MemberBirthdayMeta extends Member {
   formattedDate: string
   birthMonth: number
   birthDay: number
+  isThisMonth: boolean
+  hasPassedThisYear: boolean
 }
 
 // 8 lightweight GPU-accelerated Stardust particles (zero CPU overhead for mobile)
