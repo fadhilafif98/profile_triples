@@ -211,6 +211,7 @@ Semua data profil, diskografi, foto, dan aktivitas tripleS diverifikasi dan dipe
 
 | Tanggal | Versi / Komponen | Kategori Perubahan | Deskripsi Signifikan |
 | :--- | :--- | :--- | :--- |
+| **2026-08-16** | `src/components/objekt-modal.tsx` & `src/types/objekt.ts` | **Fitur & Media** | Integrasi pemutar video resmi MP4 (`frontMedia` dari CDN `cdn.apollo.cafe/mco/triples/`) khusus pada modal preview untuk kartu bertipe Motion Objekts dengan badge `Motion` live indicator dan autoplay loop playback. |
 | **2026-08-15** | `src/components/objekt-modal.tsx` | **Integrasi & Tautan** | Penyelarasan tautan tombol COSMO App di modal agar mengarah ke universal download link resmi MODHAUS (`https://bit.ly/4hQegaj`), konsisten dengan halaman Credits. |
 | **2026-08-15** | `src/components/objekt-modal.tsx` | **UI/UX & Responsiveness** | Pembaruan layout modal: 3 action pills (`[Info/Verified]`, `[COSMO]`, `[Apollo]`) ditempatkan di kolom kanan pada tampilan desktop di bawah spesifikasi, dan tetap ringkas di bawah foto pada layar mobile. |
 | **2026-08-15** | `public/icons/cosmo-logo.png` & `src/components/cosmo-logo.tsx` | **Aset & UI/UX** | Integrasi logo resmi COSMO App langsung dari sumber resmi (`shop.cosmo.fans/favicons/apple-touch-icon.png`) dan diimplementasikan pada tombol COSMO di modal photocard. |

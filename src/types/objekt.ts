@@ -17,6 +17,8 @@ export interface Objekt {
   frontImage?: string;
   backImage?: string;
   thumbnailImage?: string;
+  frontMedia?: string;
+  backMedia?: string;
   description?: string;
   createdAt?: number;
   contract?: string;
