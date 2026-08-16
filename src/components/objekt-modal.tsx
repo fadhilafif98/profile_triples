@@ -87,15 +87,27 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                   className="absolute inset-0 w-full h-full"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  <ObjektImage
-                    season={objekt.season}
-                    member={objekt.member}
-                    slug={objekt.slug}
-                    side="front"
-                    fallbackSrc={objekt.frontImage || objekt.thumbnailImage}
-                    priority={true}
-                    className="w-full h-full object-cover"
-                  />
+                  {objekt.frontMedia ? (
+                    <video
+                      src={objekt.frontMedia}
+                      poster={objekt.frontImage || objekt.thumbnailImage}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ObjektImage
+                      season={objekt.season}
+                      member={objekt.member}
+                      slug={objekt.slug}
+                      side="front"
+                      fallbackSrc={objekt.frontImage || objekt.thumbnailImage}
+                      priority={true}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
 
                 {/* Back Side */}
@@ -106,20 +118,40 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     transform: "rotateY(180deg)",
                   }}
                 >
-                  <ObjektImage
-                    season={objekt.season}
-                    member={objekt.member}
-                    slug={objekt.slug}
-                    side="back"
-                    fallbackSrc={objekt.backImage}
-                    priority={true}
-                    className="w-full h-full object-cover"
-                  />
+                  {objekt.backMedia ? (
+                    <video
+                      src={objekt.backMedia}
+                      poster={objekt.backImage}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ObjektImage
+                      season={objekt.season}
+                      member={objekt.member}
+                      slug={objekt.slug}
+                      side="back"
+                      fallbackSrc={objekt.backImage}
+                      priority={true}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
               </motion.div>
 
+              {/* Motion Badge Indicator */}
+              {objekt.frontMedia && activeSide === "front" && (
+                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-[9px] font-mono font-bold text-white uppercase shadow-md z-20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Motion</span>
+                </div>
+              )}
+
               {/* Hover Flip Indicator Button */}
-              <div className="absolute bottom-2.5 right-2.5 p-2 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md border border-white/20 shadow-lg transition-transform group-hover:scale-110">
+              <div className="absolute bottom-2.5 right-2.5 p-2 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md border border-white/20 shadow-lg transition-transform group-hover:scale-110 z-20">
                 <RotateCw className="h-3.5 w-3.5" />
               </div>
             </div>
