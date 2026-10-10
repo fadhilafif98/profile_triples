@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Play, ExternalLink, Sparkles, ArrowRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, X, Play, ExternalLink, Layers } from "lucide-react"
 import { members, getMemberBySlug, Member } from "@/utils/members"
+import Breadcrumb from "@/components/breadcrumb"
 
 // ─── Sub-Unit Data Map for Dimension Section ─────────────────────────────────
 const unitInfoMap: Record<string, { title: string; image: string; description: string; href?: string }> = {
@@ -413,51 +414,48 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   }
 
   if (!mounted) {
-    return <div className="min-h-screen bg-[#000000]" />
+    return <div className="min-h-screen bg-[#fafafa] dark:bg-[#08080A]" />
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#000000] text-zinc-900 dark:text-white selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors">
-      {/* ── 1. Top Navigation Bar & Member Switcher ── */}
-      <div className="sticky top-0 z-30 bg-white/85 dark:bg-black/85 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between pr-16 sm:pr-20">
-          <Link
-            href="/members"
-            className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">[ Members Directory ]</span>
-            <span className="sm:hidden font-semibold">Members</span>
-          </Link>
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white selection:bg-[#D4FF00] selection:text-black transition-colors pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28">
+      {/* ── 1. Top Breadcrumb & Member Switcher ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb
+          items={[
+            { label: "Members", href: "/members" },
+            { label: member.name },
+          ]}
+          action={
+            <div className="flex items-center justify-between w-full sm:w-auto gap-1.5 sm:gap-2.5">
+              <Link
+                href={`/members/${prevMember.slug}`}
+                className="btn-magnetic flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-[#D4FF00]/40 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm"
+                title={`Prev: S${prevMember.id} ${prevMember.name}`}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>S{prevMember.id}</span>
+              </Link>
 
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            <Link
-              href={`/members/${prevMember.slug}`}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shrink-0 shadow-sm"
-              title={`Prev: S${prevMember.id} ${prevMember.name}`}
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              <span>S{prevMember.id}</span>
-            </Link>
+              <span className="text-[11px] sm:text-xs font-mono text-zinc-600 dark:text-zinc-400 font-bold px-2 py-1 rounded-md bg-zinc-100 dark:bg-white/5 border border-zinc-200/60 dark:border-white/5 whitespace-nowrap">
+                S{member.id} <span className="text-zinc-400 dark:text-zinc-500 font-normal">/ 24</span>
+              </span>
 
-            <span className="text-[11px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-500 font-bold px-1 whitespace-nowrap">
-              S{member.id} / 24
-            </span>
-
-            <Link
-              href={`/members/${nextMember.slug}`}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shrink-0 shadow-sm"
-              title={`Next: S${nextMember.id} ${nextMember.name}`}
-            >
-              <span>S{nextMember.id}</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
+              <Link
+                href={`/members/${nextMember.slug}`}
+                className="btn-magnetic flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-[#D4FF00]/40 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm"
+                title={`Next: S${nextMember.id} ${nextMember.name}`}
+              >
+                <span>S{nextMember.id}</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          }
+        />
       </div>
 
       {/* ── 2. Integrated Member Profile & Dossier (Zero-Scroll Above the Fold) ── */}
-      <section className="pt-6 sm:pt-8 md:pt-10 pb-16 md:pb-24 border-b border-zinc-200 dark:border-zinc-900 bg-gradient-to-b from-zinc-50 via-zinc-100/40 to-[#fafafa] dark:from-[#070707] dark:via-[#020202] dark:to-[#000000]">
+      <section className="pb-16 md:pb-24 border-b border-zinc-200 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-14 items-start">
             
@@ -466,7 +464,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45 }}
-              className="md:col-span-5 space-y-6 md:sticky md:top-20"
+              className="md:col-span-5 space-y-6 md:sticky md:top-20 lg:top-24"
             >
               {/* Official Photo Card */}
               <div 
@@ -529,17 +527,17 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               className="md:col-span-7 space-y-8"
             >
               {/* Member Headline Header */}
-              <div className="border-b border-zinc-200 dark:border-zinc-800/80 pb-6">
+              <div className="border-b border-zinc-200 dark:border-white/10 pb-6">
                 <div className="flex items-center gap-2.5 mb-2.5">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 dark:bg-black/85 border border-zinc-200 dark:border-zinc-700/80 text-xs font-mono font-bold text-zinc-900 dark:text-white shadow-sm dark:shadow-md">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-xs font-mono font-bold text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] shadow-sm">
                     tripleS &bull; S{member.id}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-800 dark:text-zinc-300">
+                  <span className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-xs font-mono text-zinc-800 dark:text-zinc-300">
                     {member.representativeEmoji}
                   </span>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex flex-wrap items-baseline gap-2.5 sm:gap-3.5 font-pretendard">
+                <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white flex flex-wrap items-baseline gap-2.5 sm:gap-3.5">
                   <span>{member.name}</span>
                   {member.hangul && (
                     <span className="text-xl sm:text-2xl md:text-3xl font-normal text-zinc-500 dark:text-zinc-500 font-mono">
@@ -554,11 +552,11 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   </p>
                   <Link
                     href={`/objekts?member=${encodeURIComponent(member.name)}`}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-800 dark:text-zinc-200 transition-all hover:scale-105 shadow-sm w-fit"
+                    className="btn-magnetic inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-[#D4FF00] dark:hover:bg-[#E2FF33] dark:text-black font-mono font-bold text-xs shadow-md dark:shadow-[0_0_20px_rgba(212,255,0,0.25)] transition-all active:scale-95 w-fit"
                   >
-                    <Sparkles className="h-3 w-3 text-amber-500" />
+                    <Layers className="h-3.5 w-3.5 text-zinc-300 dark:text-black" />
                     <span>View {member.name}&apos;s Objekts</span>
-                    <ArrowRight className="h-3 w-3 opacity-60" />
+                    <span className="btn-arrow text-xs font-bold">↗</span>
                   </Link>
                 </div>
               </div>
@@ -568,7 +566,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">
                     Official Profile
                   </h2>
-                  <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">[ SPECIFICATIONS ]</span>
+                  <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Specifications</span>
                 </div>
 
                 {/* ── Quick Stats Bento Grid ── */}
@@ -600,49 +598,49 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 <div className="divide-y divide-zinc-200 dark:divide-zinc-800/70 text-sm md:text-base">
                   
                   {/* Stage Name */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Stage Name (예명 / 활동명)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono font-bold">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono font-bold">
                       {member.name} ({member.hangul})
                     </span>
                   </div>
 
                   {/* Birth Name */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Birth Name (본명)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono">
                       {member.birthName || member.name} ({member.birthNameHangul || member.hangul}{member.nativeName ? ` / ${member.nativeName}` : ""})
                     </span>
                   </div>
 
                   {/* Birthday & Age */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Birthday (생년월일)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300">
                       {member.birthday} <span className="text-zinc-500 text-xs font-mono">({getAge(member.birthday)}세)</span>
                     </span>
                   </div>
 
                   {/* Origin / Nationality */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Origin (출생 / 국적)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300">
                       {member.birthplace || member.nationality} <span className="text-zinc-500 text-xs font-mono">({member.nationality})</span>
                     </span>
                   </div>
 
                   {/* Reveal Date */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Reveal Date (공개일)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300 font-mono">
                       {member.revealDate || "N/A"}
                     </span>
                   </div>
 
                   {/* Representative Symbol */}
-                  <div className="py-4 grid grid-cols-3 sm:grid-cols-12 gap-3 items-baseline">
+                  <div className="py-3.5 sm:py-4 grid grid-cols-1 sm:grid-cols-12 gap-1 sm:gap-3 items-start sm:items-baseline">
                     <span className="sm:col-span-4 font-bold text-zinc-900 dark:text-white font-pretendard">Symbol (상징)</span>
-                    <span className="col-span-2 sm:col-span-8 text-zinc-800 dark:text-zinc-300">
+                    <span className="sm:col-span-8 text-zinc-800 dark:text-zinc-300">
                       {member.representativeEmoji}
                     </span>
                   </div>
@@ -682,20 +680,20 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       </section>
 
       {/* ── 4. Gallery & Media Grid (triplescosmos.com grid-3) ── */}
-      <section className="py-14 md:py-20 border-b border-zinc-200 dark:border-zinc-900 bg-zinc-100/60 dark:bg-zinc-950/40">
+      <section className="py-14 md:py-20 border-b border-zinc-200 dark:border-white/10 bg-zinc-100/60 dark:bg-[#07070a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl md:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight font-pretendard">
-              Gallery & Teasers
+              Gallery &amp; Teasers
             </h2>
-            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">[ VISUAL ARCHIVE ]</span>
+            <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">Visual Archive</span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {/* Primary Portrait */}
             <div 
               onClick={() => setActivePhoto(`https://i.imgur.com/${member.image}`)}
-              className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 cursor-pointer group shadow-md dark:shadow-lg"
+              className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-pointer group shadow-md dark:shadow-lg"
             >
               <Image
                 src={`https://i.imgur.com/${member.image}`}
@@ -715,7 +713,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {member.gif && (
               <div 
                 onClick={() => setActivePhoto(`https://i.giphy.com/media/v1.${member.gif}`)}
-                className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 cursor-pointer group shadow-md dark:shadow-lg"
+                className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-pointer group shadow-md dark:shadow-lg"
               >
                 <img
                   src={`https://i.giphy.com/media/v1.${member.gif}`}
@@ -731,7 +729,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             )}
 
             {/* Sub-Unit Context Card / Teaser Placeholder */}
-            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-950 p-6 flex flex-col justify-between shadow-sm dark:shadow-lg">
+            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-gradient-to-br dark:from-zinc-900 dark:to-zinc-950 p-6 flex flex-col justify-between shadow-sm dark:shadow-lg">
               <div className="space-y-2">
                 <span className="text-xs font-mono text-zinc-500 dark:text-zinc-500 uppercase tracking-wider block">
                   tripleS Cosmos
@@ -740,11 +738,11 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   S{member.id} {member.name}
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-4 leading-relaxed font-mono">
-                  {member.role} &bull; {member.nationality} &bull; {member.mbti}
+                  {member.role} • {member.nationality} • {member.mbti}
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
+              <div className="pt-4 border-t border-zinc-200 dark:border-white/10">
                 <Link
                   href="/sub-units"
                   className="inline-flex items-center gap-2 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white uppercase tracking-wider transition-colors"
@@ -759,15 +757,15 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
       {/* ── 5. Dimension Section (section-dimension - triplescosmos style) ── */}
       {matchedUnits.length > 0 && (
-        <section className="py-14 md:py-24 border-b border-zinc-200 dark:border-zinc-900 bg-white dark:bg-[#000000]">
+        <section className="py-14 md:py-24 border-b border-zinc-200 dark:border-white/10 bg-white dark:bg-[#050507]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8 md:mb-12">
               <div>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight font-pretendard">
                   Dimension
                 </h2>
-                <p className="text-xs font-mono text-zinc-500 dark:text-zinc-500 mt-1 uppercase tracking-widest">
-                  [ {matchedUnits.length} OFFICIAL FORMATIONS ]
+                <p className="text-xs font-mono text-zinc-500 mt-1 uppercase tracking-wider">
+                  {matchedUnits.length} Official Formations
                 </p>
               </div>
 
@@ -865,7 +863,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       )}
 
       {/* ── 6. More tripleS Member Slider (team-slider-max - triplescosmos style) ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-100 via-zinc-50 to-[#fafafa] dark:from-[#000000] dark:via-zinc-950 dark:to-[#000000] border-b border-zinc-200 dark:border-zinc-900">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-100 via-zinc-50 to-[#fafafa] dark:from-[#050507] dark:via-[#09090e] dark:to-[#050507] border-b border-zinc-200 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="flex items-center justify-between mb-8 md:mb-12">
@@ -873,8 +871,8 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight font-pretendard">
                 More tripleS
               </h2>
-              <p className="text-xs font-mono text-zinc-500 dark:text-zinc-500 mt-1 uppercase tracking-widest">
-                [ ALL 24 MEMBERS &bull; OT24 ROSTER ]
+              <p className="text-xs font-mono text-zinc-500 mt-1 uppercase tracking-wider">
+                All 24 Members • OT24 Roster
               </p>
             </div>
 

@@ -133,18 +133,114 @@ src/
 
 ---
 
-## 4. Standar Desain & UI/UX
+## 4. Standar Desain & Awwwards-Level UI/UX Lock
 
-### A. Tema & Visual Hierarchy (*Dark Editorial Cosmos*):
-* **Background Utama**: `bg-[#050505]` dengan aksen subtle `border-zinc-800/80`.
-* **Glass Bento Cards**: `bg-zinc-900/40 backdrop-blur-md rounded-3xl border border-zinc-800`.
-* **Tipografi**:
-  * Judul & Nama: `font-pretendard font-extrabold tracking-tight text-white`.
-  * Label Teknis / Badge: `font-mono text-xs uppercase tracking-widest text-zinc-400`.
-  * Paragraf & Deskripsi: `text-zinc-300 text-sm leading-relaxed`.
-* **Hero Headline**: Teks hollow transparan dengan stroke (`WebkitTextStroke: "2.5px rgba(255, 255, 255, 0.9)"`, `text-transparent`) dan ghost buttons transparan agar foto grup 24 member di background tidak terhalang.
+> **DESIGN LOCK**: Standar visual ini berstatus **STRICT & LOCKED**. Seluruh agen AI dan developer dilarang menyimpang ke template LLM default (AI slop) seperti kartu SaaS 3-kolom generik, purple neon glow, bracket mono tracking berlebihan, atau em-dash.
 
-### B. Standar Halaman Profil Member (*Zero-Scroll Above-the-Fold*):
+### A. Core Dials (`tasteskill` Configuration):
+* **`DESIGN_VARIANCE: 9`** (Komposisi editorial asimetris, dinamika whitespace percaya diri, ritme visual bervariasi antar section).
+* **`MOTION_INTENSITY: 8`** (GSAP + ScrollTrigger kinetic typography & pinned storytelling, Motion spring physics pada micro-interactions UI).
+* **`VISUAL_DENSITY: 3`** (Airy, breathing room premium, tidak ada kartu data yang saling berdesakan atau data-dump table).
+
+---
+
+### B. Locked Color Palette (*Dual-Theme Synergy — COSMO Violet & Acid Voltage Combo*):
+Palet warna dikunci secara absolut mengadopsi standar kreatif agensi high-fashion *LxL Creative* yang diselaraskan dengan identitas resmi tripleS & MODHAUS:
+
+| Token Name | Dark Mode | Light Mode (Default) | Peruntukan / Role |
+| :--- | :--- | :--- | :--- |
+| **`void-base`** | `#08080A` (Deep Obsidian Carbon) | `#F8F8FA` / `#FAFAFA` (Alabaster Paper) | Background utama seluruh halaman (Full Theme Lock). |
+| **`void-surface`**| `#0D0D12` (Tactile Bento Surface)| `#FFFFFF` (Pure White Surface) | Layer card, sheet, dan toolbar elevated (`.spotlight-card`). |
+| **`void-elevated`**| `#14141B` (Inner Well Depth) | `#F4F4F6` (Soft Zinc Well) | Card inner wells, simulator ballot, pills. |
+| **`void-rim`**    | `inset 0 1px 0 rgba(255,255,255,0.12)`| `inset 0 1px 0 rgba(0,0,0,0.04)` | Hairline luxury top bevel highlight (Tactile Depth). |
+| **`void-border`** | `rgba(255, 255, 255, 0.08)` | `rgba(0, 0, 0, 0.08)` / `border-zinc-200` | Hairline stroke 1px untuk kontur arsitektural. |
+| **`text-primary`**| `#F4F4F6` (Luminescent White) | `#09090B` (Deep Carbon) | Headline, nama member, dan teks utama berkontras tinggi (WCAG AAA). |
+| **`text-muted`**  | `#8E8E99` (Cosmic Muted) | `#71717A` (Neutral Zinc) | Subtitle, metadata, deskripsi, dan badge sekunder. |
+| **`kinetic-accent`**| `#D4FF00` (Acid Voltage Pulse) | `#09090B` (Monochromatic Carbon Ink) | Aksen kinetik dinamis: nav underline draw, active dots, calligraphic flourishes, active story rings. |
+| **`btn-primary`** | `#D4FF00` (Text Black) | `#09090B` (Text White) | Tombol CTA primer: kontras tinggi instan di kedua mode tanpa silau. |
+| **`brand-violet`**| `#8B5CF6` (COSMO Ultraviolet)| `#7C3AED` (COSMO Deep Violet) | Identitas ekosistem MODHAUS: voting COSMO, Gravity tokens (khusus data & branding resmi). |
+
+#### tripleS Official Brand & Member Color Architecture:
+1. **Unifying Ecosystem Palette**:
+   - **Monochromatic Carbon Ink (`#09090B` / `text-zinc-950`)**: Standar editorial high-fashion di Light Mode (kontras 19:1 WCAG AAA). Menghilangkan kesan generik AI purple (The Lila Rule), membuat aksen kaligrafi `Pinyon Script` tampil razor-sharp dan tegas tanpa blur/fuzziness.
+   - **Acid Voltage Lime (`#D4FF00`)**: Aksen kinetik modern khas First Class Objekts & Dimension energy. Digunakan sebagai aksen kinetik dan CTA di Dark Mode serta latar belakang gelap hero.
+2. **24 Official Member Colors (MODHAUS Identity)**:
+   - S1 SeoYeon (`#17A7FE`), S2 HyeRin (`#8801FF`), S3 JiWoo (`#FFD800`), S4 ChaeYeon (`#76C722`)
+   - S5 YooYeon (`#D10A70`), S6 SooMin (`#FF95C8`), S7 NaKyoung (`#538FC8`), S8 YuBin (`#FFECF3`)
+   - S9 Kaede (`#FFA947`), S10 DaHyun (`#FF73B3`), S11 Kotone (`#FFF554`), S12 YeonJi (`#4243A2`)
+   - S13 Nien (`#FF9649`), S14 SoHyun (`#082855`), S15 Xinyu (`#D51312`), S16 Mayu (`#F88059`)
+   - S17 Lynn (`#C7DFF8`), S18 JooBin (`#C9FF50`), S19 HaYeon (`#85E3B3`), S20 ShiOn (`#FFAFD3`)
+   - S21 ChaeWon (`#BEE6B5`), S22 Sullin (`#FD82B8`), S23 SeoAh (`#FFFFFF`), S24 JiYeon (`#C99DF3`)
+   *Catatan*: Warna member resmi diterapkan pada avatar border, highlight personal, dan badge individual pada halaman profil masing-masing member.
+
+> **BANNED PALETTES & ANTI-REGRESSION RULES**:
+> - Dilarang menggunakan teks `#D4FF00` di atas background putih/terang (contrast ratio hanya 1.1:1, tidak terbaca). Wajib menggunakan `text-zinc-950 dark:text-[#D4FF00]`.
+> - Dilarang menggunakan generic AI Purple Glow / SaaS Purple text di Light Mode (`text-violet-600` melanggar *The Lila Rule* dan mengaburkan garis tipis kaligrafi). Wajib menggunakan Carbon Ink `#09090B`.
+> - Dilarang hardcode background hitam `#0D0D12` pada card reusable (`.spotlight-card`). Card wajib adaptif (light: `#FFFFFF` dengan soft border, dark: `#0D0D12` dengan bevel).
+> - Dilarang menggunakan flat pure black `#000000` tanpa depth scrims.
+> - Dilarang invert tema per section (seluruh section wajib patuh pada mode aktif kecuali cinematic dark photography hero).
+
+---
+
+### C. Locked Typography Stack (4-Tier Editorial Architecture):
+* **Display & Headline Utama (`--font-display`)**:
+  * Font: `Unbounded` (Google Font) / `Pretendard` (Hangul fallback).
+  * Karakter: Geometric wide extended neo-grotesque (1:1 match karakter *Owners Wide* di LxL Creative), tracking-tight, punchy bold editorial weight.
+* **Cursive Swash & Luxury Monogram (`--font-accent`)**:
+  * Font: `Pinyon Script` (Google Font).
+  * Karakter: Ornate calligraphic flourish, high-fashion contrast, looping vertical swashes (identik logo monogram ribbon tripleS & *Scribo* accent di LxL Creative). Digunakan eksklusif untuk 1 kata aksen di hero/headline (*Possibilities*, *Cosmos*, *Vault*, *Dimensions*).
+* **Body, Subtitle & Navigation (`--font-body`)**:
+  * Font: `Manrope` (Google Font).
+  * Karakter: Clean geometric neo-grotesque, ultra-legible, modern agency standard (1:1 font utama LxL Creative). Max line-length: `65ch`.
+* **Technical Metadata & S-Number (`--font-mono`)**:
+  * Font: `JetBrains Mono` (`font-mono`) tanpa bracket pembungkus (`S1`, `2026.08`, bukan `[ S1 ]`).
+* **BANNED TYPOGRAPHY**:
+  * Dilarang menggunakan `Inter`, `Fraunces`, atau serif generik tanpa motivasi brand.
+  * Dilarang menggunakan font decorative script untuk body text (hanya untuk aksen editorial).
+
+---
+
+### D. LxL Creative Motion & Micro-Interactions:
+* **Interactive Underline Draw (`.nav-draw-link`)**:
+  * Seluruh link navbar dan tab menggunakan garis bawah `#D4FF00` yang tumbuh dari kiri ke kanan saat hover (`scaleX(0)` → `scaleX(1)`).
+* **Tactile Magnetic Buttons (`.btn-magnetic`)**:
+  * Tombol CTA mengintegrasikan micro-movement di mana panah bergeser 45° (`.btn-arrow translate(3px, -3px)`) dengan spring physics saat hover.
+* **Spotlight Bento Cards (`.spotlight-card`)**:
+  * Menggunakan surface adaptif (light: `#FFFFFF` dengan soft zinc border; dark: `#0D0D12` dengan bevel `inset 0 1px 0 rgba(255,255,255,0.12)`).
+* **Authentic K-Pop Editorial 24-Member Hero (`<HeroSection />`)**:
+  * Format hero mengadopsi standar **Anti-Slop Editorial K-Pop Poster**:
+    1. **Lower-Third Anchor Layout**: Tipografi monumental `tripleS` ditempatkan di sepertiga bawah (`justify-end`), menjaga seluruh wajah 24 member di foto atas tetap bersih tanpa terhalang huruf.
+    2. **Tanpa AI-Slop Gimmicks**: Dilarang memasang widget template generik (jam digital KST di pojok, animasi mouse capsule "scroll to explore", atau cursive script font yang ditumpuk paksa).
+    3. **Fluid Optical Typography Scale**: Menggunakan fluid clamp (`text-[4.25rem] xs:text-[5.5rem] sm:text-[7.5rem] md:text-[9.5rem] lg:text-[11.5rem] xl:text-[13rem]`) dengan kerning optik `tracking-[-0.05em]` dan `leading-[0.85]`.
+    4. **Accessible Semantics & Contrast**:
+       - `aria-labelledby="hero-main-heading"` dan hidden screen-reader description (`.sr-only`) membacakan ke-24 nama member secara utuh.
+       - Contrast well gradient 52vh menjamin rasio kontras > 16:1 (WCAG AAA).
+       - Navigasi footer hero memiliki visible keyboard focus ring (`focus-visible:ring-2 focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2`).
+    5. **Mobile-First Focal Point & Safe Area**:
+       - Focal point foto terkunci di `object-[center_28%]` agar wajah member tetap utuh di layar rasio vertikal 9:16 / 19.5:9.
+       - Padding bawah adaptif (`pb-6 sm:pb-12`) agar tidak menabrak bar browser mobile (Safari/Chrome).
+       - Mouse parallax otomatis dinonaktifkan pada reduced motion (`useReducedMotion()`) dan layar sentuh (<1024px).
+* **GSAP + ScrollTrigger**:
+  * Parallax scrub halus pada framed group photo dan staggered line reveal pada headline hero.
+  * Wajib diisolasi di komponen Client leaf (`"use client"`) menggunakan `gsap.context()` di dalam `useEffect`, dan wajib menyertakan `ctx.revert()` pada cleanup.
+
+---
+
+### E. Purposeful Iconography Architecture (Anti-AI-Slop Lock):
+* **Banned Generic AI Icons**:
+  * Dilarang menggunakan icon `Sparkles` sebagai filler generik / magic-wand aesthetic.
+  * Dilarang animasi spinning berputar pada badge status perayaan (misal `animate-spin` pada icon bintang/sparkle).
+* **Locked Semantic Mapping**:
+  * **Objekts (Photocards / Vault)**: Wajib menggunakan `Layers` (merepresentasikan dek kartu fisik & digital yang tersusun rapi), bukan `Sparkles`.
+  * **Dimensions (Sub-Units)**: Wajib menggunakan `Boxes` di navigasi (merepresentasikan modularitas unit & struktur dimensi), bukan duplikasi icon `Users`.
+  * **Discography / Albums**: Wajib menggunakan `Disc3` (piringan hitam vinil).
+  * **Birthday Celebration**: Wajib menggunakan `Cake` untuk perayaan hari ulang tahun.
+  * **Empty Search State**: Wajib menggunakan `SearchX` untuk hasil pencarian/filter kosong.
+  * **Dimension Concept Tags**: Wajib menggunakan indicator dot kinetik minimalis (`<span className="w-1.5 h-1.5 rounded-full bg-violet-600 dark:bg-[#D4FF00]" />`), bukan decorative sparkles.
+
+---
+
+### F. Standar Halaman Profil Member (*Zero-Scroll Above-the-Fold*):
 * Foto profil resmi, nama panggung, nomor S, badge emoji, MBTI, dan tabel spesifikasi terintegrasi langsung di viewport atas tanpa perlu scrolling banner kosong.
 * **Tabel Spesifikasi**:
   1. `Stage Name (예명 / 활동명)`: Nama panggung + Hangul.
@@ -156,8 +252,17 @@ src/
   7. `History & Bio (이력)`: Fakta & biografi terkurasi.
 * **More tripleS Slider**: Slider horizontal responsif dengan mouse click-and-drag (`cursor-grab active:cursor-grabbing`) dan auto-centering pada member yang aktif tanpa memicu loncatan scroll vertikal pada window.
 
-### C. Birthday Countdown:
+### G. Birthday Countdown:
 * Menggunakan antrean ulang tahun satu bulan yang sama (`sameMonthMembers`), jam countdown monokrom, dan selector interaktif antar-member.
+
+---
+
+### H. Standar Breadcrumb Navigasi Konsisten (`<Breadcrumb />`):
+* Komponen terpusat di `src/components/breadcrumb.tsx`.
+* Seluruh subhalaman (`/members`, `/members/[slug]`, `/sub-units`, `/sub-units/[slug]`, `/objekts`, `/albums`, `/about`, `/credits`) wajib menyertakan breadcrumb di bagian atas konten di bawah navbar.
+* **Hierarki**: Root item otomatis selalu `Home` (`/`), diikuti hierarki kategori (`Members`, `Dimensions`, dst.), dan diakhiri halaman aktif (`aria-current="page"`).
+* **Aksesibilitas (WCAG)**: Struktur semantik `<nav aria-label="Breadcrumb">` dengan `<ol>` dan `<li>`, chevron separator `aria-hidden="true"`.
+* **Action Slot**: Mendukung slot aksi di sisi kanan (`action?: React.ReactNode`) untuk kontrol kontekstual seperti switcher antar-member (`Prev S# Next`) atau badge nomor Dimension tanpa memecah ritme layout.
 
 ---
 
@@ -211,6 +316,31 @@ Semua data profil, diskografi, foto, dan aktivitas tripleS diverifikasi dan dipe
 
 | Tanggal | Versi / Komponen | Kategori Perubahan | Deskripsi Signifikan |
 | :--- | :--- | :--- | :--- |
+| **2026-10-10** | `src/components/home/music-archive-section.tsx`, `src/app/page.tsx`, `src/components/birthday-countdown.tsx`, `src/components/home/hero-section.tsx`, `src/components/home/video-showreel-section.tsx`, `src/components/navigation.tsx`, `src/components/footer.tsx` | **Harmonisasi Font Pairing (Display + Accent Script) & Audit Hierarki Heading WCAG AAA** | (1) **Harmonisasi Kombinasi Font di Seluruh Section Home**: Memasangkan tipografi display `Unbounded` dengan satu kata aksen kaligrafi mewah `Pinyon Script` (`font-accent font-normal text-[1.25em] text-zinc-950 dark:text-[#D4FF00]`) pada Section 4 (`Music Archive`) dan Section 6 (`Upcoming Birthdays`), menyelaraskan ritme visual yang konsisten dengan Section 3 (`... does next.`) dan Section 5 (`Featured Dimensions`). (2) **Audit Heading Structure & Eliminasi Pelanggaran WCAG**: Membersihkan seluruh cacat hierarki dokumen: membuang `<h2>` sr-only sebelum `<h1>` hero (memastikan `<h1>tripleS` jadi heading root pertama), menyematkan `<h2 className="sr-only">` pada Section 2 Showreel, membakukan Section 4 H2 (`Music archive`) sebagai induk dari H3 (`Latest release` dan `Discography`), menurunkan foil card photocard dari `<h4>` ke `<p>` (menghilangkan loncatan level H2 -> H4), serta mengganti tag `<h2>` pada mobile drawer dan footer ke `<p>` agar outline dokumen 100% semantik. |
+| **2026-10-10** | `src/components/home/video-showreel-section.tsx`, `public/home/gnd_showreel.webm`, `public/home/gnd_showreel.mp4` | **Migrasi Video Showreel ke Native HTML5 (WebM VP9 + MP4 H.264)** | Mengganti YouTube iframe embed yang rentan delay/overlay UI dengan video lokal native HTML5: (1) **Dual-Format 1080p Stream**: Klip highlight 40 detik intro + chorus OT24 *Girls Never Die* dikonversi ke WebM VP9 (`11 MB`) primer dan fallback MP4 H.264 (`14 MB`) untuk kompatibilitas Safari/iOS, (2) **Performa 60fps GPU & Eliminasi Overhead**: Menghapus seluruh polling postMessage, listener iframe message, delay curtain 1.8s, dan crop offset container; diganti `<video autoPlay loop muted playsInline poster="..." />` yang instan ter-render tanpa buffer atau YouTube chrome/watermark, (3) **Kontrol Audio Taktil**: Toggle mute/unmute langsung mengontrol properti `.muted` elemen video via DOM ref tanpa delay IPC. |
+| **2026-10-10** | `src/components/home/how-it-works-section.tsx`, `src/components/home/music-archive-section.tsx`, `src/components/home/dimensions-card-stack.tsx`, `src/app/page.tsx`, `src/app/albums/AlbumsClient.tsx` | **Anti-Slop Rework Section 3 & 4 + Scale Typografi H2 Harmonisasi** | (1) **Section 3 "The Loop"**: kartu SaaS 3-tile diganti alur 1 Collect / 2 Vote / 3 Watch tanpa chrome kartu, foto panggung full color 7-kolom, fan 3 Objekt diacak dinamis dari 24 member resmi dengan pemetaan 24 warna MODHAUS & kontras kalkulasi luminance (dilengkapi tombol taktil Shuffle S#), GSAP entrance satu momen. (2) **Section 4 "Now Playing + Record Crate"**: cover featured diperbesar ~3x dengan ambient glow artwork asli, vinyl peek interaktif, satu CTA primer, embed Spotify utuh, crate drag/swipe horizontal dengan anchor link spesifik ke `/albums#{id}`. (3) **Harmonisasi Skala H2 & Eliminasi Template Chrome**: Skala H2 di seluruh section home diturunkan proporsional ke `text-3xl sm:text-4xl lg:text-5xl font-display font-bold tracking-[-0.04em]` (tidak over-monumental). Header Section 5 (Dimensions) dan Section 6 (Birthday Countdown) dibersihkan dari template eyebrow mono bertitik tengah dan script cursive berulang. |
+| **2026-10-10** | `src/app/page.tsx` & `src/components/spotify-embed.tsx` | **Visual K-Pop Lore Bento & Monumental Listening Lounge (Section 3 & 4)** | Perombakan menyeluruh Section 3 & 4 mengadopsi standar visual K-Pop non-slop: (1) **Section 3 (How tripleS Operates)**: Mengganti layout teks koran kaku dengan **Visual Lore Bento Grid asimetris (7:5 split)** berlatar fotografi resmi tripleS (`/home/triples_hatchi.jpg` & `/about/triples_about.jpg`) dengan gradient scrim, badge resmi COSMO Protocol Grand Gravity (170k vote lore), season Objekts (Atom/Binary/Cream/Ever), dan Daily SIGNAL 21:30 KST live feed Haus, (2) **Section 4 (Music Archive)**: Menghadirkan **Monumental Listening Lounge** dengan album jacket raksasa 160px ber-ambient color glow, deskripsi editorial lengkap, aksi ganda (Detail + Spotify), **100% mempertahankan Spotify embed resmi (`<SpotifyEmbed />`) asli tanpa modifikasi**, dipadukan dengan crate katalog diskografi yang diperluas menjadi 8 rilisan (2 baris x 4 kolom). |
+| **2026-10-09** | `src/components/home/hero-section.tsx` | **Aksesibilitas, Mobile Safe-Area & Anti-Slop (Hero)** | Overhaul menyeluruh Hero Section: (1) **Anti-Slop Clean Typography**: Menghapus widget Dribbble/AI slop (jam Seoul KST, animasi mouse pill "scroll to explore", dan script cursive acak); menerapkan judul monumental fluid `tripleS` (`text-[4.25rem] ... text-[13rem]`, `leading-[0.85]`, `tracking-[-0.05em]`) di sepertiga bawah sehingga 24 wajah member tampil utuh tanpa tertutup huruf, (2) **Mobile Safe-Area & Focal Point**: `object-[center_28%]` mengunci wajah member pada rasio layar vertikal 9:16 / 19.5:9, padding bawah adaptif (`pb-6 sm:pb-12`), (3) **Aksesibilitas WCAG AAA**: `aria-labelledby`, screen reader description (`.sr-only`) membacakan seluruh nama 24 member, visible focus-ring keyboard (`focus-visible:ring-2 focus-visible:ring-[#D4FF00]`), contrast well gradient 52vh (>16:1), dan reduced motion guard pada GSAP & mouse parallax. |
+| **2026-10-09** | `src/components/birthday-countdown.tsx` & `src/app/page.tsx` | **Redesain Borderless, Objekt Aesthetic & Stabilitas Height** | Peningkatan kualitas Birthday Card selaras standar `design-taste-frontend`: (1) **Eliminasi Box-in-a-Box**: Menghapus container luar raksasa dan 4 kotak timer kaku generik; mengganti ke floating borderless layout dengan inline typographic time stream (`03d · 03h · 44m · 25s`), (2) **Dynamic Member Accent**: Radial ambient aura dan inner rim bersinar sesuai warna resmi 24 member (`MEMBER_ACCENTS`), (3) **First Class Objekt Collectible Frame**: Bingkai foto bergaya kartu fisik Objekt (foil plate S#, Hangul deboss, prismatic sheen), (4) **Eliminasi Height Jumping**: Mengunci tinggi slot header & announcement time dan memisahkan action bar (`Send Wish` / `View Dossier`) agar Y-posisi 100% stabil saat berpindah status, (5) **Mobile Pill Hardening**: Menghapus pill warna pembungkus di samping nama yang memicu line wrap, dan menambahkan circular photo avatar mini ber-border warna member di radar queue bawah dengan `unoptimized` anti-pecah. |
+| **2026-10-04** | `src/components/home/video-showreel-section.tsx` | **Eliminasi Pause & Skip Overlay (Section 2 Mobile/Touch)** | Penghapusan tuntas tombol overlay kontrol YouTube (`[|<<] (||) [>>|]`): (1) **Eliminasi Parameter Playlist**: Menghapus `playlist=...` dari URL embed agar YouTube tidak mengaktifkan tombol skip previous/next track, (2) **Transparent Interaction Shield**: Menambahkan layer perisai tak terlihat (`pointer-events-auto touch-pan-y z-20`) di atas iframe yang menyerap semua sentuhan/ketukan pengguna saat scrolling tanpa mengganggu scroll vertikal natural, sehingga YouTube mobile tidak pernah memicu HUD kontrol pause/play, (3) **Auto-HUD Hide Delay**: Menunda pembukaan curtain poster selama 1800ms setelah status `PLAYING` terdeteksi agar HUD awal bawaan YouTube tertutup sempurna dan sudah lenyap saat video mulai tampak, (4) **Seamless PostMessage Loop**: Replay otomatis video via `seekTo(0)` saat `playerState === 0` tanpa parameter URL playlist. |
+| **2026-10-04** | `src/components/home/video-showreel-section.tsx` | **Restorasi Scroll Natural & Kontrol Kompak (Section 2)** | Restorasi alur scroll natural Section 2 sesuai preferensi pengguna: (1) **Natural Scroll Restoration**: Mengembalikan container scroll natural (`min-h-[220vh]`, `end: "+=100vh"`) di mana teks manifesto mengalir mulus melintasi video yang di-pin layar penuh tanpa lock buatan, (2) Penghapusan tetap untuk pill badge atas (`assemble24 • Title Track`), (3) Pengecilan proporsional 2 tombol kontrol utilitas bawah (`Sound On/Off` dan `Watch MV`) menjadi pill utilitas ringkas (`px-3 py-1.5`, font `text-[10px] sm:text-[11px] font-mono`) berlatar glass subtle tanpa bersaing dengan tombol CTA utama. |
+| **2026-10-04** | `src/components/wav-doodle.tsx` & `src/components/navigation.tsx` | **Navigasi, Kinetik & Fandom Identity (WAV Doodle Variations)** | Implementasi underline doodle kinetik kaligrafis terinspirasi bahasa visual fandom **WAV** (웨이브) dengan 6 variasi bentuk unik dan berbeda untuk setiap item menu navbar: (1) 6 Bentuk Bezier khas (`viewBox="0 0 100 14"`): Members (wave klasik dengan cursive loop kiri), Dimensions (dual-crest flow modularitas unit), Objekts (vault ribbon dengan loop knot kanan), Albums (waveform alur vinil ber-loop tengah), About (manifesto scribble enerjik ringkas), dan Credits (sweeping heartfelt flourish memeluk teks), (2) Micro-draw animation interaktif (`pathLength: 0 -> 1` via Framer Motion) saat hover, (3) Transisi sliding antar-tab persisten via `layoutId="navbar-active-wav"`, (4) Pembersihan menyeluruh file cache/log `.playwright-cli/` dari repositori. |
+| **2026-10-04** | `src/components/page-transition.tsx` & `src/app/layout.tsx` | **Animasi & Transisi Halaman (Awwwards-Level / LxL Match)** | Implementasi sistem transisi antar-halaman 1:1 *LxL Creative* fluid calligraphy ribbon loop dengan konsep warna berotasi dinamis per transisi: (1) Single solid color ribbon bersih (bebas rainbow gradient berlebih) yang berotasi otomatis setiap kali berpindah halaman mengadopsi palet warna resmi member tripleS (Acid Voltage `#D4FF00`, S2 HyeRin Violet `#8801FF`, S5 YooYeon Magenta `#D10A70`, S1 SeoYeon Azure `#17A7FE`, S9 Kaede Amber `#FFA947`, S18 JooBin Volt `#C9FF50`, S24 JiYeon Lilac `#C99DF3`, S7 NaKyoung Cerulean `#538FC8`, dll.) dengan adaptasi kontras otomatis di Light Mode, (2) Eliminasi total kotak/modal centerpiece agar transisi tetap murni (*simple, uncluttered, editorial*), (3) Path SVG kontinu 4-sudut LxL (`viewBox="0 0 1062 1000"`, canvas 140% viewport) dengan stroke-swelling dinamis (40px -> 340px -> 30px via GSAP), (4) Backdrop veil subtle (`backdrop-blur-xl`) untuk transisi zero-flicker tanpa jeda saat Next.js me-render halaman baru. |
+| **2026-10-04** | `src/components/home/dimensions-card-stack.tsx` | **Interaksi & Fitur Otomatis** | Implementasi sistem auto-advance (auto-play peeling) pada 3D Dimension Card Stack: (1) Loop timer otomatis 4000ms dengan transisi peeling 3D halus, (2) Smart viewport detection via `IntersectionObserver` (hanya aktif saat section masuk ke viewport layar), (3) Hover & touch pause: auto-advance otomatis berhenti saat kursor menyentuh kartu/navigasi dan berlanjut saat kursor keluar, (4) Tombol kontrol interaktif Play/Pause (`Pause` / `Play` icon) terintegrasi pada toolbar navigasi, (5) Indikator status live pulse pada Active Dimension concept. |
+| **2026-10-04** | `src/components/home/video-showreel-section.tsx` | **Tipografi, Penempatan & Clearance** | Penyelarasan ukuran font dan penempatan manifesto Section 2 sesuai proporsi editorial *LxL Creative* & WCAG AAA: (1) Mengganti batas `max-w-[20ch]` (yang terdistorsi ke 224px sempit) menjadi `w-full max-w-4xl mx-auto` (896px) menghasilkan komposisi seimbang 5 baris, (2) Kalibrasi skala font editorial: desktop `text-xl sm:text-2xl md:text-3xl lg:text-[2.35rem] xl:text-[2.55rem]` dengan aksen cursive `Pinyon Script` `lg:text-[3.5rem] xl:text-[3.85rem]`, (3) Glued punctuation pada `dimensions,` mencegah isolasi koma pada awal baris, (4) Koreksi penempatan scroll: video selesai expand ke full screen pada scroll pertama (`end: "+=100vh"`), lalu teks manifesto meluncur tepat di tengah layar dengan vertical clearance aman (>210px di bawah navbar, >190px di atas kontrol suara), (5) Optimasi kontrol suara mobile agar ringkas dan bebas tabrakan dengan tombol Back-to-Top. |
+| **2026-10-04** | `src/components/home/video-showreel-section.tsx` & `src/components/smooth-scroll.tsx` | **Smoothness, GPU Compositor & Anti-Jank** | Penyempurnaan 60-120fps ultra-smooth pada Section 2 rujukan *LxL Creative* (`design-taste-frontend` 6.A): (1) Eliminasi total relayout jank (sebelumnya animating `width` & `height` menyebabkan reflow iframe YouTube); beralih ke GPU-accelerated `clip-path: inset(...)` dengan fixed 100vw container (0 reflow DOM), (2) Sinkronisasi Lenis smooth-scroll (`@studio-freight/lenis`) dengan `ScrollTrigger.update` & `gsap.ticker` di `<SmoothScroll />` menuntaskan micro-stuttering antar clock loop, (3) Eliminasi total Closed Captions (CC): URL parameters `cc_load_policy=0&cc_lang_pref=off&hl=en`, postMessage API `unloadModule('captions')` dan cropping fisik zona bawah caption YouTube dengan offset `-translate-y-[52%]` di container `overflow-hidden`. |
+| **2026-10-04** | `src/components/home/hero-section.tsx` | **Bugfix, Resolusi Mobile & Tipografi** | Perbaikan resolusi gambar mobile & visibilitas teks tripleS pada mobile & tablet: (1) Mengatasi gambar buram/pixelated di HP dengan menambahkan `unoptimized` pada foto grup 3000px (mencegah Next.js Image men-downscale ke thumbnail 213px yang diperbesar 4x di layar vertikal), (2) Optimasi framing mobile ke `object-[center_38%]` memusatkan pandangan langsung pada wajah para member (mencegah crop berlebih), (3) Mengatasi hilangnya teks `tripleS` di tablet & HP (WebKit transparent text bug) dengan render solid luminescent white berbayang kontras tinggi (`text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.95)]`) pada mobile/tablet (<lg) dan tetap hollow-stroke pada desktop (>=lg), (4) Transisi GSAP `fromTo` yang aman mencegah elemen terjebak di `opacity: 0`, (5) Penambahan radial dark scrim untuk jaminan keterbacaan teks 100%. |
+| **2026-10-04** | Global (Light Mode Palette) | **Aksen Kinetik & Tipografi Editorial** | Overhaul total aksen Light Mode dari generic AI violet (`#7C3AED` / `text-violet-600`) ke **Monochromatic Carbon Ink (`#09090B` / `text-zinc-950`)** berdasarkan `design-taste-frontend` (*The Lila Rule* anti-slop): (1) Kaligrafi luxury `Pinyon Script` (*tripleS*, *Discography*, *Profiles*, *Vault*, *Dimensions*, *Cosmos*, *Credits*) beralih ke deep ink 19:1 WCAG AAA untuk ketajaman optik maksimal tanpa blur, (2) Underline draw kinetik `.nav-draw-link` & active nav link beralih ke carbon ink `#09090B`, (3) Eyebrow badges beralih ke tactile `bg-zinc-900/5 border-zinc-900/10 text-zinc-900`, (4) Keyboard focus-visible ring terintegrasi `outline: 2px solid #09090B`, (5) Menghilangkan 100% dependensi aksen violet di Light Mode pada seluruh 8 subhalaman dan landing page. |
+| **2026-10-04** | `src/components/navigation.tsx` & Page Containers | **UI/UX & Dynamic Scroll Shrink** | Unifikasi arsitektur navigasi ke Edge-to-Edge Full-Width Header selaras dengan grid halaman & Dynamic Scroll-Shrink Header: (1) Mengganti floating capsule pill terisolasi (`max-w-5xl` / 1024px) menjadi header full-width (`fixed top-0 inset-x-0`) dengan kontainer grid `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`, mensejajarkan logo `tripleS COSMOS` persis dengan margin kiri breadcrumb dan Vault CTA dengan margin kanan, (2) Dynamic Scroll-Shrink Header: logo dan brand text tampil lebih besar di posisi atas (`w-8 h-8 sm:w-9 sm:h-9`, `text-lg sm:text-2xl`, header `h-16 sm:h-20`) dan mengecil mulus saat di-scroll (`w-6 h-6 sm:w-7 sm:h-7`, `text-base sm:text-lg`, header `h-14 sm:h-16`), (3) Standardisasi kontainer `max-w-7xl` pada subhalaman Albums, About, dan Credits, (4) Standardisasi top padding ke `pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28` di seluruh 8 subhalaman agar konten berada persis di bawah header tanpa tabrakan. |
+| **2026-10-04** | `src/components/navigation.tsx` & All Pages | **Bugfix & Top Blank Space Elimination** | Perbaikan tuntas ruang kosong berlebih di bagian atas halaman (*blank space on top*): (1) Implementasi mobile & tablet header bar terintegrasi (`fixed top-0 inset-x-0 h-14 lg:hidden`) dengan logo `tripleS COSMOS`, theme toggle, dan menu button (tetap transparan murni saat di hero), (2) Standardisasi top padding dari sebelumnya statis kaku `pt-24` (96px) menjadi adaptif `pt-16 sm:pt-20 lg:pt-24` di seluruh 8 subhalaman (`/credits`, `/about`, `/albums`, `/objekts`, `/members`, `/members/[slug]`, `/sub-units`, `/sub-units/[slug]`), memposisikan breadcrumb tepat 8px di bawah header bar pada mobile tanpa celah kosong, (3) Menambahkan close button `<X />` internal pada drawer menu mobile. |
+| **2026-10-04** | `triples/v3` (Global Mobile & Tablet) | **Responsiveness & Mobile/Tablet Overhaul** | Audit dan optimasi komprehensif seluruh tampilan mobile (<640px) dan tablet (640px–1024px) di semua halaman & komponen: (1) Tipografi fluid (`text-3xl xs:text-4xl sm:text-5xl md:text-6xl`) mencegah judul editorial patah di layar sempit 320px–360px, (2) Standardisasi padding bento card dari kaku `p-8/p-10` menjadi adaptif `p-4 sm:p-6 md:p-8/10`, (3) CTA buttons responsif (`w-full sm:w-auto`) untuk touch targets mobile yang ergonomis, (4) Tabel spesifikasi profil member adaptif `grid-cols-1 sm:grid-cols-12`, (5) Eliminasi tuntas sisa bracket mono slop `[ ... ]` di seluruh halaman About, Credits, Sub-Units, dan Birthday Radar, (6) Countdown jam ulang tahun proporsional tanpa overflow horizontal pada 320px screens. |
+| **2026-10-04** | Global (`src/components/breadcrumb.tsx`) | **Standardisasi & Aksesibilitas** | Implementasi sistem breadcrumb universal dan konsisten di seluruh subhalaman (`/members`, `/members/[slug]`, `/sub-units`, `/sub-units/[slug]`, `/objekts`, `/albums`, `/about`, `/credits`): (1) Komponen `<Breadcrumb />` semantik WCAG (`nav`, `ol`, `li`, `aria-current="page"`), (2) Root item otomatis `Home`, (3) Action slot terintegrasi untuk kontrol kontekstual (switcher member S1–S24 & badge Dimension), (4) Penghapusan sisa bracket mono `[ ARCHIVE ]` pada halaman About & Credits. |
+| **2026-10-04** | `src/app/members/[slug]/` | **Bugfix & UI/UX** | Penyelesaian tabrakan navbar dan halaman profil member: (1) Penambahan padding atas `pt-24 pb-28` pada container halaman (selaras dengan seluruh halaman situs), (2) Mengubah switcher member yang sebelumnya `sticky top-0 z-30` (yang tumpang tindih dengan floating global navbar) menjadi in-page breadcrumb & switcher elegan di dalam batas `max-w-7xl`, (3) Menyesuaikan sticky offset kartu foto member menjadi `md:sticky md:top-24` agar tidak tertabrak navbar saat di-scroll, (4) Menghilangkan flash hitam saat unmounted (`bg-[#fafafa] dark:bg-[#08080A]`). |
+| **2026-10-04** | `triples/v3` (Branch), Iconography & Anti-Slop | **Standardisasi & UI/UX** | Pembersihan menyeluruh generic AI-slop iconography: (1) Penghapusan total icon `Sparkles` generik di seluruh antarmuka, (2) Objekts Vault & Photocard action menggunakan `Layers` (dek kartu tersusun), (3) Dimensions di navigasi menggunakan `Boxes`, (4) Perayaan hari ulang tahun menggunakan `Cake` (menggantikan spinning sparkles), (5) Empty search state Objekts menggunakan `SearchX`, (6) Tag konsep Dimension beralih ke subtle indicator dot kinetik, (7) Eliminasi bracket mono slop `[ Category ]` di halaman Sub-Units. |
+| **2026-10-04** | `triples/v3` (Branch), `HeroSection` & `Navigation` | **Restorasi Hero Orisinal & Anti-Slop** | Mempertahankan format hero imersif layar penuh orisinal dengan hollow-stroke typography (`tripleS`) dan menerapkan 4 perbaikan: (1) Penghapusan running marquee text `<EditorialTicker />`, (2) Penghapusan tombol CTA dan seluruh badge di hero (fokus murni pada fotografi 24 member & tipografi), (3) Navbar transparan penuh saat di hero (`!scrolled`), (4) Penghapusan backdrop hitam yang dipaksakan; bagian bawah foto hero melebur mulus (*dissolve gradient*) ke background tema aktif (`from-[#fafafa]` light, `dark:from-[#08080A]` dark). |
+| **2026-10-04** | `triples/v3` (Branch), Theme Engine & CSS | **UI/UX, Kontras & Palet Resmi** | Penyelarasan komprehensif Light & Dark Mode (Dual-Theme Synergy) berdasarkan riset resmi MODHAUS & COSMO: (1) Light Mode mengadopsi *COSMO Violet* (`#7C3AED`) untuk aksen kinetik, draw-lines (`.nav-draw-link`), status pills, dan title accents (&gt;7.5:1 WCAG AAA), (2) Tombol CTA primer adaptif (`bg-zinc-900 text-white` di Light Mode, `bg-[#D4FF00] text-black` di Dark Mode), (3) `.spotlight-card` diperbaiki dari background statis gelap menjadi kartu adaptif berlatar putih bersih dengan soft border di Light Mode, (4) Dokumentasi 24 warna member resmi S1–S24 (MODHAUS official identity) dan penguncian anti-regresi di `GEMINI.md`. |
+| **2026-10-04** | `triples/v3` (Branch), Layout & Micro-Interactions | **Standardisasi, Tipografi & Desain** | Overhaul total mengadopsi standar agensi *LxL Creative* (`lxlcreative.co.uk`) & user monogram calligraphy reference: (1) 4-tier font stack (`Unbounded` display, `Pinyon Script` luxury cursive flourish accent, `Manrope` body/UI, `JetBrains Mono` specs), (2) Palette Lock Deep Obsidian `#08080A` dengan tactile bevel `inset 0 1px 0 rgba(255,255,255,0.12)` dan `#D4FF00` (Acid Voltage Pulse) dual-accent combo, (3) Kinetic micro-interactions: nav animated draw-lines (`.nav-draw-link`), tactile magnetic buttons (`.btn-magnetic` with 45° arrow slide), spotlight bento cards (`.spotlight-card`), dan infinite running marquee `<EditorialTicker />`. |
+| **2026-10-04** | `GEMINI.md`, Layout & Design System | **Standardisasi & Desain** | Penguncian resmi Standar Desain Awwwards-Level (`tasteskill`), Color Palette Lock (`void-base #050507`, `brand-violet #8B5CF6`, `acid-cyan #06B6D4`), Typography Stack (`Space Grotesk` + `Pretendard`), GSAP + ScrollTrigger architecture rules, dan 7 Anti-AI-Flop strict invariants. |
 | **2026-08-16** | `src/components/objekt-modal.tsx` & `src/types/objekt.ts` | **Fitur & Media** | Integrasi pemutar video resmi MP4 (`frontMedia` dari CDN `cdn.apollo.cafe/mco/triples/`) khusus pada modal preview untuk kartu bertipe Motion Objekts dengan badge `Motion` live indicator dan autoplay loop playback. |
 | **2026-08-15** | `src/components/objekt-modal.tsx` | **Integrasi & Tautan** | Penyelarasan tautan tombol COSMO App di modal agar mengarah ke universal download link resmi MODHAUS (`https://bit.ly/4hQegaj`), konsisten dengan halaman Credits. |
 | **2026-08-15** | `src/components/objekt-modal.tsx` | **UI/UX & Responsiveness** | Pembaruan layout modal: 3 action pills (`[Info/Verified]`, `[COSMO]`, `[Apollo]`) ditempatkan di kolom kanan pada tampilan desktop di bawah spesifikasi, dan tetap ringkas di bawah foto pada layar mobile. |

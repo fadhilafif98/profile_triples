@@ -4,8 +4,9 @@ import { useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, Search, Sparkles, Layers, LayoutGrid, List } from "lucide-react"
+import { ArrowRight, Search, LayoutGrid, List } from "lucide-react"
 import { subUnits } from "@/utils/sub-units"
+import Breadcrumb from "@/components/breadcrumb"
 
 type CategoryFilter = "All" | "Main Dimension" | "msnz Project" | "Special & Genre" | "Introductory" | "Japan"
 
@@ -38,19 +39,19 @@ export default function SubUnitsClient() {
   }, [selectedCategory, searchQuery])
 
   return (
-    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black min-h-screen transition-colors">
+    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-[#D4FF00] selection:text-black min-h-screen transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: "Dimensions" }]} />
         
         {/* ── 1. Page Header ── */}
         <div className="mb-12">
-          <div className="flex items-center gap-2 mb-2">
-            <Layers className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-mono">[ GRAVITY & DIMENSIONS ]</p>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">
-            Sub-Units & Dimensions
+          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
+            Grand Gravity Formations
+          </span>
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
+            Sub-Units &amp; <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">Dimensions</span>
           </h1>
-          <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 mt-4 max-w-3xl leading-relaxed">
+          <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 mt-3 max-w-3xl leading-relaxed">
             tripleS operates through dynamic subunit formations called <span className="text-zinc-900 dark:text-white font-medium">Dimensions</span> created through fan-participatory Grand Gravity events. Explore all 15 official sub-units categorized by Fandom Wiki.
           </p>
         </div>
@@ -59,7 +60,7 @@ export default function SubUnitsClient() {
         <div className="mb-12 space-y-4">
           
           {/* Category Tabs */}
-          <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800/80 pb-4 overflow-x-auto no-scrollbar sm:flex-wrap">
+          <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-white/10 pb-4 overflow-x-auto no-scrollbar sm:flex-wrap">
             {categories.map((cat) => {
               const isActive = selectedCategory === cat.value
               return (
@@ -68,13 +69,13 @@ export default function SubUnitsClient() {
                   onClick={() => setSelectedCategory(cat.value)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono transition-all shrink-0 ${
                     isActive
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-black font-bold shadow-md"
-                      : "bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600"
+                      ? "bg-zinc-900 text-white dark:bg-[#D4FF00] dark:text-black font-bold shadow-md dark:shadow-[0_0_15px_rgba(212,255,0,0.3)]"
+                      : "bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-[#D4FF00]/30"
                   }`}
                 >
                   <span>{cat.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isActive ? "bg-white/20 dark:bg-black/20 text-white dark:text-black font-mono" : "bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400 font-mono"
+                    isActive ? "bg-white/20 dark:bg-black/20 text-white dark:text-black font-mono font-bold" : "bg-zinc-200 dark:bg-white/10 text-zinc-700 dark:text-zinc-400 font-mono"
                   }`}>
                     {cat.count}
                   </span>
@@ -164,7 +165,7 @@ export default function SubUnitsClient() {
                   transition={{ duration: 0.4, delay: index * 0.04 }}
                   className={`grid grid-cols-1 ${
                     index % 2 === 0 ? "lg:grid-cols-[1fr_1.2fr]" : "lg:grid-cols-[1.2fr_1fr]"
-                  } gap-8 lg:gap-12 items-center p-6 sm:p-8 md:p-10 rounded-3xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 shadow-md dark:shadow-xl`}
+                  } gap-6 sm:gap-8 lg:gap-12 items-center p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 shadow-md dark:shadow-xl`}
                 >
                   <div className={`${index % 2 !== 0 && "lg:order-2"}`}>
                     <Link
@@ -198,11 +199,11 @@ export default function SubUnitsClient() {
                   <div className={`${index % 2 !== 0 && "lg:order-1"} space-y-4`}>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono uppercase tracking-wider text-zinc-800 dark:text-zinc-300">
-                        <Sparkles className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-[#D4FF00]" />
                         {unit.concept}
                       </span>
                       <span className="text-[10px] font-mono text-zinc-500 uppercase px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800">
-                        [ {unit.category} ]
+                        {unit.category}
                       </span>
                     </div>
 
@@ -287,11 +288,11 @@ export default function SubUnitsClient() {
                       </div>
                     </div>
 
-                    <div className="p-6 space-y-3">
+                    <div className="p-5 sm:p-6 space-y-3">
                       <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block">
-                        [ {unit.category} ]
+                        {unit.category}
                       </span>
-                      <h3 className="text-xl font-bold text-zinc-900 dark:text-white font-pretendard group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                      <h3 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white font-pretendard group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                         {unit.name}
                       </h3>
                       <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
@@ -313,7 +314,7 @@ export default function SubUnitsClient() {
                     </div>
                   </Link>
 
-                  <div className="p-6 pt-0">
+                  <div className="p-5 sm:p-6 pt-0 sm:pt-0">
                     <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-xs font-mono">
                       <span className="text-zinc-500 truncate max-w-[150px]">{unit.debutRelease}</span>
                       <Link
@@ -331,8 +332,8 @@ export default function SubUnitsClient() {
         </AnimatePresence>
 
         {/* ── 4. Footer Participation Callout ── */}
-        <div className="mt-24 p-10 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-900/40 text-center max-w-4xl mx-auto shadow-sm">
-          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ GRAND GRAVITY ]</p>
+        <div className="mt-16 sm:mt-24 p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-900/40 text-center max-w-4xl mx-auto shadow-sm">
+          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">GRAND GRAVITY</p>
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-zinc-900 dark:text-white font-pretendard">
             Participate in Future Dimensions
           </h2>
@@ -341,7 +342,7 @@ export default function SubUnitsClient() {
           </p>
           <Link
             href="/about"
-            className="inline-flex items-center justify-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-black px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all tracking-wide shadow-md"
+            className="inline-flex items-center justify-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-black px-7 py-3.5 rounded-full text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all tracking-wide shadow-md w-full sm:w-auto"
           >
             Learn How Gravity Works <ArrowRight className="h-4 w-4" />
           </Link>

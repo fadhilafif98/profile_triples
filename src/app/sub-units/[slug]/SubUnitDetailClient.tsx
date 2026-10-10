@@ -6,9 +6,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { motion } from "framer-motion"
 import {
-  ArrowLeft,
   ArrowRight,
-  Sparkles,
   Calendar,
   Layers,
   Crown,
@@ -21,6 +19,7 @@ import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"
 import { getMemberById } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
+import Breadcrumb from "@/components/breadcrumb"
 
 interface SubUnitDetailClientProps {
   slug: string
@@ -81,30 +80,21 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
   }, [allUnits, unit.slug])
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* ── 1. Navigation Breadcrumb ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-8 flex items-center justify-between"
-        >
-          <Link
-            href="/sub-units"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>All Sub-Units & Dimensions</span>
-          </Link>
-
-          <div className="flex items-center gap-2">
+        <Breadcrumb
+          items={[
+            { label: "Dimensions", href: "/sub-units" },
+            { label: unit.name },
+          ]}
+          action={
             <span className="text-xs font-mono px-3 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               Dimension #{String(unit.id).padStart(2, "0")}
             </span>
-          </div>
-        </motion.div>
+          }
+        />
 
         {/* ── 2. Hero Bento Section ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start mb-16">
@@ -160,7 +150,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-mono uppercase tracking-wider text-zinc-800 dark:text-zinc-300">
-                <Sparkles className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-[#D4FF00]" />
                 {unit.concept}
               </span>
               <span className="text-xs font-mono px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
@@ -170,7 +160,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
 
             {/* Main Headline */}
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">
                 {unit.name}
               </h1>
               <p className="text-base sm:text-lg font-mono text-zinc-500 dark:text-zinc-400 mt-1">
@@ -216,7 +206,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               <div className="flex items-center gap-2 mb-1">
                 <Users className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                 <p className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-                  [ LINEUP DOSSIER &bull; {taggedMembers.length} MEMBERS ]
+                  LINEUP DOSSIER &bull; {taggedMembers.length} MEMBERS
                 </p>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">
@@ -321,7 +311,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             <div className="flex items-center gap-2 mb-1">
               <Disc3 className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
               <p className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-                [ DISCOGRAPHY &bull; {relatedReleases.length} {relatedReleases.length === 1 ? "RELEASE" : "RELEASES"} ]
+                DISCOGRAPHY &bull; {relatedReleases.length} {relatedReleases.length === 1 ? "RELEASE" : "RELEASES"}
               </p>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white mb-8">
@@ -332,7 +322,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               {relatedReleases.map((album) => (
                 <div
                   key={album.id}
-                  className="flex flex-col sm:flex-row gap-5 p-5 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 backdrop-blur-md shadow-md"
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-5 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 backdrop-blur-md shadow-md"
                 >
                   <div className="relative aspect-square w-full sm:w-36 shrink-0 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm bg-zinc-100 dark:bg-zinc-950">
                     <Image
@@ -368,7 +358,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                           href={album.spotifyLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-semibold transition-colors shadow-sm"
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-semibold transition-colors shadow-sm w-full sm:w-auto"
                         >
                           <Music2 className="h-3.5 w-3.5" />
                           <span>Stream on Spotify</span>
@@ -385,12 +375,12 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
 
         {/* ── 5. Explore Other Dimensions Slider / Grid ── */}
         <section className="pt-6 border-t border-zinc-200 dark:border-zinc-800/80">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Layers className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                 <p className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-                  [ NEXT DIMENSION ]
+                  NEXT DIMENSION
                 </p>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">

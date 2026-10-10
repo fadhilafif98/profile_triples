@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import AnimatedLogo from "@/components/animated-logo";
+import Breadcrumb from "@/components/breadcrumb";
 import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaInstagram, FaLinkedin, FaSpotify, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 
 export const metadata: Metadata = {
@@ -31,13 +32,17 @@ export const metadata: Metadata = {
 
 export default function ThankYouPage() {
   return (
-    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black min-h-screen transition-colors">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-[#D4FF00] selection:text-black min-h-screen transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: "Credits & Sources" }]} />
+
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ DIRECTORY & CREDITS ]</p>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-pretendard">
-            Official Channels & Credits
+          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
+            Directory &amp; Credits
+          </span>
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
+            Official Channels &amp; <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">Credits</span>
           </h1>
           <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mt-4 leading-relaxed">
             Direct gateways to tripleS official channels, COSMO application, music streaming, and project architecture details.
@@ -48,7 +53,7 @@ export default function ThankYouPage() {
         <div className="mb-20">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">Official tripleS Links</h2>
-            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-500">[ MODHAUS OFFICIAL ]</span>
+            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">MODHAUS OFFICIAL</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -133,17 +138,17 @@ export default function ThankYouPage() {
         </div>
 
         {/* Website Credits */}
-        <div className="bg-zinc-100/70 dark:bg-zinc-900/30 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 md:p-12 shadow-sm">
+        <div className="bg-zinc-100/70 dark:bg-zinc-900/30 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 p-5 sm:p-8 md:p-12 shadow-sm">
           <div className="flex items-center gap-3 mb-8">
             <FaCode className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">Project Architecture & Credits</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">Project Architecture & Credits</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white dark:bg-zinc-950/60 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">[ STACK ]</span>
-              <h3 className="text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Technology Stack</h3>
-              <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-10">
+            <div className="bg-white dark:bg-zinc-950/60 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">STACK</span>
+              <h3 className="text-base sm:text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Technology Stack</h3>
+              <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
                 <li>• Next.js App Router (React 19)</li>
                 <li>• Tailwind CSS & Custom Design System</li>
                 <li>• Framer Motion for Transitions</li>
@@ -151,10 +156,10 @@ export default function ThankYouPage() {
               </ul>
             </div>
 
-            <div className="bg-white dark:bg-zinc-950/60 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">[ DATA ]</span>
-              <h3 className="text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Information Sources</h3>
-              <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
+            <div className="bg-white dark:bg-zinc-950/60 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">DATA SOURCES</span>
+              <h3 className="text-base sm:text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Information Sources</h3>
+              <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
                 <li>• MODHAUS official releases and Cosmo logs</li>
                 <li>• tripleS Fandom Wiki & KpopProfiles references</li>
                 <li>• Official Spotify and YouTube metadata</li>

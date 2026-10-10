@@ -4,16 +4,21 @@ import { albums } from "@/utils/albums"
 import Image from "next/image"
 import { FaSpotify } from "react-icons/fa"
 import { ArrowUp } from "lucide-react"
+import Breadcrumb from "@/components/breadcrumb"
 
 export default function AlbumsClient() {
   return (
-    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors min-h-screen">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-[#D4FF00] selection:text-black transition-colors min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: "Discography" }]} />
+
         {/* Header */}
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ CHRONOLOGICAL ARCHIVE ]</p>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-pretendard">
-            Official Discography
+          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
+            Chronological Archive
+          </span>
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
+            Official <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">Discography</span>
           </h1>
           <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-4 max-w-3xl leading-relaxed">
             The complete release history of tripleS and its Dimensions, featuring all full-length albums, mini albums, and unit singles in chronological order.
@@ -23,14 +28,14 @@ export default function AlbumsClient() {
         {/* Timeline */}
         <div className="relative">
           {/* Timeline center line (desktop only) */}
-          <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+          <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-zinc-200 dark:border-white/10"></div>
 
           {/* Albums */}
           <div className="space-y-8 md:space-y-16">
             {albums.map((album, index) => (
-              <div key={album.id} className="relative">
+              <div key={album.id} id={album.id} className="relative scroll-mt-28">
                 {/* Timeline dot (desktop only) */}
-                <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-[32px] w-3 h-3 rounded-full bg-zinc-900 dark:bg-white border-2 border-white dark:border-black z-10"></div>
+                <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-[32px] w-3 h-3 rounded-full bg-zinc-950 dark:bg-[#D4FF00] border-2 border-white dark:border-black z-10"></div>
 
                 {/* Album content */}
                 <div
@@ -44,7 +49,7 @@ export default function AlbumsClient() {
                       index % 2 === 0 ? "md:text-right md:pr-12" : "md:text-left md:pl-12"
                     }`}
                   >
-                    <div className="inline-block px-3 py-1 md:p-0 rounded-full bg-zinc-100 dark:bg-zinc-900 md:bg-transparent md:dark:bg-transparent border border-zinc-200 dark:border-zinc-800 md:border-none text-xs md:text-lg font-mono font-semibold text-zinc-800 dark:text-zinc-300 md:text-zinc-500 md:dark:text-zinc-400">
+                    <div className="inline-block px-3 py-1 md:p-0 rounded-full bg-zinc-100 dark:bg-[#14141B] md:bg-transparent md:dark:bg-transparent border border-zinc-200 dark:border-white/10 md:border-none text-xs md:text-lg font-mono font-semibold text-zinc-800 dark:text-zinc-300 md:text-zinc-500 md:dark:text-zinc-400">
                       {album.releaseDate}
                     </div>
                   </div>
@@ -53,7 +58,7 @@ export default function AlbumsClient() {
                   <div
                     className={`w-full md:w-1/2 ${index % 2 === 0 ? "md:pl-12" : "md:pr-12"}`}
                   >
-                    <div className="bg-white dark:bg-zinc-900/40 p-6 md:p-7 rounded-3xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-sm dark:shadow-none transition-all">
+                    <div className="spotlight-card p-4 sm:p-6 md:p-7 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-white/10 shadow-sm transition-all">
                       <div className="flex flex-col sm:flex-row gap-5 md:gap-6 items-start">
                         {/* Album cover */}
                         <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex-shrink-0 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 shadow-sm">
@@ -69,7 +74,7 @@ export default function AlbumsClient() {
                           <div className="flex flex-wrap items-center gap-2 mb-2">
                             {album.type && (
                               <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                                [ {album.type} ]
+                                {album.type}
                               </span>
                             )}
                             {album.unit && (
@@ -78,7 +83,7 @@ export default function AlbumsClient() {
                               </span>
                             )}
                           </div>
-                          <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2 truncate font-pretendard">
+                          <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2 truncate font-display tracking-tight">
                             {album.title}
                           </h3>
                           <p className="text-xs md:text-sm text-zinc-600 dark:text-zinc-400 mb-4 line-clamp-3 leading-relaxed">

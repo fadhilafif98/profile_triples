@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
+import Breadcrumb from "@/components/breadcrumb"
 
 export const metadata: Metadata = {
   title: "About tripleS | The Idol of All Possibilities",
@@ -30,13 +31,17 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black min-h-screen transition-colors">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-[#D4FF00] selection:text-black min-h-screen transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: "About tripleS" }]} />
+
         {/* Header */}
         <div className="mb-16">
-          <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ ARCHIVE & DOSSIER ]</p>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-pretendard">
-            About tripleS
+          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
+            Archive &amp; Dossier
+          </span>
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
+            About <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">tripleS</span>
           </h1>
         </div>
 
@@ -74,12 +79,12 @@ export default function AboutPage() {
         {/* Concept Architecture */}
         <div className="mb-20">
           <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ CORE MECHANICS ]</p>
+            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">CORE MECHANICS</p>
             <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white font-pretendard">The Decentralized Model</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-zinc-900/40 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">01 / GRAVITY</span>
               <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Decentralized Voting</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
@@ -87,7 +92,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900/40 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">02 / OBJEKTS</span>
               <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Digital Collectibles</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
@@ -95,7 +100,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900/40 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">03 / DIMENSIONS</span>
               <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Seasonal Dimensions</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
@@ -108,39 +113,39 @@ export default function AboutPage() {
         {/* Milestones & Metrics */}
         <div>
           <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">[ METRICS & IMPACT ]</p>
+            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">METRICS & IMPACT</p>
             <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white font-pretendard">Global Footprint</h2>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Album Sales</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">740K+</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Album Sales</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">740K+</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">Albums distributed worldwide</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Community</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">680K+</h3>
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Community</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">680K+</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">Instagram followers</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Video Platform</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">2.78M+</h3>
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Video Platform</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">2.78M+</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">YouTube subscribers</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Recognition</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">9</h3>
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Recognition</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">9</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">Major music awards won</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Global Reach</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">20+</h3>
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Global Reach</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">20+</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">Countries toured / visited</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Streaming</span>
-              <h3 className="text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">520M+</h3>
+            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Streaming</span>
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">520M+</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-xs">Total YouTube impressions & views</p>
             </div>
           </div>

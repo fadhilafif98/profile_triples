@@ -48,3 +48,5 @@ next-env.d.ts
 .opencode/
 .github/copilot-instructions.md
 AGENTS.md
+.agents/
+skills-lock.json

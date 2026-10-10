@@ -5,8 +5,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
   Search,
-  Sparkles,
-  Layers,
+  SearchX,
   ChevronLeft,
   ChevronRight,
   Grid3X3,
@@ -25,6 +24,7 @@ import ObjektCard from "@/components/objekt-card";
 import ObjektModal from "@/components/objekt-modal";
 import CustomDropdown, { DropdownOption } from "@/components/custom-dropdown";
 import SeasonDropdown from "@/components/season-dropdown";
+import Breadcrumb from "@/components/breadcrumb";
 
 type SortOption =
   | "newest"
@@ -265,35 +265,34 @@ export default function ObjektsClient() {
   ].filter(Boolean).length;
 
   return (
-    <div className="bg-[#fafafa] dark:bg-[#050505] text-zinc-900 dark:text-white pt-24 pb-28 min-h-screen selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors">
+    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 min-h-screen selection:bg-[#D4FF00] selection:text-black transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ label: "Objekts Vault" }]} />
+
         {/* ── 1. Page Header ── */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <Layers className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-mono">
-              [ COSMO DIGITAL OBJEKTS ARCHIVE ]
-            </p>
-          </div>
+          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
+            COSMO Digital Archive
+          </span>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-pretendard text-zinc-900 dark:text-white">
-                Objekts Vault
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
+                Objekts <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">Vault</span>
               </h1>
-              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-3 max-w-3xl leading-relaxed">
+              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 mt-2.5 max-w-3xl leading-relaxed">
                 Complete tripleS digital photocard archive. Explore official front &amp; back photocard scans across all seasons, editions, and member dimensions.
               </p>
             </div>
 
             {/* Quick Stats Pill */}
-            <div className="flex items-center gap-3 bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 rounded-2xl shrink-0">
+            <div className="flex items-center gap-3 bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] px-4 py-2.5 rounded-2xl shrink-0">
               <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                <Grid3X3 className="h-4 w-4 text-zinc-500" />
-                <span>
+                <Grid3X3 className="h-4 w-4 text-zinc-900 dark:text-[#D4FF00]" />
+                <span className="font-bold text-zinc-900 dark:text-white">
                   {loading ? "..." : `${filteredObjekts.length.toLocaleString()} Cards`}
                 </span>
               </div>
-              <div className="h-3 w-[1px] bg-zinc-300 dark:bg-zinc-700" />
+              <div className="h-3 w-[1px] bg-zinc-300 dark:border-white/10" />
               <div className="flex items-center gap-1.5 font-mono text-xs text-zinc-600 dark:text-zinc-400">
                 <Calendar className="h-3.5 w-3.5 text-zinc-500" />
                 <span>Updated: Aug 15, 2026</span>
@@ -314,11 +313,11 @@ export default function ObjektsClient() {
               <div
                 className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-all duration-200 ${
                   selectedMember === "All"
-                    ? "bg-gradient-to-tr from-purple-500 via-pink-500 to-amber-400 scale-105 shadow-[0_0_14px_rgba(168,85,247,0.45)]"
+                    ? "bg-zinc-950 dark:bg-[#D4FF00] scale-105 shadow-[0_0_16px_rgba(0,0,0,0.2)] dark:shadow-[0_0_16px_rgba(212,255,0,0.45)]"
                     : "bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700"
                 }`}
               >
-                <div className="w-full h-full rounded-full bg-white dark:bg-[#121216] flex items-center justify-center font-mono font-extrabold text-[11px] sm:text-xs text-zinc-900 dark:text-white">
+                <div className="w-full h-full rounded-full bg-white dark:bg-[#0D0D12] flex items-center justify-center font-mono font-extrabold text-[11px] sm:text-xs text-zinc-900 dark:text-white">
                   0T24
                 </div>
               </div>
@@ -474,7 +473,7 @@ export default function ObjektsClient() {
         ) : filteredObjekts.length === 0 ? (
           /* Empty State */
           <div className="p-16 text-center rounded-3xl bg-zinc-100 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800">
-            <Sparkles className="h-8 w-8 text-zinc-400 mx-auto mb-3 opacity-60" />
+            <SearchX className="h-8 w-8 text-zinc-400 mx-auto mb-3 opacity-60" />
             <h3 className="font-pretendard text-lg font-bold text-zinc-800 dark:text-zinc-200">
               No Objekts Found
             </h3>

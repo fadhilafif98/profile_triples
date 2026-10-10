@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { RefreshCcw, RefreshCwOff, ArrowRight, Cake, Sparkles } from "lucide-react"
+import { RefreshCcw, RefreshCwOff, ArrowRight, Cake } from "lucide-react"
 import type { Member } from "@/utils/members"
 
 interface BirthdayCountdownProps {
@@ -64,6 +64,34 @@ function CosmicStardust() {
       ))}
     </div>
   )
+}
+
+// 24 Official Member Colors (MODHAUS Identity from GEMINI.md)
+const MEMBER_ACCENTS: Record<number, { hex: string; name: string; border: string; glow: string }> = {
+  1: { hex: "#17A7FE", name: "Azure Blue", border: "rgba(23,167,254,0.45)", glow: "rgba(23,167,254,0.18)" },
+  2: { hex: "#8801FF", name: "Electric Violet", border: "rgba(136,1,255,0.45)", glow: "rgba(136,1,255,0.18)" },
+  3: { hex: "#FFD800", name: "Warm Yellow", border: "rgba(255,216,0,0.5)", glow: "rgba(255,216,0,0.18)" },
+  4: { hex: "#76C722", name: "Leaf Green", border: "rgba(118,199,34,0.45)", glow: "rgba(118,199,34,0.18)" },
+  5: { hex: "#D10A70", name: "Vivid Magenta", border: "rgba(209,10,112,0.45)", glow: "rgba(209,10,112,0.18)" },
+  6: { hex: "#FF95C8", name: "Soft Pink", border: "rgba(255,149,200,0.45)", glow: "rgba(255,149,200,0.18)" },
+  7: { hex: "#538FC8", name: "Cerulean Blue", border: "rgba(83,143,200,0.45)", glow: "rgba(83,143,200,0.18)" },
+  8: { hex: "#FF8AB8", name: "Blush Rose", border: "rgba(255,138,184,0.45)", glow: "rgba(255,138,184,0.18)" },
+  9: { hex: "#FFA947", name: "Bright Tangerine", border: "rgba(255,169,71,0.45)", glow: "rgba(255,169,71,0.18)" },
+  10: { hex: "#FF73B3", name: "Neon Rose", border: "rgba(255,115,179,0.45)", glow: "rgba(255,115,179,0.18)" },
+  11: { hex: "#FFF554", name: "Lemon Yellow", border: "rgba(255,245,84,0.5)", glow: "rgba(255,245,84,0.18)" },
+  12: { hex: "#4243A2", name: "Deep Indigo", border: "rgba(66,67,162,0.5)", glow: "rgba(66,67,162,0.2)" },
+  13: { hex: "#FF9649", name: "Sunset Orange", border: "rgba(255,150,73,0.45)", glow: "rgba(255,150,73,0.18)" },
+  14: { hex: "#2255A4", name: "Midnight Navy", border: "rgba(34,85,164,0.5)", glow: "rgba(34,85,164,0.2)" },
+  15: { hex: "#D51312", name: "Scarlet Red", border: "rgba(213,19,18,0.45)", glow: "rgba(213,19,18,0.18)" },
+  16: { hex: "#F88059", name: "Coral Apricot", border: "rgba(248,128,89,0.45)", glow: "rgba(248,128,89,0.18)" },
+  17: { hex: "#7EAEF5", name: "Sky Glaze", border: "rgba(126,174,245,0.45)", glow: "rgba(126,174,245,0.18)" },
+  18: { hex: "#C9FF50", name: "Lime Volt", border: "rgba(201,255,80,0.5)", glow: "rgba(201,255,80,0.2)" },
+  19: { hex: "#85E3B3", name: "Sea Mint", border: "rgba(133,227,179,0.45)", glow: "rgba(133,227,179,0.18)" },
+  20: { hex: "#FFAFD3", name: "Cherry Blossom", border: "rgba(255,175,211,0.45)", glow: "rgba(255,175,211,0.18)" },
+  21: { hex: "#BEE6B5", name: "Pale Pistachio", border: "rgba(190,230,181,0.45)", glow: "rgba(190,230,181,0.18)" },
+  22: { hex: "#FD82B8", name: "Bubblegum Pink", border: "rgba(253,130,184,0.45)", glow: "rgba(253,130,184,0.18)" },
+  23: { hex: "#E2E8F0", name: "Pure Pearl", border: "rgba(226,232,240,0.5)", glow: "rgba(226,232,240,0.2)" },
+  24: { hex: "#C99DF3", name: "Cosmic Lilac", border: "rgba(201,157,243,0.45)", glow: "rgba(201,157,243,0.18)" },
 }
 
 // Generate consistent celebration message
@@ -231,6 +259,29 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     return () => clearInterval(timer)
   }, [autoRotate, pipelineQueue, activeMember])
 
+  // 24 Member dynamic accent & live interactive wish state
+  const memberAccent = activeMember
+    ? (MEMBER_ACCENTS[activeMember.id] || { hex: "#D4FF00", name: "Acid Voltage", border: "rgba(212,255,0,0.45)", glow: "rgba(212,255,0,0.18)" })
+    : { hex: "#D4FF00", name: "Acid Voltage", border: "rgba(212,255,0,0.45)", glow: "rgba(212,255,0,0.18)" }
+
+  const [wished, setWished] = useState(false)
+  const [wishCount, setWishCount] = useState(128 + (activeMember?.id || 1) * 7)
+
+  // Reset wish state on active member switch
+  useEffect(() => {
+    setWished(false)
+    if (activeMember) {
+      setWishCount(128 + activeMember.id * 7)
+    }
+  }, [activeMember?.id])
+
+  const handleWish = () => {
+    if (!wished) {
+      setWished(true)
+      setWishCount((prev) => prev + 1)
+    }
+  }
+
   if (!activeMember) return null
 
   const countdownUnits = [
@@ -245,82 +296,113 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   const isCountdownActive = activeMember.daysUntil > 0 && activeMember.daysUntil <= 30 && !isThisMonthPassed
 
   return (
-    <div className="relative overflow-hidden w-full">
+    <div className="relative w-full py-4 sm:py-6">
       <div className="max-w-5xl mx-auto">
-        <div className={`relative rounded-3xl border transition-all duration-500 overflow-hidden ${
-          isTodayCelebrating
-            ? "border-amber-300/70 dark:border-amber-500/30 bg-gradient-to-b from-amber-50/40 via-white/80 to-white/90 dark:from-amber-950/10 dark:via-zinc-900/60 dark:to-zinc-900/40 shadow-xl dark:shadow-2xl"
-            : "border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 shadow-lg dark:shadow-2xl"
-        } backdrop-blur-md p-6 sm:p-10`}>
-          
+        {/* Borderless Floating Editorial Layout (No Outer Box, No Nested Card) */}
+        <div className="relative">
+          {/* Ambient Cosmic Member Glow Bleed (No Box Stroke) */}
+          <div
+            className="absolute -top-24 left-1/4 w-[480px] h-[480px] rounded-full blur-[120px] pointer-events-none transition-all duration-1000 opacity-20 dark:opacity-25"
+            style={{ backgroundColor: memberAccent.hex }}
+            aria-hidden="true"
+          />
+
           {isTodayCelebrating && <CosmicStardust />}
 
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center">
             
-            {/* ── Left Column: Member Portrait Card ── */}
+            {/* ── Left Column: Standalone Physical Objekt Collectible Card ── */}
             <div className="md:col-span-5 flex justify-center">
               <motion.div
                 key={`photo-${activeMember.id}`}
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="relative aspect-[3/4] w-full max-w-[280px] rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 shadow-md dark:shadow-2xl group"
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="relative aspect-[3/4.25] w-full max-w-[300px] rounded-2xl overflow-hidden p-1.5 transition-all duration-500 group"
+                style={{
+                  background: `linear-gradient(135deg, ${memberAccent.hex} 0%, rgba(255,255,255,0.18) 45%, rgba(0,0,0,0.7) 100%)`,
+                  boxShadow: `0 24px 50px -12px rgba(0,0,0,0.55), 0 0 35px -5px ${memberAccent.glow}`,
+                }}
               >
-                <Link
-                  href={`/members/${activeMember.slug}`}
-                  className="absolute inset-0 z-20"
-                  aria-label={`View ${activeMember.name}'s profile`}
-                />
-                <Image
-                  src={`https://i.imgur.com/${activeMember.image}`}
-                  alt={activeMember.name}
-                  fill
-                  sizes="(max-width: 768px) 280px, 320px"
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
+                {/* Physical Card Inner Core */}
+                <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-zinc-950 border border-black/40">
+                  <Link
+                    href={`/members/${activeMember.slug}`}
+                    className="absolute inset-0 z-30"
+                    aria-label={`View ${activeMember.name}'s profile`}
+                  />
+                  
+                  {/* Photo with Smooth Zoom */}
+                  <Image
+                    src={`https://i.imgur.com/${activeMember.image}`}
+                    alt={activeMember.name}
+                    fill
+                    sizes="(max-width: 768px) 300px, 340px"
+                    className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                  
+                  {/* Iridescent Foil Sheen Reflection */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/35 pointer-events-none" />
 
-                {/* Top Outline S# Badge & Emoji Pill */}
-                <div className="absolute top-3 left-3.5 flex items-center gap-2.5 z-10">
-                  <span
-                    className="text-2xl sm:text-3xl font-black tracking-tighter text-transparent select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
-                    style={{ WebkitTextStroke: "1.8px rgba(255, 255, 255, 0.95)" }}
-                  >
-                    S{activeMember.id}
-                  </span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-zinc-700/80 text-zinc-200 shadow-md">
-                    {activeMember.representativeEmoji}
-                  </span>
-                </div>
+                  {/* Top Objekt Header Foil Sheet */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 pointer-events-none">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="px-2 py-0.5 rounded text-[10px] font-mono font-black tracking-widest text-black shadow-sm"
+                        style={{ backgroundColor: memberAccent.hex }}
+                      >
+                        S{activeMember.id.toString().padStart(2, "0")}
+                      </span>
+                      <span className="text-[9px] font-mono uppercase tracking-wider text-white/85 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded border border-white/15">
+                        FIRST CLASS
+                      </span>
+                    </div>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur-md border border-white/15 text-white/90 shadow-sm">
+                      {activeMember.representativeEmoji}
+                    </span>
+                  </div>
 
-                {/* Bottom Role & CTA */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-zinc-300 z-10">
-                  <span className="truncate max-w-[150px]">{activeMember.role}</span>
-                  <span className="text-zinc-400 group-hover:text-white transition-colors flex items-center gap-1 font-semibold">
-                    Dossier <ArrowRight className="h-3 w-3" />
-                  </span>
+                  {/* Bottom Objekt Spec Foil Label */}
+                  <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-none">
+                    <div className="flex items-end justify-between border-t border-white/20 pt-2 text-white">
+                      <div>
+                        <p className="text-[10px] font-mono tracking-widest uppercase text-white/70">
+                          {activeMember.hangul} &bull; {memberAccent.name}
+                        </p>
+                        <p className="text-lg font-display font-black tracking-tight leading-none text-white drop-shadow-md">
+                          {activeMember.name}
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-mono text-white/90 group-hover:text-white transition-colors flex items-center gap-1 font-semibold bg-white/15 px-2.5 py-1 rounded backdrop-blur-sm">
+                        Dossier <ArrowRight className="h-2.5 w-2.5" />
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             </div>
 
-            {/* ── Right Column: Info & Adaptive Display ── */}
-            <div className="md:col-span-7 flex flex-col justify-between text-center md:text-left space-y-6">
+            {/* ── Right Column: Info & Typographic Floating Display ── */}
+            <div className="md:col-span-7 flex flex-col justify-center text-center md:text-left space-y-5">
               
-              {/* Static Anchor Header with Smooth Internal Text Morphing */}
+              {/* Static Anchor Header */}
               <div>
-                {/* Top Status Badge & Controls */}
+                {/* Top Status Pill & Auto-rotate Toggle */}
                 <div className="flex flex-wrap items-center justify-center md:justify-between gap-3 mb-3">
-                  <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider shadow-sm border transition-all ${
-                    isTodayCelebrating
-                      ? "bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-600/60 text-amber-800 dark:text-amber-300 font-bold"
-                      : isCountdownActive
-                        ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-800 dark:text-emerald-300 font-bold"
-                        : "bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300"
-                  }`}>
+                  <div
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider shadow-sm border transition-all ${
+                      isTodayCelebrating
+                        ? "bg-amber-100 dark:bg-amber-950/70 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-200 font-bold"
+                        : isCountdownActive
+                          ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 font-bold"
+                          : "bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300"
+                    }`}
+                  >
                     {isTodayCelebrating ? (
                       <>
-                        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" style={{ animationDuration: "6s" }} />
-                        <span>TODAY&apos;S BIRTHDAY CELEBRATION</span>
+                        <Cake className="w-3.5 h-3.5 text-amber-500" />
+                        <span>TODAY&apos;S SOLAR RETURN</span>
                       </>
                     ) : isCountdownActive ? (
                       <>
@@ -329,18 +411,21 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                       </>
                     ) : isThisMonthPassed ? (
                       <>
-                        <span className="text-amber-500">🌟</span>
+                        <span className="text-amber-500">✦</span>
                         <span>{currentMonthName.toUpperCase()} CELEBRANT</span>
                       </>
                     ) : (
                       <>
-                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500" />
-                        <span>UPCOMING &bull; D-{activeMember.daysUntil}</span>
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: memberAccent.hex }}
+                        />
+                        <span>ORBIT PIPELINE &bull; D-{activeMember.daysUntil}</span>
                       </>
                     )}
                   </div>
 
-                  {/* Controls */}
+                  {/* Top Controls: Today star button & Auto rotate */}
                   <div className="flex items-center gap-2">
                     {todayMembers.length > 0 && (
                       <button
@@ -348,7 +433,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                           setSelectedMemberId(todayMembers[0].id)
                           setViewCelebration(true)
                         }}
-                        className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-700 dark:text-zinc-300 transition-colors shadow-sm"
+                        className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-800 dark:text-zinc-200 transition-colors shadow-sm"
                       >
                         Today&apos;s Star
                       </button>
@@ -356,7 +441,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
                     <button
                       onClick={() => setAutoRotate(!autoRotate)}
-                      title={autoRotate ? "Pause auto-rotate" : "Resume auto-rotate"}
+                      title={autoRotate ? "Pause radar rotation" : "Resume radar rotation"}
                       className={`p-1.5 rounded-full border transition-all shadow-sm ${
                         autoRotate
                           ? "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white"
@@ -369,132 +454,159 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                   </div>
                 </div>
 
-                {/* Animated Member Title & Info Reveal */}
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={`header-${activeMember.id}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight font-pretendard flex flex-wrap items-baseline justify-center md:justify-start gap-2.5">
-                      <span>{activeMember.name}</span>
-                      {activeMember.hangul && (
-                        <span className="text-lg sm:text-2xl font-normal text-zinc-500 dark:text-zinc-500 font-mono">
-                          ({activeMember.hangul})
-                        </span>
-                      )}
-                    </h3>
+                {/* Animated Member Title & Info Reveal (Fixed Height Container) */}
+                <div className="min-h-[82px] sm:min-h-[90px] flex flex-col justify-center">
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={`header-${activeMember.id}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex items-baseline justify-center md:justify-start gap-3">
+                        <h3 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-zinc-950 dark:text-white tracking-tight">
+                          {activeMember.name}
+                        </h3>
+                        {activeMember.hangul && (
+                          <span className="text-2xl sm:text-3xl font-mono text-zinc-400 dark:text-zinc-500 font-normal">
+                            {activeMember.hangul}
+                          </span>
+                        )}
+                      </div>
 
-                    <p className="text-xs sm:text-sm font-mono text-zinc-600 dark:text-zinc-400 mt-2 flex flex-wrap items-center justify-center md:justify-start gap-2">
-                      <span>{activeMember.formattedDate}</span>
-                      <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
-                      <span>{isThisMonthPassed ? "Turned" : activeMember.isToday ? "Turning" : "Turns"} {activeMember.turningAge} y.o</span>
-                      <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
-                      <span className="text-zinc-800 dark:text-zinc-300 font-medium">{activeMember.nationality}</span>
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
+                      <p className="text-xs sm:text-sm font-mono text-zinc-600 dark:text-zinc-400 mt-1.5 flex flex-wrap items-center justify-center md:justify-start gap-2">
+                        <span className="font-semibold text-zinc-950 dark:text-white">{activeMember.formattedDate}</span>
+                        <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
+                        <span>{isThisMonthPassed ? "Turned" : activeMember.isToday ? "Turning" : "Turns"} {activeMember.turningAge} years old</span>
+                        <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
+                        <span>{activeMember.birthplace || activeMember.nationality}</span>
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               </div>
 
-              {/* ── Fixed Identical-Height Switcher with Smooth Slide/Fade (h-94px) ── */}
-              <div className="h-[88px] sm:h-[94px]">
+              {/* ── Typographic Floating Time / Announcement (Strict Fixed Height - Zero Height Jump) ── */}
+              <div className="h-[64px] sm:h-[68px] flex flex-col justify-center">
                 <AnimatePresence mode="wait" initial={false}>
                   {isTodayCelebrating ? (
                     <motion.div
                       key={`today-${activeMember.id}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full rounded-2xl bg-white/90 dark:bg-zinc-950/90 border border-amber-200/80 dark:border-amber-900/40 px-4 sm:px-5 py-3 shadow-sm dark:shadow-inner text-left flex items-center justify-between gap-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="border-l-2 pl-4 text-left"
+                      style={{ borderColor: memberAccent.hex }}
                     >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                          <Cake className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                          <span className="truncate">HAPPY {activeMember.name.toUpperCase()} DAY!</span>
-                        </div>
-                        <p className="text-xs sm:text-[13px] text-zinc-700 dark:text-zinc-300 leading-tight font-pretendard line-clamp-2">
-                          &ldquo;{getBirthdayMessage(activeMember)}&rdquo;
-                        </p>
-                      </div>
-                      <Link
-                        href={`/members/${activeMember.slug}`}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-md"
-                      >
-                        <span>Dossier</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
+                      <p className="text-[11px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 font-bold mb-0.5">
+                        Solar Return Announcement
+                      </p>
+                      <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-snug font-pretendard line-clamp-2">
+                        &ldquo;{getBirthdayMessage(activeMember)}&rdquo;
+                      </p>
                     </motion.div>
                   ) : isCountdownActive ? (
                     <motion.div
                       key={`countdown-${activeMember.id}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full w-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="flex items-baseline justify-center md:justify-start gap-4 sm:gap-6 font-mono"
                     >
-                      <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5 h-full max-w-md mx-auto md:mx-0">
-                        {countdownUnits.map((unit) => (
-                          <div
-                            key={unit.label}
-                            className="h-full rounded-2xl bg-zinc-100/90 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800/80 text-center shadow-sm dark:shadow-md hover:-translate-y-0.5 transition-transform flex flex-col items-center justify-center py-1.5"
-                          >
-                            <div className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white font-mono tracking-tight leading-none">
-                              {unit.value}
-                            </div>
-                            <div className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-1">
-                              {unit.label}
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
+                          {timeLeft.days.toString().padStart(2, "0")}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">d</span>
+                      </div>
+                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
+                          {timeLeft.hours.toString().padStart(2, "0")}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">h</span>
+                      </div>
+                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
+                          {timeLeft.minutes.toString().padStart(2, "0")}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">m</span>
+                      </div>
+                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
+                      <div className="flex items-baseline gap-1">
+                        <span
+                          className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight"
+                          style={{ color: memberAccent.hex }}
+                        >
+                          {timeLeft.seconds.toString().padStart(2, "0")}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">s</span>
                       </div>
                     </motion.div>
                   ) : (
                     <motion.div
                       key={`star-${activeMember.id}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full rounded-2xl bg-zinc-100/80 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 px-4 sm:px-5 py-3 shadow-sm text-left flex items-center justify-between gap-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="border-l-2 pl-4 text-left border-zinc-300 dark:border-zinc-700"
                     >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                          <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                          <span>{currentMonthName.toUpperCase()} BIRTHDAY STAR</span>
-                        </div>
-                        <p className="text-xs sm:text-[13px] text-zinc-700 dark:text-zinc-300 leading-tight font-pretendard line-clamp-2">
-                          Celebrated on {activeMember.formattedDate} &bull; Turned {activeMember.turningAge} years old.
-                        </p>
-                      </div>
-                      <Link
-                        href={`/members/${activeMember.slug}`}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-semibold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-md"
-                      >
-                        <span>Dossier</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
+                      <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-bold mb-0.5">
+                        {currentMonthName.toUpperCase()} CELEBRATION COMPLETED
+                      </p>
+                      <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
+                        Celebrated on {activeMember.formattedDate} &bull; Turned {activeMember.turningAge} years old.
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* ── Active Pipeline Queue with Spring Sliding Active Pill Indicator ── */}
-              <div className="pt-3.5 sm:pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
-                    [ {currentMonthName.toUpperCase()} STARS &bull; H-30 RADAR ]
+              {/* Shared Persistent Action Bar (Never shifts, responsive layout) */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 pt-1">
+                <button
+                  onClick={handleWish}
+                  className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-mono font-bold transition-all shrink-0 whitespace-nowrap ${
+                    wished
+                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                      : "bg-zinc-950 dark:bg-white text-white dark:text-black hover:scale-105 active:scale-95 shadow-md"
+                  }`}
+                >
+                  <span>{wished ? "Wished! 💖" : isTodayCelebrating ? "Send Wish ✦" : "Cheer Early ✦"}</span>
+                  <span className="text-[10px] opacity-80 font-normal">({wishCount})</span>
+                </button>
+                <Link
+                  href={`/members/${activeMember.slug}`}
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shrink-0 whitespace-nowrap"
+                >
+                  <span>View Dossier</span>
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {/* ── Active Pipeline Queue with Crisp Mini Avatars ── */}
+              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+                    {currentMonthName.toUpperCase()} STARS &bull; H-30 RADAR PIPELINE
                   </p>
+                  <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
+                    {pipelineQueue.length} Active
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 flex-nowrap justify-start">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5 px-0.5 -mx-1 sm:mx-0 flex-nowrap justify-start">
                   {pipelineQueue.map((m) => {
                     const isSelected = m.id === activeMember.id
                     const isPassedStar = m.isThisMonth && m.hasPassedThisYear && !m.isToday
                     const isImminent = m.daysUntil > 0 && m.daysUntil <= 30 && !isPassedStar
+                    const itemAccent = MEMBER_ACCENTS[m.id] || { hex: "#D4FF00" }
+
                     return (
                       <button
                         key={m.id}
@@ -502,30 +614,43 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                           setSelectedMemberId(m.id)
                           setViewCelebration(false)
                         }}
-                        className={`shrink-0 relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full border text-[11px] sm:text-xs font-mono transition-colors ${
+                        className={`shrink-0 relative flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border text-[11px] sm:text-xs font-mono transition-all whitespace-nowrap ${
                           isSelected
                             ? "border-transparent"
-                            : "bg-zinc-100 dark:bg-zinc-950/70 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600"
+                            : "bg-white/70 dark:bg-zinc-900/70 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600 shadow-2xs"
                         }`}
                       >
                         {/* Smooth Spring Gliding Capsule Pill */}
                         {isSelected && (
                           <motion.div
                             layoutId="active-birthday-pill-indicator"
-                            className="absolute inset-0 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-black shadow-md z-0"
+                            className="absolute inset-0 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-black shadow-md z-0"
                             transition={{ type: "spring", stiffness: 400, damping: 32 }}
                           />
                         )}
 
-                        <span className={`relative z-10 text-[10px] ${isSelected ? "text-zinc-300 dark:text-zinc-600 font-bold" : "opacity-75"}`}>
-                          S{m.id}
-                        </span>
+                        {/* Mini Circular Photo Avatar with Member Color Rim */}
+                        <div
+                          className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 z-10 border bg-zinc-800"
+                          style={{ borderColor: itemAccent.hex }}
+                        >
+                          <Image
+                            src={`https://i.imgur.com/${m.image}`}
+                            alt={m.name}
+                            fill
+                            sizes="24px"
+                            unoptimized
+                            className="object-cover object-top"
+                          />
+                        </div>
+
                         <span className={`relative z-10 font-semibold ${isSelected ? "text-white dark:text-black" : ""}`}>
                           {m.name}
                         </span>
+
                         <span className={`relative z-10 text-[10px] ${
                           isSelected
-                            ? "text-zinc-300 dark:text-zinc-700 font-medium"
+                            ? "text-zinc-300 dark:text-zinc-600 font-medium"
                             : isImminent
                               ? "text-emerald-600 dark:text-emerald-400 font-bold"
                               : "text-zinc-500"

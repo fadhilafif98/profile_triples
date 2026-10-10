@@ -30,14 +30,14 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         text-zinc-800 dark:text-zinc-200 
         hover:text-black dark:hover:text-white 
         hover:bg-zinc-100 dark:hover:bg-zinc-800 
-        hover:scale-105 shadow-md backdrop-blur-md ${className}`}
+        hover:scale-105 shadow-md backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${className}`}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
-        <Sun className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-300 rotate-0 hover:rotate-45 text-amber-400" />
+        <Sun className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-300 rotate-0 hover:rotate-45 text-amber-400" aria-hidden="true" />
       ) : (
-        <Moon className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-300 -rotate-12 hover:rotate-0 text-zinc-700" />
+        <Moon className="h-4 w-4 sm:h-[18px] sm:w-[18px] transition-transform duration-300 -rotate-12 hover:rotate-0 text-zinc-700" aria-hidden="true" />
       )}
     </button>
   )
@@ -60,30 +60,36 @@ export function ThemePillToggle({ className = "" }: { className?: string }) {
   const isDark = resolvedTheme === "dark" || theme === "dark"
 
   return (
-    <div className={`w-full p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 flex items-center justify-between shadow-inner ${className}`}>
+    <div
+      role="group"
+      aria-label="Theme selection"
+      className={`w-full p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/90 flex items-center justify-between shadow-inner ${className}`}
+    >
       <button
         type="button"
         onClick={() => setTheme("light")}
-        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 ${
+        aria-pressed={!isDark}
+        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
           !isDark
             ? "bg-white text-zinc-900 font-bold shadow-md border border-zinc-200/90"
             : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
         }`}
       >
-        <Sun className={`h-3.5 w-3.5 ${!isDark ? "text-amber-500" : "text-zinc-400"}`} />
+        <Sun className={`h-3.5 w-3.5 ${!isDark ? "text-amber-500" : "text-zinc-400"}`} aria-hidden="true" />
         <span>Light</span>
       </button>
 
       <button
         type="button"
         onClick={() => setTheme("dark")}
-        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 ${
+        aria-pressed={isDark}
+        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
           isDark
             ? "bg-zinc-800 text-white font-bold shadow-md border border-zinc-700"
             : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
         }`}
       >
-        <Moon className={`h-3.5 w-3.5 ${isDark ? "text-amber-400" : "text-zinc-400"}`} />
+        <Moon className={`h-3.5 w-3.5 ${isDark ? "text-amber-400" : "text-zinc-400"}`} aria-hidden="true" />
         <span>Dark</span>
       </button>
     </div>
