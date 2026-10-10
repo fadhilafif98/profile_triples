@@ -1,7 +1,7 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
-import { Unbounded, Manrope, Pinyon_Script, JetBrains_Mono } from "next/font/google"
+import { Syne, Manrope, Pinyon_Script, JetBrains_Mono } from "next/font/google"
 import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
@@ -11,28 +11,29 @@ import PageTransition from "@/components/page-transition"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 
-const unbounded = Unbounded({
+const syne = Syne({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "600", "700", "800"],
+  display: "swap",
 })
 
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
 })
 
 const pinyonScript = Pinyon_Script({
   subsets: ["latin"],
   variable: "--font-accent",
   weight: "400",
+  display: "swap",
 })
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-  weight: ["400", "500", "600"],
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
-      <body className={`${manrope.variable} ${unbounded.variable} ${pinyonScript.variable} ${jetbrainsMono.variable} font-sans antialiased selection:bg-[#D4FF00] selection:text-black`}>
+      <body className={`${manrope.variable} ${syne.variable} ${pinyonScript.variable} ${jetbrainsMono.variable} font-sans antialiased selection:bg-[#D4FF00] selection:text-black`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           {/* Skip to Main Content Link for Keyboard / Screen Reader Accessibility (WCAG 2.4.1) */}
           <a

@@ -110,8 +110,19 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
 
   // Randomize on client mount
   useEffect(() => {
-    pickRandomTrio()
+    pickRandomTrio([9, 1, 15])
   }, [pickRandomTrio])
+
+  const handleShuffle = useCallback(() => {
+    pickRandomTrio(selectedMembers.map((m) => m.id))
+    if (!reduceMotion) {
+      gsap.fromTo(
+        ".loop-objekt",
+        { scale: 0.94, y: 8 },
+        { scale: 1, y: 0, duration: 0.45, ease: "back.out(2)", stagger: 0.05 }
+      )
+    }
+  }, [pickRandomTrio, selectedMembers, reduceMotion])
 
   const fan = selectedMembers.map((member, i) => {
     const slot = FAN_SLOTS[i] || FAN_SLOTS[1]
@@ -139,12 +150,11 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
         ease: "expo.out",
       })
       gsap.utils.toArray<HTMLElement>(".loop-objekt").forEach((el, i) => {
-        const xp = Number(el.dataset.x ?? 0)
-        const rot = Number(el.dataset.rotate ?? 0)
+        const slot = FAN_SLOTS[i] || FAN_SLOTS[1]
         tl.fromTo(
           el,
           { x: 0, xPercent: 0, rotation: 0, y: 40, opacity: 0 },
-          { x: 0, xPercent: xp, rotation: rot, y: 0, opacity: 1, duration: 0.9, ease: "back.out(1.4)" },
+          { x: 0, xPercent: slot.x, rotation: slot.rotate, y: 0, opacity: 1, duration: 0.9, ease: "back.out(1.4)" },
           i === 0 ? "-=0.6" : "<0.08"
         )
       })
@@ -184,8 +194,8 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
         <div className="loop-media grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-16 sm:mb-20">
           <div className="loop-photo relative lg:col-span-7 aspect-[4/3] lg:aspect-auto lg:h-[540px] rounded-2xl overflow-hidden bg-zinc-200 dark:bg-[#14141B]">
             <Image
-              src="/home/triples_hatchi.jpg"
-              alt="tripleS members together on stage"
+              src="/home/triples_section3.jpg"
+              alt="tripleS members group photo"
               fill
               sizes="(max-width: 1024px) 100vw, 58vw"
               className="object-cover object-center"
@@ -200,8 +210,8 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
             <div className="absolute inset-0 flex items-center justify-center">
               {fan.map(({ member, color, ink, rotate, x }, i) => (
                 <div
-                  key={member.id}
-                  className="loop-objekt absolute w-[38%] max-w-[180px]"
+                  key={i}
+                  className="loop-objekt absolute w-[38%] max-w-[180px] hover:z-10 focus-within:z-10"
                   data-x={x}
                   data-rotate={rotate}
                   style={{ transform: `translateX(${x}%) rotate(${rotate}deg)`, zIndex: i === 1 ? 3 : 1 }}
@@ -213,7 +223,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                     <div className="relative aspect-[5.5/8.5] rounded-xl overflow-hidden bg-white shadow-[0_24px_48px_-16px_rgba(9,9,11,0.35)]">
                       <Image
                         src={`https://i.imgur.com/${member.image}`}
-                        alt={`${member.name} Objekt`}
+                        alt={`${member.name} (${member.birthName}) official profile photo`}
                         fill
                         sizes="180px"
                         className="object-cover object-top"
@@ -237,7 +247,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
             <div className="absolute bottom-3 right-3 z-20">
               <button
                 type="button"
-                onClick={() => pickRandomTrio(selectedMembers.map((m) => m.id))}
+                onClick={handleShuffle}
                 aria-label="Shuffle random member Objekts"
                 className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 dark:bg-[#0D0D12]/90 hover:bg-white dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-[11px] font-mono font-medium backdrop-blur-md border border-zinc-200 dark:border-white/15 transition-all shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
               >

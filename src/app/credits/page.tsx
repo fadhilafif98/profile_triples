@@ -38,13 +38,13 @@ export default function ThankYouPage() {
 
         {/* Header */}
         <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
-            Directory &amp; Credits
-          </span>
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
-            Official Channels &amp; <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">Credits</span>
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] sm:whitespace-nowrap">
+            Official{" "}
+            <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
+              Credits
+            </span>
           </h1>
-          <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mt-4 leading-relaxed">
+          <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mt-3 leading-relaxed">
             Direct gateways to tripleS official channels, COSMO application, music streaming, and project architecture details.
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function ThankYouPage() {
         {/* Official Channels Grid */}
         <div className="mb-20">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">Official tripleS Links</h2>
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">Official tripleS Links</h2>
             <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">MODHAUS OFFICIAL</span>
           </div>
 
@@ -129,7 +129,7 @@ export default function ThankYouPage() {
               >
                 <div className="text-zinc-700 dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white transition-colors">{social.icon}</div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-zinc-600 dark:group-hover:text-zinc-200 font-pretendard">{social.name}</h3>
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-zinc-600 dark:group-hover:text-zinc-200 font-display">{social.name}</h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono mt-0.5">{social.handle}</p>
                 </div>
               </a>
@@ -141,13 +141,13 @@ export default function ThankYouPage() {
         <div className="bg-zinc-100/70 dark:bg-zinc-900/30 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 p-5 sm:p-8 md:p-12 shadow-sm">
           <div className="flex items-center gap-3 mb-8">
             <FaCode className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-            <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight font-pretendard">Project Architecture & Credits</h2>
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">Project Architecture & Credits</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-10">
             <div className="bg-white dark:bg-zinc-950/60 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">STACK</span>
-              <h3 className="text-base sm:text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Technology Stack</h3>
+              <h3 className="text-base sm:text-lg font-display font-bold my-2 text-zinc-950 dark:text-white tracking-tight">Technology Stack</h3>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
                 <li>• Next.js App Router (React 19)</li>
                 <li>• Tailwind CSS & Custom Design System</li>
@@ -158,7 +158,7 @@ export default function ThankYouPage() {
 
             <div className="bg-white dark:bg-zinc-950/60 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">DATA SOURCES</span>
-              <h3 className="text-base sm:text-lg font-semibold my-2 text-zinc-900 dark:text-white font-pretendard">Information Sources</h3>
+              <h3 className="text-base sm:text-lg font-display font-bold my-2 text-zinc-950 dark:text-white tracking-tight">Information Sources</h3>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm">
                 <li>• MODHAUS official releases and Cosmo logs</li>
                 <li>• tripleS Fandom Wiki & KpopProfiles references</li>

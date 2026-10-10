@@ -1,21 +1,22 @@
 import type { Metadata } from "next"
-import Image from "next/image"
-import Breadcrumb from "@/components/breadcrumb"
+import AboutClient from "./AboutClient"
 
 export const metadata: Metadata = {
   title: "About tripleS | The Idol of All Possibilities",
-  description: "Learn about the concept of tripleS (트리플에스), the world's first decentralized girl group with 24 members. Explore their unique sub-units and milestones.",
+  description:
+    "Learn about the revolutionary concept of tripleS (트리플에스), the world's first decentralized 24-member girl group under MODHAUS. Explore their HAUS SIGNAL reality, COSMO Grand Gravity voting protocol, and fluid seasonal Dimensions.",
   openGraph: {
     title: "About tripleS | The Idol of All Possibilities",
-    description: "Learn about the concept of tripleS (트리플에스), the world's first decentralized girl group with 24 members. Explore their unique sub-units and milestones.",
+    description:
+      "Learn about the revolutionary concept of tripleS (트리플에스), the world's first decentralized 24-member girl group under MODHAUS. Explore their HAUS SIGNAL reality, COSMO Grand Gravity voting protocol, and fluid seasonal Dimensions.",
     url: "https://profile-triples.vercel.app/about",
     siteName: "tripleS Profile DB",
     images: [
       {
-        url: "https://i.imgur.com/vHqYhWc.jpeg",
+        url: "https://profile-triples.vercel.app/home/triples_group_3000.jpg",
         width: 1200,
         height: 630,
-        alt: "tripleS Group Photo",
+        alt: "tripleS 24-member official assemble portrait",
       },
     ],
     locale: "en_US",
@@ -24,133 +25,61 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "About tripleS | Decentralized K-Pop Idol Group",
-    description: "Learn about the concept of tripleS (트리플에스), the world's first decentralized girl group with 24 members.",
-    images: ["https://i.imgur.com/vHqYhWc.jpeg"],
+    description:
+      "Learn about the concept of tripleS (트리플에스), the world's first decentralized girl group with 24 members.",
+    images: ["https://profile-triples.vercel.app/home/triples_group_3000.jpg"],
   },
 }
 
 export default function AboutPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: "tripleS",
+    alternateName: ["트리플에스", "トリプルS", "Social Sonyo Seoul"],
+    description:
+      "24-member decentralized South Korean girl group under MODHAUS, governed by fans through Grand Gravity and the COSMO ecosystem.",
+    genre: ["K-pop", "Dance-pop", "Alternative R&B"],
+    foundingLocation: {
+      "@type": "Place",
+      name: "Seoul, South Korea",
+    },
+    member: [
+      { "@type": "Person", name: "Yoon SeoYeon" },
+      { "@type": "Person", name: "Jeong HyeRin" },
+      { "@type": "Person", name: "Lee JiWoo" },
+      { "@type": "Person", name: "Kim ChaeYeon" },
+      { "@type": "Person", name: "Kim YooYeon" },
+      { "@type": "Person", name: "Kim SooMin" },
+      { "@type": "Person", name: "Kim NaKyoung" },
+      { "@type": "Person", name: "Gong YuBin" },
+      { "@type": "Person", name: "Kaede" },
+      { "@type": "Person", name: "Seo DaHyun" },
+      { "@type": "Person", name: "Kotone" },
+      { "@type": "Person", name: "Kwak YeonJi" },
+      { "@type": "Person", name: "Nien" },
+      { "@type": "Person", name: "Park SoHyun" },
+      { "@type": "Person", name: "Xinyu" },
+      { "@type": "Person", name: "Mayu" },
+      { "@type": "Person", name: "Lynn" },
+      { "@type": "Person", name: "JooBin" },
+      { "@type": "Person", name: "Jeong HaYeon" },
+      { "@type": "Person", name: "Park ShiOn" },
+      { "@type": "Person", name: "Kim ChaeWon" },
+      { "@type": "Person", name: "Sullin" },
+      { "@type": "Person", name: "SeoAh" },
+      { "@type": "Person", name: "JiYeon" },
+    ],
+    url: "https://profile-triples.vercel.app/about",
+  }
+
   return (
-    <div className="bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-28 selection:bg-[#D4FF00] selection:text-black min-h-screen transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ label: "About tripleS" }]} />
-
-        {/* Header */}
-        <div className="mb-16">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900/5 border border-zinc-900/10 text-zinc-900 dark:bg-[#D4FF00]/10 dark:border-[#D4FF00]/25 dark:text-[#D4FF00] text-xs font-mono font-semibold mb-3">
-            Archive &amp; Dossier
-          </span>
-          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight text-zinc-900 dark:text-white">
-            About <span className="font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">tripleS</span>
-          </h1>
-        </div>
-
-        {/* Profile Overview (Side-by-Side 2 Columns) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
-          <div className="space-y-6 text-zinc-700 dark:text-zinc-300 text-base md:text-lg leading-relaxed">
-            <p>
-              <strong className="text-zinc-900 dark:text-white">tripleS</strong> (트리플에스 / トリプルS; also known as Social Sonyo Seoul) is a 24-member South Korean girl group founded under MODHAUS.
-            </p>
-            <p>
-              The 24-member roster spans S1 to S24: Yoon SeoYeon, Jeong HyeRin, Lee JiWoo, Kim ChaeYeon, Kim YooYeon, Kim SooMin, Kim NaKyoung, Gong YuBin, Kaede, Seo DaHyun, Kotone, Kwak YeonJi, Nien, Park SoHyun, Xinyu, Mayu, Lynn, JooBin, Jeong HaYeon, Park ShiOn, Kim ChaeWon, Sullin, SeoAh, and JiYeon.
-            </p>
-            <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-700 pl-4 py-1">
-              tripleS began member reveals on May 1, 2022. The initial 10-member unit debuted on February 13, 2023 with <em className="text-zinc-800 dark:text-zinc-200">ASSEMBLE</em>, followed by the landmark OT24 full-group assemble on May 8, 2024 with <em className="text-zinc-800 dark:text-zinc-200">ASSEMBLE24</em>.
-            </p>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-black/60 shadow-md dark:shadow-xl">
-            <div className="relative w-full aspect-[3/2]">
-              <Image
-                src="/about/triples_about.jpg"
-                alt="tripleS 24 Members Group Photo"
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-              />
-            </div>
-            <div className="p-3 border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-950/80 text-center">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-600 dark:text-zinc-400">OT24 ASSEMBLE24 Live Stage</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Concept Architecture */}
-        <div className="mb-20">
-          <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">CORE MECHANICS</p>
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white font-pretendard">The Decentralized Model</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">01 / GRAVITY</span>
-              <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Decentralized Voting</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Fans actively determine subunit combinations, title tracks, and main concepts through official Gravity voting rounds hosted on the Cosmo application.
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">02 / OBJEKTS</span>
-              <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Digital Collectibles</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Digital & physical photocards (Objekts) grant utility tokens (COMO), which serve as voting power for participants during each Gravity event.
-              </p>
-            </div>
-
-            <div className="bg-white dark:bg-zinc-900/40 p-5 sm:p-6 md:p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-300">03 / DIMENSIONS</span>
-              <h3 className="text-xl font-bold mt-4 mb-2 text-zinc-900 dark:text-white font-pretendard">Seasonal Dimensions</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Each season, members form new specialized sub-units (Dimensions) to explore diverse musical directions, dance performances, and global releases.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Milestones & Metrics */}
-        <div>
-          <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 font-mono">METRICS & IMPACT</p>
-            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white font-pretendard">Global Footprint</h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Album Sales</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">740K+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">Albums distributed worldwide</p>
-            </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Community</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">680K+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">Instagram followers</p>
-            </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Video Platform</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">2.78M+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">YouTube subscribers</p>
-            </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Recognition</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">9</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">Major music awards won</p>
-            </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Global Reach</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">20+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">Countries toured / visited</p>
-            </div>
-            <div className="bg-white dark:bg-zinc-900/40 p-4 sm:p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              <span className="text-[10px] sm:text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Streaming</span>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold my-2 text-zinc-900 dark:text-white tracking-tight font-pretendard">520M+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-xs">Total YouTube impressions & views</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <AboutClient />
+    </>
   )
 }

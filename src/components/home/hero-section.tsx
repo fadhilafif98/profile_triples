@@ -86,8 +86,7 @@ export default function HeroSection() {
           alt="tripleS 24-member full group assemble portrait"
           fill
           priority
-          quality={85}
-          sizes="100vw"
+          unoptimized
           className="object-cover object-[center_28%] sm:object-[center_28%] lg:object-[center_25%] brightness-[1.02] contrast-[1.04]"
         />
 
@@ -97,8 +96,8 @@ export default function HeroSection() {
         {/* Subtle Ambient Scrim across entire photo */}
         <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
-        {/* Engineered Optical Contrast Well: Ensures > 16:1 text contrast for typography */}
-        <div className="absolute inset-x-0 bottom-0 h-[58vh] sm:h-[52vh] bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
+        {/* Engineered Optical Contrast Well: Ensures > 16:1 text contrast while preserving member visibility */}
+        <div className="absolute inset-x-0 bottom-0 h-[48vh] sm:h-[42vh] bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
       </div>
 
       {/* Screen Reader Extended Announcement */}
@@ -113,7 +112,7 @@ export default function HeroSection() {
       <div className="relative z-10 w-full px-5 sm:px-8 md:px-12 lg:px-16 pb-6 sm:pb-12 max-w-7xl mx-auto">
         
         {/* Semantic Eyebrow with Hangul Subtitle */}
-        <div className="hero-eyebrow mb-1.5 sm:mb-3">
+        <div className="hero-eyebrow mb-1.5 sm:mb-2.5">
           <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] uppercase text-zinc-300/90 font-medium flex items-center gap-2">
             <span>The Idol of All Possibilities</span>
             <span className="text-white/40" aria-hidden="true">&bull;</span>
@@ -121,10 +120,10 @@ export default function HeroSection() {
           </p>
         </div>
 
-        {/* Monumental Fluid Display Title: Clean Unbounded Font with Optical Tracking */}
+        {/* Balanced Editorial Display Title: Clean Unbounded Proportion */}
         <h1
           id="hero-main-heading"
-          className="hero-main-title text-[4.25rem] xs:text-[5.5rem] sm:text-[7.5rem] md:text-[9.5rem] lg:text-[11.5rem] xl:text-[13rem] font-black tracking-[-0.05em] leading-[0.85] font-display text-white select-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)]"
+          className="hero-main-title text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] 2xl:text-[7.5rem] font-black tracking-[-0.04em] leading-[0.9] sm:leading-[0.88] font-display text-white select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
         >
           tripleS
         </h1>

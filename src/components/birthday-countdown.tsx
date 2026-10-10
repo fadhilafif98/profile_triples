@@ -273,7 +273,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     if (activeMember) {
       setWishCount(128 + activeMember.id * 7)
     }
-  }, [activeMember?.id])
+  }, [activeMember])
 
   const handleWish = () => {
     if (!wished) {
@@ -283,13 +283,6 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   }
 
   if (!activeMember) return null
-
-  const countdownUnits = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Mins", value: timeLeft.minutes },
-    { label: "Secs", value: timeLeft.seconds },
-  ]
 
   const isTodayCelebrating = activeMember.isToday
   const isThisMonthPassed = activeMember.isThisMonth && activeMember.hasPassedThisYear && !activeMember.isToday
@@ -335,7 +328,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                   {/* Photo with Smooth Zoom */}
                   <Image
                     src={`https://i.imgur.com/${activeMember.image}`}
-                    alt={activeMember.name}
+                    alt={`${activeMember.name} (${activeMember.birthName || activeMember.name}) birthday portrait`}
                     fill
                     sizes="(max-width: 768px) 300px, 340px"
                     className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
@@ -636,7 +629,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                         >
                           <Image
                             src={`https://i.imgur.com/${m.image}`}
-                            alt={m.name}
+                            alt={`${m.name} (S${m.id}) avatar`}
                             fill
                             sizes="24px"
                             unoptimized

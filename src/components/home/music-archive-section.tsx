@@ -55,7 +55,7 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
   return (
     <section
       aria-labelledby="music-archive-heading"
-      className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-b border-zinc-200 dark:border-white/10 relative overflow-hidden bg-zinc-100/60 dark:bg-[#08080A]"
+      className="py-24 sm:py-32 px-5 sm:px-6 lg:px-8 border-b border-zinc-200 dark:border-white/10 relative overflow-hidden bg-zinc-100/60 dark:bg-[#08080A]"
     >
       <div className="max-w-7xl mx-auto">
         {/* Section Header: Standardized H2 scale matching Sections 3, 5, 6 */}
@@ -75,11 +75,11 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
         </div>
 
         {/* Now playing: the record is the hero */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-24 sm:mb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center mb-20 sm:mb-28">
           <Link
             href={`/albums#${featured.id}`}
             aria-label={`View ${featured.title}`}
-            className="group relative lg:col-span-6 w-full max-w-[540px] mx-auto lg:mx-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
+            className="group relative lg:col-span-6 w-full max-w-[280px] sm:max-w-[380px] md:max-w-[460px] lg:max-w-[540px] mx-auto lg:mx-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
           >
             {/* Ambient light taken from the artwork itself, not a generic glow */}
             <div className="absolute -inset-10 pointer-events-none" aria-hidden="true">
@@ -87,7 +87,7 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
                 src={featured.cover}
                 alt=""
                 fill
-                sizes="540px"
+                sizes="(max-width: 640px) 280px, (max-width: 1024px) 460px, 540px"
                 className="object-cover blur-3xl scale-110 opacity-40 dark:opacity-35 saturate-150"
               />
             </div>
@@ -111,7 +111,7 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
                 src={featured.cover}
                 alt={`${featured.title} album cover`}
                 fill
-                sizes="(max-width: 1024px) 88vw, 480px"
+                sizes="(max-width: 640px) 250px, (max-width: 1024px) 400px, 480px"
                 className="object-cover"
               />
             </div>
@@ -169,7 +169,7 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
           onPointerLeave={endDrag}
           onClickCapture={onClickCapture}
           onDragStart={(e) => e.preventDefault()}
-          className="-mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing pb-2"
+          className="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing pb-4"
           role="list"
           aria-label="tripleS discography"
         >
@@ -178,20 +178,22 @@ export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps
               key={album.id}
               href={`/albums#${album.id}`}
               role="listitem"
-              className="group shrink-0 snap-start w-[44vw] sm:w-[200px] lg:w-[220px] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
+              className="group shrink-0 snap-start w-[190px] xs:w-[200px] sm:w-[210px] lg:w-[220px] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
             >
-              <div className="relative aspect-square rounded-md overflow-hidden bg-zinc-200 dark:bg-[#14141B] shadow-[0_12px_30px_-16px_rgba(9,9,11,0.4)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1.5 motion-reduce:transition-none">
+              <div className="relative aspect-square rounded-md overflow-hidden bg-zinc-200 dark:bg-[#14141B] shadow-[0_14px_34px_-16px_rgba(9,9,11,0.45)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1.5 motion-reduce:transition-none">
                 <Image
                   src={album.cover}
                   alt={`${album.title} album cover`}
                   fill
                   draggable={false}
-                  sizes="(max-width: 640px) 44vw, 220px"
+                  sizes="(max-width: 640px) 200px, 220px"
                   className="object-cover"
                 />
               </div>
-              <p className="mt-3 text-sm font-semibold text-zinc-950 dark:text-white truncate">{album.title}</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+              <p className="mt-3 text-sm font-semibold text-zinc-950 dark:text-white truncate">
+                {album.title}
+              </p>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 truncate">
                 <span className="font-mono">{yearOf(album.releaseDate)}</span>
                 {album.unit ? `, ${album.unit}` : ""}
               </p>
