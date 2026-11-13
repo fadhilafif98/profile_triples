@@ -54,6 +54,23 @@ export default function ObjektCard({ objekt, onSelect, priority = false }: Objek
             priority={priority}
             className="w-full h-full object-cover"
           />
+
+          {/* Official COSMO Collection Code Overlay (Vertical Right Tab) */}
+          {objekt.collectionNo && (
+            <div
+              className="absolute right-0 top-0 bottom-0 w-[11.2%] flex items-center justify-center pointer-events-none select-none z-10"
+              aria-hidden="true"
+            >
+              <span
+                className="font-bold text-[8.5px] xs:text-[9.5px] sm:text-[10.5px] md:text-[11.5px] tracking-[0.05em] whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
+                style={{
+                  color: objekt.textColor || "#000000",
+                }}
+              >
+                {objekt.collectionNo}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Back Side (Lazy loaded on flip) */}

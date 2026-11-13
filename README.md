@@ -2,7 +2,8 @@
 
 An interactive directory and archive for the 24-member decentralized K-pop girl group **tripleS** (트리플에스), built with Next.js App Router, Tailwind CSS, and Framer Motion.
 
-Live: [profile-triples.vercel.app](https://profile-triples.vercel.app)
+Live: [profile-triples.vercel.app](https://profile-triples.vercel.app)  
+**Status**: Actively Maintained • **Last Updated**: October 11, 2026
 
 ---
 

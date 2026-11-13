@@ -42,9 +42,13 @@ next-env.d.ts
 .aider*
 
 # AI coding assistant rules & configs (local, not for repo)
+.playwright-cli/
 .clinerules/
 .cursor/
 .windsurf/
 .opencode/
 .github/copilot-instructions.md
 AGENTS.md
+.agents/
+skills-lock.json
+.playwright-cli/

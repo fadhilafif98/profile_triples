@@ -18,10 +18,16 @@ import a15 from "@/data/albums/15-assemble25.json"
 import a16 from "@/data/albums/16-secrethimitsubimil.json"
 import a17 from "@/data/albums/17-beyond-beauty.json"
 import a18 from "@/data/albums/18-love-and-pop-pt1.json"
+import a19 from "@/data/albums/19-baby-flower-city-remixes.json"
+import a20 from "@/data/albums/20-dream-dress.json"
+import a21 from "@/data/albums/21-world-wild-women.json"
+import a22 from "@/data/albums/22-dna.json"
+import a23 from "@/data/albums/23-welcome-to-heaven.json"
 
 export const albumsList: Album[] = [
   a01, a02, a03, a04, a05, a06, a07, a08, a09,
   a10, a11, a12, a13, a14, a15, a16, a17, a18,
+  a19, a20, a21, a22, a23,
 ] as Album[]
 
 // Newest first by default for discography timeline

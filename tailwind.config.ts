@@ -19,7 +19,26 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-body)", "system-ui", "-apple-system", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        accent: ["var(--font-accent)", "cursive"],
+        mono: ["var(--font-mono)", "monospace"],
+      },
       colors: {
+        voltage: {
+          DEFAULT: "#D4FF00",
+          hover: "#E2FF33",
+          dim: "rgba(212, 255, 0, 0.12)",
+          border: "rgba(212, 255, 0, 0.3)",
+        },
+        void: {
+          base: "#08080A",
+          surface: "#0D0D12",
+          elevated: "#14141B",
+          highlight: "rgba(255, 255, 255, 0.08)",
+          rim: "rgba(255, 255, 255, 0.12)",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

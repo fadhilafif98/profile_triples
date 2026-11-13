@@ -92,9 +92,19 @@ export default function ObjektImage({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Loading Skeleton */}
+      {/* Loading Skeleton with official tripleS logo */}
       {isLoading && !allFailed && (
-        <div className="absolute inset-0 bg-zinc-200/60 dark:bg-zinc-800/60 animate-pulse rounded-inherit z-10" />
+        <div className="absolute inset-0 bg-zinc-100 dark:bg-[#0D0D12] z-10 flex items-center justify-center p-3 select-none">
+          <div className="text-zinc-300 dark:text-zinc-800 animate-pulse">
+            <TriplesLogo
+              width={40}
+              height={40}
+              strokeWidth={170}
+              strokeColor="currentColor"
+              className="w-8 h-8 sm:w-10 sm:h-10"
+            />
+          </div>
+        </div>
       )}
 
       {/* Fallback Graphic: pure clean official static tripleS logo */}

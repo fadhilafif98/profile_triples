@@ -77,7 +77,7 @@ export default function SeasonDropdown({
         onClick={() => setIsOpen((prev) => !prev)}
         className={`w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all text-xs font-mono select-none ${
           isOpen
-            ? "bg-white dark:bg-[#151518] border-purple-500/80 shadow-[0_0_12px_rgba(139,92,246,0.25)] text-zinc-900 dark:text-white"
+            ? "bg-white dark:bg-[#151518] border-zinc-950 dark:border-[#D4FF00] shadow-sm text-zinc-900 dark:text-white"
             : "bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800/90 text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 dark:hover:border-zinc-700 shadow-sm"
         }`}
       >
@@ -90,7 +90,7 @@ export default function SeasonDropdown({
             {selectedSeason === "All" ? "All Seasons" : selectedSeason}
           </span>
           {isFiltered && (
-            <span className="px-1.5 py-0.5 rounded-full bg-purple-600 dark:bg-[#8B5CF6] text-white text-[10px] font-bold font-mono shadow-[0_0_6px_rgba(139,92,246,0.6)]">
+            <span className="px-1.5 py-0.5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black text-[10px] font-bold font-mono shadow-xs">
               1
             </span>
           )}
@@ -150,7 +150,7 @@ export default function SeasonDropdown({
                   >
                     {/* Circular Radio Icon */}
                     {isSelected ? (
-                      <div className="w-5 h-5 rounded-full bg-purple-600 dark:bg-[#8B5CF6] flex items-center justify-center text-white shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.6)]">
+                      <div className="w-5 h-5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black flex items-center justify-center shrink-0 shadow-xs">
                         <Check className="w-3.5 h-3.5 stroke-[3]" />
                       </div>
                     ) : (
@@ -158,7 +158,7 @@ export default function SeasonDropdown({
                     )}
 
                     {/* Season Label */}
-                    <span className="text-sm font-pretendard tracking-tight text-zinc-900 dark:text-zinc-100">
+                    <span className="text-sm font-sans font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
                       {season === "All" ? "All Seasons" : season}
                     </span>
                   </button>

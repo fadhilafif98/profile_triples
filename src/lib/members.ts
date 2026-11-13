@@ -54,3 +54,64 @@ export function getRelatedMembers(member: Member, count = 4): Member[] {
     .sort(() => Math.random() - 0.5)
     .slice(0, count)
 }
+
+// 24 Official Member Colors (MODHAUS Identity from GEMINI.md)
+export const OFFICIAL_MEMBER_COLORS: Record<number, string> = {
+  1: "#17A7FE",
+  2: "#8801FF",
+  3: "#FFD800",
+  4: "#76C722",
+  5: "#D10A70",
+  6: "#FF95C8",
+  7: "#538FC8",
+  8: "#FFECF3",
+  9: "#FFA947",
+  10: "#FF73B3",
+  11: "#FFF554",
+  12: "#4243A2",
+  13: "#FF9649",
+  14: "#082855",
+  15: "#D51312",
+  16: "#F88059",
+  17: "#C7DFF8",
+  18: "#C9FF50",
+  19: "#85E3B3",
+  20: "#FFAFD3",
+  21: "#BEE6B5",
+  22: "#FD82B8",
+  23: "#FFFFFF",
+  24: "#C99DF3",
+}
+
+export function getMemberColor(id: number): string {
+  return OFFICIAL_MEMBER_COLORS[id] || "#D4FF00"
+}
+
+/**
+ * Resolves official member portrait image URL using local Andless assets in public/members/.
+ */
+export function getMemberImageUrl(
+  memberOrImage?: { id?: number; image?: string; slug?: string } | string | null
+): string {
+  if (!memberOrImage) return ""
+
+  if (typeof memberOrImage === "string") {
+    if (memberOrImage.startsWith("/") || memberOrImage.startsWith("http")) {
+      return memberOrImage
+    }
+    return ""
+  }
+
+  if (memberOrImage.image) {
+    if (memberOrImage.image.startsWith("/") || memberOrImage.image.startsWith("http")) {
+      return memberOrImage.image
+    }
+  }
+
+  if (memberOrImage.id) {
+    return `/members/s${String(memberOrImage.id).padStart(2, "0")}.jpg`
+  }
+
+  return ""
+}
+

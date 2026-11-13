@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import anime from "animejs"
 
 interface AnimatedLogoProps {
   width?: number | string
@@ -25,20 +24,61 @@ export default function AnimatedLogo({
   const logoRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
-    if (logoRef.current) {
-      // Get all paths in the SVG
-      const paths = logoRef.current.querySelectorAll("path")
+    if (!logoRef.current) return
+    const paths = logoRef.current.querySelectorAll("path")
 
-      // Set up the animation
-      anime({
-        targets: paths,
-        strokeDashoffset: [anime.setDashoffset, 0],
-        easing: "easeInOutCubic",
-        duration: duration,
-        delay: (el, i) => i * 200,
-        direction: loop ? "alternate" : "normal",
-        loop: loop,
+    // Respect reduced motion preference
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+    if (prefersReducedMotion) {
+      paths.forEach((path) => {
+        path.style.strokeDasharray = "none"
+        path.style.strokeDashoffset = "0"
       })
+      return
+    }
+
+    const animations: Animation[] = []
+
+    paths.forEach((path, i) => {
+      if (typeof path.getTotalLength !== "function") return
+      const length = path.getTotalLength()
+      path.style.strokeDasharray = `${length}`
+      path.style.strokeDashoffset = `${length}`
+
+      // Pure native Web Animations API: zero external runtime overhead, 60fps compositor
+      if (typeof path.animate === "function") {
+        const anim = path.animate(
+          [
+            { strokeDashoffset: `${length}` },
+            { strokeDashoffset: "0" },
+          ],
+          {
+            duration,
+            delay: i * 200,
+            easing: "cubic-bezier(0.65, 0, 0.35, 1)", // easeInOutCubic
+            direction: loop ? "alternate" : "normal",
+            iterations: loop ? Infinity : 1,
+            fill: "forwards",
+          }
+        )
+
+        anim.onfinish = () => {
+          if (!loop) {
+            path.style.strokeDashoffset = "0"
+          }
+        }
+
+        animations.push(anim)
+      } else {
+        path.style.strokeDashoffset = "0"
+      }
+    })
+
+    return () => {
+      animations.forEach((anim) => anim.cancel())
     }
   }, [duration, loop])
 
