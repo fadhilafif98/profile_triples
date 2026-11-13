@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
-import BirthdayCountdown from "@/components/birthday-countdown"
+import dynamic from "next/dynamic"
 import HeroSection from "@/components/home/hero-section"
 import VideoShowreelSection from "@/components/home/video-showreel-section"
-import DimensionsCardStack from "@/components/home/dimensions-card-stack"
-import HowItWorksSection from "@/components/home/how-it-works-section"
-import MusicArchiveSection from "@/components/home/music-archive-section"
 import { getAllMembers } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { getAllSubUnits } from "@/lib/sub-units"
+
+const HowItWorksSection = dynamic(() => import("@/components/home/how-it-works-section"), { ssr: true })
+const MusicArchiveSection = dynamic(() => import("@/components/home/music-archive-section"), { ssr: true })
+const DimensionsCardStack = dynamic(() => import("@/components/home/dimensions-card-stack"), { ssr: true })
+const BirthdayCountdown = dynamic(() => import("@/components/birthday-countdown"), { ssr: true })
 
 export const metadata: Metadata = {
   title: "tripleS | Fanmade Website",
@@ -43,41 +45,23 @@ export default function Home() {
 
   return (
     <div className="relative bg-[#fafafa] dark:bg-[#08080A] text-zinc-900 dark:text-white selection:bg-[#D4FF00] selection:text-black transition-colors">
-      {/* ── 1. Hero Section (Awwwards GSAP Parallax & Kinetic Editorial) ── */}
+      {/* 1. Full-Viewport K-Pop Editorial Hero */}
       <HeroSection />
 
-      {/* ── 2. Cinematic Video Showreel Section (LxL Creative Section 2 - Girls Never Die MV) ── */}
+      {/* 2. Pinned MV Showreel & Editorial Statement */}
       <VideoShowreelSection />
 
-      {/* ── 3. How tripleS Works (The Loop: Collect, Vote, Watch) ── */}
+      {/* 3. How tripleS Works (Unboxed Objekt Fan + 3-Step Flow) */}
       <HowItWorksSection members={membersList} />
 
-      {/* ── 4. Music Archive (Now Playing + Record Crate) ── */}
+      {/* 4. Music Archive (Unboxed Vinyl Sleeve + Spotify + Record Crate) */}
       <MusicArchiveSection albums={allAlbums} />
 
-      {/* ── 5. Featured Dimensions (LxL Creative Section 3 - 3D Perspective Card Stack) ── */}
+      {/* 5. Featured Dimensions (Interactive 3D Perspective Card Stack) */}
       <DimensionsCardStack subUnits={allSubUnits} />
 
-      {/* ── 6. Birthday Countdown ── */}
-      <section aria-labelledby="birthday-heading" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-2xl mx-auto text-center mb-12 sm:mb-16">
-            <h2
-              id="birthday-heading"
-              className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold tracking-[-0.04em] text-zinc-950 dark:text-white leading-[1.05]"
-            >
-              Upcoming{" "}
-              <span className="font-accent font-normal tracking-normal text-[1.25em] leading-none text-zinc-950 dark:text-[#D4FF00]">
-                Birthdays
-              </span>
-            </h2>
-            <p className="mt-4 text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[46ch] mx-auto">
-              Count down to the next member birthday and send your wishes.
-            </p>
-          </div>
-          <BirthdayCountdown members={membersList} />
-        </div>
-      </section>
+      {/* 6. Upcoming Birthdays */}
+      <BirthdayCountdown members={membersList} />
     </div>
   )
 }

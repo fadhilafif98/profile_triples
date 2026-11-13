@@ -7,23 +7,23 @@ const TICKER_ITEMS = [
   { text: "S3 JIWOO", highlight: false },
   { text: "S4 CHAEYEON", highlight: false },
   { text: "S5 YOOYEON", highlight: false },
-  { text: "S6 SOOHYUN", highlight: false },
+  { text: "S6 SOOMIN", highlight: false },
   { text: "S7 NAKYOUNG", highlight: false },
-  { text: "S8 YUHYEON", highlight: false },
+  { text: "S8 YUBIN", highlight: false },
   { text: "S9 KAEDE", highlight: false },
   { text: "S10 DAHYUN", highlight: false },
   { text: "S11 KOTONE", highlight: false },
   { text: "S12 YEONJI", highlight: false },
-  { text: "S13 NIENTIE", highlight: false },
+  { text: "S13 NIEN", highlight: false },
   { text: "S14 SOHYUN", highlight: false },
   { text: "S15 XINYU", highlight: false },
   { text: "S16 MAYU", highlight: false },
-  { text: "S17 LINN", highlight: false },
+  { text: "S17 LYNN", highlight: false },
   { text: "S18 JOOBIN", highlight: false },
   { text: "S19 HAYEON", highlight: false },
   { text: "S20 SHION", highlight: false },
   { text: "S21 CHAEWON", highlight: false },
-  { text: "S22 SULLI", highlight: false },
+  { text: "S22 SULLIN", highlight: false },
   { text: "S23 SEOAH", highlight: false },
   { text: "S24 JIYEON", highlight: false },
   { text: "15 DIMENSIONS", highlight: true },
@@ -44,13 +44,13 @@ export default function EditorialTicker() {
             <span
               className={`text-xs sm:text-sm font-mono tracking-widest uppercase transition-colors ${
                 item.highlight
-                  ? "text-violet-600 dark:text-[#D4FF00] font-bold"
+                  ? "text-zinc-950 dark:text-[#D4FF00] font-bold"
                   : "text-zinc-600 dark:text-zinc-400 font-medium hover:text-zinc-900 dark:hover:text-white"
               }`}
             >
               {item.text}
             </span>
-            <span className="text-violet-600 dark:text-[#D4FF00] text-xs">✦</span>
+            <span className="text-zinc-950 dark:text-[#D4FF00] text-xs">✦</span>
           </div>
         ))}
       </div>

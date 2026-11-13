@@ -4,16 +4,16 @@ import AboutClient from "./AboutClient"
 export const metadata: Metadata = {
   title: "About tripleS | The Idol of All Possibilities",
   description:
-    "Learn about the revolutionary concept of tripleS (트리플에스), the world's first decentralized 24-member girl group under MODHAUS. Explore their HAUS SIGNAL reality, COSMO Grand Gravity voting protocol, and fluid seasonal Dimensions.",
+    "Discover tripleS (트리플에스), the 24-member K-pop girl group under MODHAUS known as 'The Idol of All Possibilities' — 'We are one and also twenty-four.' Explore their story from small 's' to big 'S', daily SIGNAL episodes, COSMO Objekts, and fan-voted Dimensions.",
   openGraph: {
     title: "About tripleS | The Idol of All Possibilities",
     description:
-      "Learn about the revolutionary concept of tripleS (트리플에스), the world's first decentralized 24-member girl group under MODHAUS. Explore their HAUS SIGNAL reality, COSMO Grand Gravity voting protocol, and fluid seasonal Dimensions.",
+      "Discover tripleS (트리플에스), the 24-member K-pop girl group under MODHAUS known as 'The Idol of All Possibilities' — 'We are one and also twenty-four.' Explore their story from small 's' to big 'S', daily SIGNAL episodes, COSMO Objekts, and fan-voted Dimensions.",
     url: "https://profile-triples.vercel.app/about",
     siteName: "tripleS Profile DB",
     images: [
       {
-        url: "https://profile-triples.vercel.app/home/triples_group_3000.jpg",
+        url: "https://profile-triples.vercel.app/home/triples_hero.jpg",
         width: 1200,
         height: 630,
         alt: "tripleS 24-member official assemble portrait",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "About tripleS | Decentralized K-Pop Idol Group",
     description:
       "Learn about the concept of tripleS (트리플에스), the world's first decentralized girl group with 24 members.",
-    images: ["https://profile-triples.vercel.app/home/triples_group_3000.jpg"],
+    images: ["https://profile-triples.vercel.app/home/triples_hero.jpg"],
   },
 }
 
@@ -38,7 +38,7 @@ export default function AboutPage() {
     name: "tripleS",
     alternateName: ["트리플에스", "トリプルS", "Social Sonyo Seoul"],
     description:
-      "24-member decentralized South Korean girl group under MODHAUS, governed by fans through Grand Gravity and the COSMO ecosystem.",
+      "24-member South Korean K-pop girl group under MODHAUS ('The Idol of All Possibilities' — 'We are one and also twenty-four'), where WAV shape Dimensions and title tracks through Grand Gravity on COSMO.",
     genre: ["K-pop", "Dance-pop", "Alternative R&B"],
     foundingLocation: {
       "@type": "Place",

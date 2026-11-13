@@ -11,7 +11,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Objekt } from "@/types/objekt";
-import { membersList, getMemberColor } from "@/lib/members";
+import { membersList, getMemberColor, getMemberImageUrl } from "@/lib/members";
 import {
   ALL_OBJEKTS_JSON_URL,
   getObjektSeasons,
@@ -336,13 +336,13 @@ export default function ObjektsClient() {
                 </span>
               </h1>
               <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 mt-2 max-w-2xl leading-relaxed pt-1">
-                Official digital photocard archive. High-resolution front &amp; back scans across all seasons, classes, and member dimensions registered in the MODHAUS ecosystem.
+                Official physical and digital photocard archive from COSMO : the Gate. High-resolution front and back scans across all seasons, classes, and 24 members.
               </p>
             </div>
 
             {/* Dynamic Status Counter Pill */}
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-xs font-mono text-zinc-700 dark:text-zinc-300 w-fit shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] shrink-0" aria-hidden="true" />
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0" aria-hidden="true" />
               <span className="font-bold text-zinc-950 dark:text-white">
                 {loading ? "..." : `${filteredObjekts.length.toLocaleString()} Objekts`}
               </span>
@@ -369,7 +369,7 @@ export default function ObjektsClient() {
                 }`}
               >
                 <div className="w-full h-full rounded-full bg-white dark:bg-[#14141B] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center font-mono font-bold text-[11px] sm:text-xs text-zinc-950 dark:text-white shadow-sm">
-                  0T24
+                  OT24
                 </div>
               </div>
               <span
@@ -406,7 +406,7 @@ export default function ObjektsClient() {
                   >
                     <div className="relative w-full h-full rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10">
                       <Image
-                        src={m.image.startsWith("http") ? m.image : `https://i.imgur.com/${m.image}`}
+                        src={getMemberImageUrl(m)}
                         alt={`${m.name} (S${m.id}) avatar`}
                         fill
                         sizes="56px"

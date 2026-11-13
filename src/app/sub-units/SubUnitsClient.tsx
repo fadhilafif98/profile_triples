@@ -6,7 +6,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, Search, Crown, Boxes } from "lucide-react"
 import { subUnits } from "@/lib/sub-units"
-import { getMemberById, getMemberColor } from "@/lib/members"
+import { getMemberById, getMemberColor, getMemberImageUrl } from "@/lib/members"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
 
@@ -252,7 +252,7 @@ export default function SubUnitsClient() {
                                 >
                                   {m.image ? (
                                     <Image
-                                      src={`https://i.imgur.com/${m.image}`}
+                                      src={getMemberImageUrl(m)}
                                       alt={`${m.name} (S${m.id}) avatar`}
                                       fill
                                       sizes="32px"

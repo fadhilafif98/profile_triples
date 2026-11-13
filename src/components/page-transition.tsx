@@ -6,7 +6,7 @@ import { useTheme } from "next-themes"
 import gsap from "gsap"
 
 // Curated official tripleS colors cycling sequentially on each transition
-// Single clean solid color per transition matching LxL simplicity & aesthetics
+// Single clean solid color per transition with minimalist simplicity & aesthetics
 const TRANSITION_PALETTE = [
   { dark: "#D4FF00", light: "#09090B", name: "Acid Voltage / Carbon" },
   { dark: "#8801FF", light: "#7C3AED", name: "S2 HyeRin Violet" },
@@ -90,7 +90,7 @@ export default function PageTransition() {
     }
   }, [])
 
-  // 2. Animate In: Signature LxL-Style Simple Ribbon Sweeps & Swells with Single Dynamic Color
+  // 2. Animate In: Signature Calligraphic Ribbon Sweeps & Swells with Single Dynamic Color
   const animateIn = useCallback(
     (href: string) => {
       if (!overlayRef.current || !pathCoreRef.current || !pathGlowRef.current) {
@@ -153,7 +153,7 @@ export default function PageTransition() {
         },
       })
 
-      // Ribbon sweep & swelling stroke (1:1 LxL Creative architecture)
+      // Ribbon sweep & swelling stroke architecture
       tl.to(
         [pathCore, pathGlow],
         {
@@ -232,8 +232,8 @@ export default function PageTransition() {
 
   if (!mounted) return null
 
-  // Iconic LxL fluid continuous calligraphy ribbon path (spans all 4 corners)
-  const lxlRibbonPath =
+  // Fluid continuous calligraphy ribbon path (spans all 4 corners)
+  const calligraphyRibbonPath =
     "M20.002 787.914C41.7003 820.073 100.527 881.496 162.246 869.918C239.396 855.447 258.683 763.796 203.232 669.732C147.781 575.669 65.8095 404.425 162.246 361.011C258.683 317.597 292.436 397.189 294.847 553.962C297.258 710.734 444.324 739.677 463.611 640.789C482.898 541.902 249.039 414.072 323.778 283.831C398.516 153.589 675.772 218.71 656.484 464.722C637.197 710.734 579.335 925.392 745.688 922.98C912.042 920.568 928.918 797.562 875.878 686.615C822.838 575.669 731.223 500.9 890.343 430.955C1049.46 361.011 1080.81 262.124 996.424 194.591C912.042 127.058 733.634 346.54 656.484 225.945C579.335 105.351 400.927 35.4064 224.93 180.119"
 
   return (
@@ -249,7 +249,7 @@ export default function PageTransition() {
         className="absolute inset-0 bg-[#FAFAFA]/95 dark:bg-[#08080A]/95 backdrop-blur-xl opacity-0"
       />
 
-      {/* 2. Fluid Single-Color SVG Ribbon Canvas (140% oversized matching LxL .transition_shape) */}
+      {/* 2. Fluid Single-Color SVG Ribbon Canvas (140% oversized .transition_shape) */}
       <div className="absolute inset-[-20%] w-[140%] h-[140%] flex items-center justify-center pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -268,7 +268,7 @@ export default function PageTransition() {
           {/* Underlay Subtle Bloom Ribbon */}
           <path
             ref={pathGlowRef}
-            d={lxlRibbonPath}
+            d={calligraphyRibbonPath}
             fill="none"
             stroke="#D4FF00"
             strokeLinecap="round"
@@ -283,7 +283,7 @@ export default function PageTransition() {
           {/* Foreground Pure Vector Ribbon (Solid Color Cycling on Every Route Change) */}
           <path
             ref={pathCoreRef}
-            d={lxlRibbonPath}
+            d={calligraphyRibbonPath}
             fill="none"
             stroke="#D4FF00"
             strokeLinecap="round"

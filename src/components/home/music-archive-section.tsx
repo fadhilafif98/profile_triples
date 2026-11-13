@@ -1,206 +1,348 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
-import SpotifyEmbed from "@/components/spotify-embed"
-import type { Album } from "@/types/album"
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import type { Album } from "@/types/album";
 
 interface MusicArchiveSectionProps {
-  albums: Album[]
+  albums: Album[];
 }
 
-const yearOf = (releaseDate: string) => releaseDate.slice(-4)
+export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const crateRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const drag = useRef({
+    down: false,
+    startX: 0,
+    scrollLeft: 0,
+    moved: false,
+  });
 
-export default function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
-  const [featured, ...rest] = albums
-  const crateRef = useRef<HTMLDivElement>(null)
-  // Drag state lives in a ref: no re-render per pointer move.
-  const drag = useRef({ active: false, moved: false, startX: 0, startScroll: 0 })
+  useEffect(() => {
+    const container = crateRef.current;
+    const item = itemRefs.current[activeIndex];
+    if (!container || !item) return;
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse" || !crateRef.current) return
-    drag.current = { active: true, moved: false, startX: e.clientX, startScroll: crateRef.current.scrollLeft }
-  }
+    const targetLeft =
+      item.offsetLeft - container.clientWidth / 2 + item.clientWidth / 2;
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+    const clampedLeft = Math.max(0, Math.min(targetLeft, maxScroll));
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = crateRef.current
-    if (!drag.current.active || !el) return
-    const dx = e.clientX - drag.current.startX
-    if (!drag.current.moved && Math.abs(dx) > 5) {
-      drag.current.moved = true
-      el.classList.remove("snap-x", "scroll-smooth")
+    if (Math.abs(container.scrollLeft - clampedLeft) < 2) return;
+
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    container.scrollTo({
+      left: clampedLeft,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, [activeIndex]);
+
+  if (!albums || albums.length === 0) return null;
+
+  const activeAlbum = albums[activeIndex] ?? albums[0];
+
+  const stepAlbum = (delta: number) => {
+    setActiveIndex((prev) => (prev + delta + albums.length) % albums.length);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      stepAlbum(-1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      stepAlbum(1);
     }
-    if (drag.current.moved) el.scrollLeft = drag.current.startScroll - dx
-  }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || e.pointerType === "touch") return;
+    const el = crateRef.current;
+    if (!el) return;
+
+    drag.current = {
+      down: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drag.current.down) return;
+    const el = crateRef.current;
+    if (!el) return;
+
+    const delta = e.clientX - drag.current.startX;
+    if (Math.abs(delta) > 5) {
+      drag.current.moved = true;
+    }
+    if (drag.current.moved) {
+      el.scrollLeft = drag.current.scrollLeft - delta;
+    }
+  };
 
   const endDrag = () => {
-    if (!drag.current.active) return
-    drag.current.active = false
-    crateRef.current?.classList.add("snap-x", "scroll-smooth")
-  }
-
-  // Swallow the click that ends a drag so it doesn't navigate.
-  const onClickCapture = (e: React.MouseEvent) => {
+    drag.current.down = false;
     if (drag.current.moved) {
-      e.preventDefault()
-      e.stopPropagation()
-      drag.current.moved = false
+      window.setTimeout(() => {
+        drag.current.moved = false;
+      }, 0);
     }
-  }
+  };
 
-  if (!featured) return null
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
 
   return (
     <section
+      id="music-archive"
       aria-labelledby="music-archive-heading"
-      className="py-24 sm:py-32 px-5 sm:px-6 lg:px-8 border-b border-zinc-200 dark:border-white/10 relative overflow-hidden bg-zinc-100/60 dark:bg-[#08080A]"
+      onKeyDown={handleKeyDown}
+      className="relative flex flex-col justify-between lg:min-h-[calc(100dvh-4rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 gap-6 lg:gap-8 overflow-x-clip"
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header: Standardized H2 scale matching Sections 3, 5, 6 */}
-        <div className="max-w-3xl mb-12 sm:mb-16">
+      {/* Top Row */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-2">
           <h2
             id="music-archive-heading"
-            className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold tracking-[-0.04em] text-zinc-950 dark:text-white leading-[1.05]"
+            className="text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]"
           >
             Music{" "}
-            <span className="font-accent font-normal tracking-normal text-[1.25em] leading-none text-zinc-950 dark:text-[#D4FF00]">
+            <span className="font-accent text-4xl sm:text-5xl lg:text-6xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
               Archive
             </span>
           </h2>
-          <p className="mt-4 text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[46ch]">
-            Official discography from debut to the latest Gravity comebacks.
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl">
+            Every unit and full-group release pressed on physical sleeve and digital stream.
           </p>
         </div>
 
-        {/* Now playing: the record is the hero */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center mb-20 sm:mb-28">
-          <Link
-            href={`/albums#${featured.id}`}
-            aria-label={`View ${featured.title}`}
-            className="group relative lg:col-span-6 w-full max-w-[280px] sm:max-w-[380px] md:max-w-[460px] lg:max-w-[540px] mx-auto lg:mx-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          <span
+            aria-live="polite"
+            className="font-mono text-xs tabular-nums tracking-[0.14em] text-zinc-500 dark:text-zinc-400 mr-1"
           >
-            {/* Ambient light taken from the artwork itself, not a generic glow */}
-            <div className="absolute -inset-10 pointer-events-none" aria-hidden="true">
+            {String(activeIndex + 1).padStart(2, "0")} /{" "}
+            {String(albums.length).padStart(2, "0")}
+          </span>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => stepAlbum(-1)}
+              aria-label="Previous release"
+              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => stepAlbum(1)}
+              aria-label="Next release"
+              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <Link
+            href="/albums"
+            className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+          >
+            All {albums.length} Releases
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Middle Row: Interactive Vinyl Sleeve Deck */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto py-2">
+        {/* Left: Unboxed Sliding Vinyl Sleeve */}
+        <div className="lg:col-span-5 flex items-center justify-center py-2">
+          <div className="relative w-full max-w-[230px] sm:max-w-[270px] lg:max-w-[300px] mr-12 sm:mr-16 group">
+            {/* Ambient artwork blur */}
+            <div
+              className="pointer-events-none absolute -inset-6 rounded-full opacity-35 dark:opacity-30 blur-2xl overflow-hidden"
+              aria-hidden="true"
+            >
               <Image
-                src={featured.cover}
+                src={activeAlbum.cover}
                 alt=""
                 fill
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 460px, 540px"
-                className="object-cover blur-3xl scale-110 opacity-40 dark:opacity-35 saturate-150"
+                sizes="320px"
+                className="object-cover scale-125"
               />
             </div>
 
-            {/* Vinyl slides out of the sleeve */}
+            {/* Protruding Vinyl Disc */}
             <div
               aria-hidden="true"
-              className="absolute top-[4%] bottom-[4%] right-0 aspect-square rounded-full translate-x-[8%] group-hover:translate-x-[26%] group-focus-visible:translate-x-[26%] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]"
-              style={{
-                background: "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
-              }}
+              className="pointer-events-none absolute top-[4%] right-0 w-[92%] h-[92%] translate-x-[36%] group-hover:translate-x-[42%] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
             >
-              <div className="absolute inset-[33%] rounded-full overflow-hidden">
-                <Image src={featured.cover} alt="" fill sizes="120px" className="object-cover" />
+              <div
+                className="relative w-full h-full rounded-full shadow-[0_20px_40px_-14px_rgba(9,9,11,0.55)] flex items-center justify-center"
+                style={{
+                  background:
+                    "radial-gradient(circle, #18181B 0%, #09090B 68%, #141418 100%)",
+                }}
+              >
+                <div className="absolute inset-[12%] rounded-full border border-white/[0.06]" />
+                <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
+                <div className="relative w-[34%] h-[34%] rounded-full overflow-hidden ring-2 ring-black/70">
+                  <Image
+                    src={activeAlbum.cover}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                  <span className="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-[#09090B] ring-1 ring-white/25" />
+                </div>
               </div>
-              <div className="absolute inset-[48.5%] rounded-full bg-zinc-100 dark:bg-[#08080A]" />
             </div>
 
-            <div className="relative w-[88%] aspect-square rounded-md overflow-hidden bg-zinc-200 dark:bg-[#14141B] shadow-[0_30px_60px_-24px_rgba(9,9,11,0.45)]">
+            {/* Square Album Jacket Sleeve (Shadow Only — Single Elevation) */}
+            <div className="relative z-10 aspect-square w-full rounded-xl overflow-hidden shadow-[0_24px_48px_-18px_rgba(9,9,11,0.45)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-100 dark:bg-zinc-900">
               <Image
-                src={featured.cover}
-                alt={`${featured.title} album cover`}
+                src={activeAlbum.cover}
+                alt={`${activeAlbum.title} album cover`}
                 fill
-                sizes="(max-width: 640px) 250px, (max-width: 1024px) 400px, 480px"
-                className="object-cover"
+                sizes="(max-width: 1024px) 270px, 300px"
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
               />
-            </div>
-          </Link>
-
-          <div className="lg:col-span-6 min-w-0">
-            <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">
-              Latest release
-            </p>
-            <h3 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl tracking-[-0.04em] leading-[1] text-zinc-950 dark:text-white break-words">
-              {featured.title}
-            </h3>
-            <p className="mt-5 text-base text-zinc-700 dark:text-zinc-300">
-              {featured.unit ?? "tripleS"}
-              <span className="font-mono text-sm text-zinc-500 dark:text-zinc-400 ml-3">
-                {featured.type ? `${featured.type}, ` : ""}
-                {featured.releaseDate}
-              </span>
-            </p>
-            <p className="mt-4 text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[52ch] line-clamp-3">
-              {featured.description}
-            </p>
-            <Link
-              href={`/albums#${featured.id}`}
-              className="btn-magnetic mt-8 inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-6 py-3 text-sm font-bold hover:bg-zinc-800 dark:hover:bg-[#E2FF33] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2"
-            >
-              View album
-              <ArrowUpRight className="btn-arrow w-4 h-4" aria-hidden="true" />
-            </Link>
-            <div className="mt-10">
-              <SpotifyEmbed />
             </div>
           </div>
         </div>
 
-        {/* Record crate: full catalog, drag or swipe */}
-        <div className="flex items-baseline justify-between gap-4 mb-6">
-          <h3 className="font-display font-bold text-2xl sm:text-3xl tracking-tight text-zinc-950 dark:text-white">
-            Discography
+        {/* Right: Active Release Details */}
+        <div className="lg:col-span-7 flex flex-col items-start gap-4 lg:gap-5">
+          <h3 className="text-2xl sm:text-4xl lg:text-[2.75rem] font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.06]">
+            {activeAlbum.title}
           </h3>
-          <Link
-            href="/albums"
-            className="btn-magnetic nav-draw-link gap-1.5 text-sm font-semibold text-zinc-950 dark:text-[#D4FF00]"
-          >
-            All {albums.length} releases
-            <ArrowUpRight className="btn-arrow w-4 h-4" aria-hidden="true" />
-          </Link>
-        </div>
 
+          <p className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="text-zinc-950 dark:text-zinc-200 font-medium">
+              {activeAlbum.unit}
+            </span>
+            <span aria-hidden="true">/</span>
+            <span>{activeAlbum.type}</span>
+            <span aria-hidden="true">/</span>
+            <span className="tabular-nums">{activeAlbum.releaseDate}</span>
+          </p>
+
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed line-clamp-2">
+            {activeAlbum.description}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-5 pt-1">
+            <Link
+              href={`/albums#${activeAlbum.id}`}
+              className="btn-primary btn-magnetic inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono uppercase tracking-[0.15em]"
+            >
+              Inspect Release
+              <ArrowUpRight className="btn-arrow w-3.5 h-3.5" />
+            </Link>
+
+            {activeAlbum.spotifyLink && (
+              <a
+                href={activeAlbum.spotifyLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+              >
+                Stream on Spotify
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Horizontal Draggable Record Crate */}
+      <div className="w-full">
         <div
           ref={crateRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
+          role="listbox"
+          aria-label="Discography record crate"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
           onPointerUp={endDrag}
+          onPointerCancel={endDrag}
           onPointerLeave={endDrag}
-          onClickCapture={onClickCapture}
-          onDragStart={(e) => e.preventDefault()}
-          className="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth overscroll-x-contain select-none cursor-grab active:cursor-grabbing pb-4"
-          role="list"
-          aria-label="tripleS discography"
+          onClickCapture={handleClickCapture}
+          className="flex items-start gap-3 overflow-x-auto no-scrollbar py-2 px-1 cursor-grab active:cursor-grabbing select-none"
         >
-          {rest.map((album) => (
-            <Link
-              key={album.id}
-              href={`/albums#${album.id}`}
-              role="listitem"
-              className="group shrink-0 snap-start w-[190px] xs:w-[200px] sm:w-[210px] lg:w-[220px] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4"
-            >
-              <div className="relative aspect-square rounded-md overflow-hidden bg-zinc-200 dark:bg-[#14141B] shadow-[0_14px_34px_-16px_rgba(9,9,11,0.45)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1.5 motion-reduce:transition-none">
-                <Image
-                  src={album.cover}
-                  alt={`${album.title} album cover`}
-                  fill
-                  draggable={false}
-                  sizes="(max-width: 640px) 200px, 220px"
-                  className="object-cover"
-                />
-              </div>
-              <p className="mt-3 text-sm font-semibold text-zinc-950 dark:text-white truncate">
-                {album.title}
-              </p>
-              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                <span className="font-mono">{yearOf(album.releaseDate)}</span>
-                {album.unit ? `, ${album.unit}` : ""}
-              </p>
-            </Link>
-          ))}
+          {albums.map((album, idx) => {
+            const isActive = idx === activeIndex;
+            return (
+              <button
+                key={album.id}
+                ref={(el) => {
+                  itemRefs.current[idx] = el;
+                }}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                aria-label={`${String(idx + 1).padStart(2, "0")}. ${album.title}`}
+                draggable={false}
+                onClick={() => setActiveIndex(idx)}
+                className="w-16 sm:w-20 shrink-0 group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] rounded-lg"
+              >
+                <div
+                  className={`relative aspect-square w-full rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-900 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${
+                    isActive
+                      ? "ring-2 ring-zinc-950 dark:ring-[#D4FF00] ring-offset-2 ring-offset-[#FAFAFA] dark:ring-offset-[#08080A] -translate-y-1 opacity-100"
+                      : "opacity-60 group-hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={album.cover}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    draggable={false}
+                    className="object-cover pointer-events-none"
+                  />
+                </div>
+                <div className="mt-1.5 flex items-center gap-1 font-mono text-[10px] tabular-nums leading-none">
+                  <span
+                    className={
+                      isActive
+                        ? "text-zinc-950 dark:text-[#D4FF00] font-semibold"
+                        : "text-zinc-400 dark:text-zinc-500"
+                    }
+                  >
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className={`truncate ${
+                      isActive
+                        ? "text-zinc-950 dark:text-white font-medium"
+                        : "text-zinc-500 dark:text-zinc-400"
+                    }`}
+                  >
+                    {album.title}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
-  )
+  );
 }
+
+export default MusicArchiveSection;

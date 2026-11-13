@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { FaSpotify } from "react-icons/fa"
 import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"
-import { getMemberById, getMemberColor } from "@/lib/members"
+import { getMemberById, getMemberColor, getMemberImageUrl } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
 import Breadcrumb from "@/components/breadcrumb"
@@ -35,7 +35,7 @@ const UNIT_STORIES: Record<string, UnitStory> = {
   "acid-angel-from-asia": {
     leadSingle: "Generation",
     formationStory:
-      "In September 2022, MODHAUS introduced the Grand Gravity governance system. Fans holding COMO tokens on the COSMO application voted to divide the first eight revealed members into two debut dimensions. Acid Angel from Asia (AAA) emerged as the rebellious, trendsetting unit representing Generation Z youth culture across Asia.",
+      "In September 2022, MODHAUS introduced the Grand Gravity fan voting system on COSMO. Fans holding COMO tokens on the COSMO application voted to divide the first eight revealed members into two debut dimensions. Acid Angel from Asia (AAA) emerged as the rebellious, trendsetting unit representing Generation Z youth culture across Asia.",
     legacyStory:
       "Fronted by the viral Y2K smash 'Generation', AAA captured worldwide attention with its anti-drop chorus and playful choreography. Under the initial MODHAUS rule, the unit needed to reach 100,000 physical album sales to maintain continuous activity. While completing its cycle after ~20,000 sales, 'Generation' solidified tripleS' sonic signature and remains a landmark rookie release in modern K-pop.",
   },
@@ -215,7 +215,14 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
       if (unit.slug === "glow") return aUnit.includes("glow") || album.id === "11-inner-dance"
       if (unit.slug === "visionary-vision") return aUnit.includes("visionary") || aUnit.includes("vv") || album.id === "13-performante"
       if (unit.slug === "hatchi") return aUnit.includes("hatchi") || aUnit.includes("∞!") || album.id === "14-untitled" || album.id === "16-secrethimitsubimil"
-      if (unit.category === "msnz Project") return aUnit.includes("msnz") || album.id === "17-beyond-beauty"
+      if (unit.category === "msnz Project") {
+        return (
+          aUnit.includes(unit.slug) ||
+          album.id === "17-beyond-beauty" ||
+          album.id === "beyond-beauty" ||
+          (aUnit.includes("msnz") && !aUnit.includes("moon") && !aUnit.includes("sun") && !aUnit.includes("neptune") && !aUnit.includes("zenith"))
+        )
+      }
       return aUnit.includes(unitNameClean) || aUnit.includes(unit.slug)
     })
   }, [unit, allAlbums])
@@ -414,7 +421,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 >
                   {/* Portrait Photograph */}
                   <Image
-                    src={`https://i.imgur.com/${member.image}`}
+                    src={getMemberImageUrl(member)}
                     alt={`${member.name} (${member.birthName || member.name}) photocard`}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"

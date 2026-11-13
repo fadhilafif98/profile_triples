@@ -1,299 +1,409 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState, useCallback } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useReducedMotion } from "motion/react"
-import { ArrowUpRight, Shuffle } from "lucide-react"
-import type { Member } from "@/types/member"
-
-gsap.registerPlugin(ScrollTrigger)
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import WavWordmark from "@/components/wav-wordmark";
+import { OFFICIAL_MEMBER_COLORS, getMemberImageUrl } from "@/lib/members";
+import type { Member } from "@/types/member";
 
 interface HowItWorksSectionProps {
-  members: Member[]
+  members: Member[];
 }
 
-// 24 Official Member Colors (MODHAUS Identity from GEMINI.md)
-const OFFICIAL_MEMBER_COLORS: Record<number, string> = {
-  1: "#17A7FE",
-  2: "#8801FF",
-  3: "#FFD800",
-  4: "#76C722",
-  5: "#D10A70",
-  6: "#FF95C8",
-  7: "#538FC8",
-  8: "#FFECF3",
-  9: "#FFA947",
-  10: "#FF73B3",
-  11: "#FFF554",
-  12: "#4243A2",
-  13: "#FF9649",
-  14: "#082855",
-  15: "#D51312",
-  16: "#F88059",
-  17: "#C7DFF8",
-  18: "#C9FF50",
-  19: "#85E3B3",
-  20: "#FFAFD3",
-  21: "#BEE6B5",
-  22: "#FD82B8",
-  23: "#FFFFFF",
-  24: "#C99DF3",
+interface StepItem {
+  number: string;
+  title: string;
+  description: string;
 }
 
-function getContrastingInk(hex: string): string {
-  const c = hex.replace("#", "")
-  const r = parseInt(c.substring(0, 2), 16) || 0
-  const g = parseInt(c.substring(2, 4), 16) || 0
-  const b = parseInt(c.substring(4, 6), 16) || 0
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000
-  return yiq >= 150 ? "#09090B" : "#FFFFFF"
+const STEPS: StepItem[] = [
+  {
+    number: "01",
+    title: "Collect Objekts",
+    description: "Digital and physical photocards that generate COMO voting tokens.",
+  },
+  {
+    number: "02",
+    title: "Vote in Gravity",
+    description: "Use COMO on COSMO to vote on lineups, title tracks, and concepts.",
+  },
+  {
+    number: "03",
+    title: "Form Dimensions",
+    description: "Winning fan votes assemble the 24 members into new seasonal sub-units.",
+  },
+];
+
+function isLightHex(hex: string): boolean {
+  const clean = hex.replace("#", "");
+  if (clean.length !== 6) return false;
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return 0.299 * r + 0.587 * g + 0.114 * b > 165;
 }
-
-const FAN_SLOTS = [
-  { rotate: -9, x: -58 },
-  { rotate: 0, x: 0 },
-  { rotate: 9, x: 58 },
-] as const
-
-const STEPS = [
-  {
-    n: "1",
-    title: "Collect",
-    body: "Every Objekt you collect in COSMO earns COMO, the token fans vote with.",
-    href: "/objekts",
-    cta: "Open vault",
-    external: false,
-  },
-  {
-    n: "2",
-    title: "Vote",
-    body: "Spend COMO in Gravity to pick unit line-ups, leaders and concepts.",
-    href: "/about",
-    cta: "How Gravity works",
-    external: false,
-  },
-  {
-    n: "3",
-    title: "Watch",
-    body: "See the result play out on SIGNAL, the group's daily video log.",
-    href: "https://www.youtube.com/@triplescosmos",
-    cta: "Watch SIGNAL",
-    external: true,
-  },
-] as const
 
 export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null)
-  const reduceMotion = useReducedMotion()
-
-  // Deterministic SSR fallback (S9, S1, S15)
-  const [selectedMembers, setSelectedMembers] = useState<Member[]>(() => {
-    const defaultIds = [9, 1, 15]
-    const found = defaultIds.map((id) => members.find((m) => m.id === id)).filter(Boolean) as Member[]
-    return found.length === 3 ? found : members.slice(0, 3)
-  })
-
-  // Pick 3 random distinct members
-  const pickRandomTrio = useCallback(
-    (currentIds: number[] = []) => {
-      if (members.length < 3) return
-      const pool = members.filter((m) => !currentIds.includes(m.id))
-      const source = pool.length >= 3 ? pool : members
-      const shuffled = [...source].sort(() => Math.random() - 0.5)
-      setSelectedMembers(shuffled.slice(0, 3))
-    },
+  const orderedMembers = useMemo(
+    () => [...members].sort((a, b) => a.id - b.id),
     [members]
-  )
+  );
 
-  // Randomize on client mount
+  const [activeIndex, setActiveIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragScrollLeftRef = useRef(0);
+  const dragMovedRef = useRef(false);
+
+  const totalMembers = orderedMembers.length;
+  const safeActiveIndex = totalMembers > 0 ? Math.min(activeIndex, totalMembers - 1) : 0;
+  const activeMember = orderedMembers[safeActiveIndex];
+
+  const stepMember = useCallback(
+    (delta: number) => {
+      if (totalMembers === 0) return;
+      setActiveIndex((prev) => (prev + delta + totalMembers) % totalMembers);
+    },
+    [totalMembers]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        stepMember(-1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        stepMember(1);
+      }
+    },
+    [stepMember]
+  );
+
   useEffect(() => {
-    pickRandomTrio([9, 1, 15])
-  }, [pickRandomTrio])
+    const track = trackRef.current;
+    if (!track) return;
+    const isLg = window.innerWidth >= 1024;
+    const collapsedW = isLg ? 56 : 52;
+    const expandedW = isLg ? 325 : 290;
+    const gap = 8;
+    const cardCenter = safeActiveIndex * (collapsedW + gap) + expandedW / 2;
+    const targetLeft = Math.max(0, cardCenter - track.clientWidth / 2);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.scrollTo({ left: targetLeft, behavior: reduced ? "auto" : "smooth" });
+  }, [safeActiveIndex]);
 
-  const handleShuffle = useCallback(() => {
-    pickRandomTrio(selectedMembers.map((m) => m.id))
-    if (!reduceMotion) {
-      gsap.fromTo(
-        ".loop-objekt",
-        { scale: 0.94, y: 8 },
-        { scale: 1, y: 0, duration: 0.45, ease: "back.out(2)", stagger: 0.05 }
-      )
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const track = trackRef.current;
+    if (!track) return;
+    isDraggingRef.current = true;
+    dragMovedRef.current = false;
+    dragStartXRef.current = e.pageX;
+    dragScrollLeftRef.current = track.scrollLeft;
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    const track = trackRef.current;
+    if (!track) return;
+    const dx = e.pageX - dragStartXRef.current;
+    if (Math.abs(dx) > 6) {
+      dragMovedRef.current = true;
     }
-  }, [pickRandomTrio, selectedMembers, reduceMotion])
+    track.scrollLeft = dragScrollLeftRef.current - dx;
+  }, []);
 
-  const fan = selectedMembers.map((member, i) => {
-    const slot = FAN_SLOTS[i] || FAN_SLOTS[1]
-    const color = OFFICIAL_MEMBER_COLORS[member.id] || "#17A7FE"
-    const ink = getContrastingInk(color)
-    return {
-      member,
-      color,
-      ink,
-      rotate: slot.rotate,
-      x: slot.x,
-    }
-  })
+  const handleMouseUpOrLeave = useCallback(() => {
+    isDraggingRef.current = false;
+  }, []);
 
-  useEffect(() => {
-    if (reduceMotion || !sectionRef.current) return
-    const ctx = gsap.context(() => {
-      // One orchestrated moment: the photo wipes open, then the Objekts fan out of a single stack.
-      const tl = gsap.timeline({
-        scrollTrigger: { trigger: ".loop-media", start: "top 75%", once: true },
-      })
-      tl.from(".loop-photo", {
-        clipPath: "inset(100% 0% 0% 0%)",
-        duration: 1.1,
-        ease: "expo.out",
-      })
-      gsap.utils.toArray<HTMLElement>(".loop-objekt").forEach((el, i) => {
-        const slot = FAN_SLOTS[i] || FAN_SLOTS[1]
-        tl.fromTo(
-          el,
-          { x: 0, xPercent: 0, rotation: 0, y: 40, opacity: 0 },
-          { x: 0, xPercent: slot.x, rotation: slot.rotate, y: 0, opacity: 1, duration: 0.9, ease: "back.out(1.4)" },
-          i === 0 ? "-=0.6" : "<0.08"
-        )
-      })
-      tl.from(
-        ".loop-step",
-        { y: 24, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.1 },
-        "-=0.5"
-      )
-    }, sectionRef)
-    return () => ctx.revert()
-  }, [reduceMotion])
+  if (!activeMember) return null;
+
+  const activeCode = `S${String(activeMember.id).padStart(2, "0")}`;
+  const totalCode = String(totalMembers).padStart(2, "0");
+  const activeHex = OFFICIAL_MEMBER_COLORS[activeMember.id] ?? "#18181B";
+  const activeLightBand = isLightHex(activeHex);
 
   return (
     <section
-      ref={sectionRef}
-      aria-labelledby="how-it-works-heading"
-      className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 border-b border-zinc-200 dark:border-white/10 bg-[#fafafa] dark:bg-[#08080A]"
+      id="how-it-works"
+      aria-labelledby="lookbook-heading"
+      className="relative py-16 sm:py-20 lg:py-12 px-4 sm:px-6 lg:px-8 border-t border-zinc-200 dark:border-white/10 lg:min-h-[calc(100dvh-4rem)] flex items-center"
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Header: single focused message, stacked (no eyebrow, no split header) */}
-        <div className="max-w-3xl mb-12 sm:mb-16">
-          <h2
-            id="how-it-works-heading"
-            className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold tracking-[-0.04em] text-zinc-950 dark:text-white leading-[1.05]"
-          >
-            You decide what tripleS does{" "}
-            <span className="font-accent font-normal tracking-normal text-[1.25em] leading-none text-zinc-950 dark:text-[#D4FF00]">
-              next.
-            </span>
-          </h2>
-          <p className="mt-6 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[46ch]">
-            Unit line-ups and leaders are decided by fans, through Gravity votes in the COSMO app.
-          </p>
-        </div>
-
-        {/* Media: asymmetric 7/5 with the Objekt fan dropped lower for rhythm */}
-        <div className="loop-media grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-16 sm:mb-20">
-          <div className="loop-photo relative lg:col-span-7 aspect-[4/3] lg:aspect-auto lg:h-[540px] rounded-2xl overflow-hidden bg-zinc-200 dark:bg-[#14141B]">
-            <Image
-              src="/home/triples_section3.jpg"
-              alt="tripleS members group photo"
-              fill
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-cover object-center"
-            />
+      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        {/* Left Column (5 Cols): Quiet Typographic Narrative */}
+        <div className="lg:col-span-5 space-y-8">
+          <div className="space-y-3">
+            <h2
+              id="lookbook-heading"
+              className="text-3xl sm:text-4xl lg:text-[2.75rem] font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.04]"
+            >
+              You decide what tripleS does{" "}
+              <span className="font-accent font-normal text-4xl sm:text-5xl lg:text-[3.5rem] text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
+                next.
+              </span>
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[44ch]">
+              Every Dimension begins on
+              <WavWordmark
+                alt="COSMO"
+                className="h-[0.82em] mx-1.5 text-zinc-950 dark:text-[#D4FF00] align-baseline"
+              />
+              in three steps.
+            </p>
           </div>
 
-          <div
-            className="relative lg:col-span-5 h-[380px] sm:h-[440px] lg:h-[480px] lg:mt-16 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-[#14141B] shadow-[inset_0_1px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-            aria-label="Example Objekt photocards"
-            role="img"
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              {fan.map(({ member, color, ink, rotate, x }, i) => (
-                <div
-                  key={i}
-                  className="loop-objekt absolute w-[38%] max-w-[180px] hover:z-10 focus-within:z-10"
-                  data-x={x}
-                  data-rotate={rotate}
-                  style={{ transform: `translateX(${x}%) rotate(${rotate}deg)`, zIndex: i === 1 ? 3 : 1 }}
-                >
-                  <Link
-                    href={`/members/${member.slug}`}
-                    className="group block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-4 focus-visible:-translate-y-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-4 rounded-xl"
-                  >
-                    <div className="relative aspect-[5.5/8.5] rounded-xl overflow-hidden bg-white shadow-[0_24px_48px_-16px_rgba(9,9,11,0.35)]">
-                      <Image
-                        src={`https://i.imgur.com/${member.image}`}
-                        alt={`${member.name} (${member.birthName}) official profile photo`}
-                        fill
-                        sizes="180px"
-                        className="object-cover object-top"
-                      />
-                      {/* Objekt side band: member color + S-number, like the physical card */}
-                      <div
-                        className="absolute inset-y-0 right-0 w-[16%] flex items-center justify-center"
-                        style={{ backgroundColor: color, color: ink }}
-                      >
-                        <span className="font-mono text-[10px] font-bold whitespace-nowrap [writing-mode:vertical-rl]">
-                          {member.name} S{member.id}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
+          <ol className="divide-y divide-zinc-200 dark:divide-white/10 border-y border-zinc-200 dark:border-white/10">
+            {STEPS.map((step) => (
+              <li key={step.number} className="py-4 flex items-baseline gap-4">
+                <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500 shrink-0 tabular-nums">
+                  {step.number}
+                </span>
+                <div className="space-y-1">
+                  <h3 className="text-base font-display font-bold tracking-tight text-zinc-950 dark:text-white">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
-              ))}
-            </div>
+              </li>
+            ))}
+          </ol>
 
-            {/* Interactive Shuffle Trigger */}
-            <div className="absolute bottom-3 right-3 z-20">
+          <div className="flex flex-wrap items-center gap-6">
+            <Link href="/members" className="btn-primary btn-magnetic">
+              <span>Explore 24 Members</span>
+              <ArrowUpRight className="w-4 h-4 btn-arrow" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/about"
+              className="nav-draw-link font-mono text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors duration-200"
+            >
+              How COSMO works
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column (7 Cols): Unified 24-Member Horizontal Filmstrip Track */}
+        <div className="lg:col-span-7 flex flex-col gap-3 min-w-0">
+          <div className="flex items-center justify-end gap-3">
+            <span
+              className="font-mono text-xs tracking-wider text-zinc-500 dark:text-zinc-400 tabular-nums"
+              aria-live="polite"
+            >
+              <span className="font-bold text-zinc-950 dark:text-white">{activeCode}</span>
+              {" / "}
+              {totalCode}
+            </span>
+
+            <div className="inline-flex items-center gap-1">
               <button
                 type="button"
-                onClick={handleShuffle}
-                aria-label="Shuffle random member Objekts"
-                className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 dark:bg-[#0D0D12]/90 hover:bg-white dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-[11px] font-mono font-medium backdrop-blur-md border border-zinc-200 dark:border-white/15 transition-all shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+                onClick={() => stepMember(-1)}
+                aria-label="Previous member portrait"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-200 dark:border-white/15 text-zinc-700 dark:text-zinc-300 hover:border-zinc-950 hover:text-zinc-950 dark:hover:border-[#D4FF00] dark:hover:text-[#D4FF00] transition-colors duration-200 cursor-pointer"
               >
-                <Shuffle className="w-3 h-3 text-zinc-950 dark:text-[#D4FF00] transition-transform duration-300 group-hover:rotate-180" />
-                <span>Shuffle S#</span>
+                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => stepMember(1)}
+                aria-label="Next member portrait"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-200 dark:border-white/15 text-zinc-700 dark:text-zinc-300 hover:border-zinc-950 hover:text-zinc-950 dark:hover:border-[#D4FF00] dark:hover:text-[#D4FF00] transition-colors duration-200 cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
-        </div>
 
-        {/* The loop: a real sequence, so numerals are meaningful */}
-        <ol className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-8 lg:gap-12 border-t border-zinc-200 dark:border-white/10">
-          {STEPS.map((step) => (
-            <li key={step.n} className="loop-step pt-8">
-              <span className="block font-display font-bold text-6xl sm:text-7xl leading-none tracking-[-0.05em] text-zinc-300 dark:text-white/15 mb-6" aria-hidden="true">
-                {step.n}
-              </span>
-              <h3 className="font-display font-bold text-2xl tracking-tight text-zinc-950 dark:text-white mb-2">
-                {step.title}
-              </h3>
-              <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[32ch] mb-5">
-                {step.body}
-              </p>
-              {step.external ? (
-                <a
-                  href={step.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-magnetic nav-draw-link gap-1.5 text-sm font-semibold text-zinc-950 dark:text-[#D4FF00]"
+          {/* Desktop & Tablet Unified 24-Member Scrollable Accordion Track */}
+          <div
+            ref={trackRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            onKeyDown={handleKeyDown}
+            role="region"
+            aria-label="tripleS S01 through S24 portrait filmstrip"
+            className="hidden sm:flex h-[460px] lg:h-[510px] w-full gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden select-none cursor-grab active:cursor-grabbing"
+          >
+            {orderedMembers.map((member, idx) => {
+              const isExpanded = idx === safeActiveIndex;
+              const memberHex = OFFICIAL_MEMBER_COLORS[member.id] ?? "#18181B";
+              const lightBand = isLightHex(memberHex);
+              const sCode = `S${String(member.id).padStart(2, "0")}`;
+
+              if (!isExpanded) {
+                return (
+                  <article
+                    key={member.id}
+                    className="group relative shrink-0 w-[52px] lg:w-[56px] hover:w-[62px] h-full overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-900 transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+                  >
+                    <Image
+                      src={getMemberImageUrl(member)}
+                      alt={`${sCode} ${member.name}`}
+                      fill
+                      draggable={false}
+                      sizes="120px"
+                      className="object-cover object-top origin-top scale-[1.05]"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        if (dragMovedRef.current) {
+                          e.preventDefault();
+                          return;
+                        }
+                        setActiveIndex(idx);
+                      }}
+                      aria-label={`Select ${sCode} ${member.name}`}
+                      className="absolute inset-0 z-10 flex flex-col items-center justify-between py-4 px-1 bg-gradient-to-t from-black/80 via-black/15 to-black/30 group-hover:via-black/5 transition-colors duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D4FF00]"
+                    >
+                      <span className="font-mono text-[10px] font-bold tracking-wider text-white/90">
+                        {sCode}
+                      </span>
+                      <span
+                        style={{ writingMode: "vertical-rl" }}
+                        className="rotate-180 font-display text-xs font-bold tracking-tight text-white whitespace-nowrap"
+                      >
+                        {member.name}
+                      </span>
+                    </button>
+                  </article>
+                );
+              }
+
+              return (
+                <article
+                  key={member.id}
+                  className="group relative shrink-0 w-[290px] lg:w-[325px] h-full overflow-hidden rounded-2xl bg-zinc-900 shadow-xl transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
                 >
-                  {step.cta}
-                  <ArrowUpRight className="btn-arrow w-4 h-4" aria-hidden="true" />
-                </a>
-              ) : (
-                <Link
-                  href={step.href}
-                  className="btn-magnetic nav-draw-link gap-1.5 text-sm font-semibold text-zinc-950 dark:text-[#D4FF00]"
+                  <Link
+                    href={`/members/${member.slug}`}
+                    draggable={false}
+                    onClick={(e) => {
+                      if (dragMovedRef.current) {
+                        e.preventDefault();
+                      }
+                    }}
+                    aria-label={`View ${sCode} ${member.name} profile`}
+                    className="block relative w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D4FF00]"
+                  >
+                    <Image
+                      src={getMemberImageUrl(member)}
+                      alt={`${sCode} ${member.name} First Class Objekt portrait`}
+                      fill
+                      draggable={false}
+                      sizes="360px"
+                      className="object-cover object-top origin-top scale-[1.05] group-hover:scale-[1.07] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+                    />
+
+                    {/* Subtle Bottom 26% Scrim — Face & Upper Portrait Stay Clear */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[26%] z-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent"
+                    />
+
+                    {/* Official MODHAUS COSMO Vertical Sideband */}
+                    <div
+                      aria-hidden="true"
+                      style={{ backgroundColor: memberHex }}
+                      className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[26px] flex flex-col items-center justify-between py-4 px-0.5 select-none ${
+                        lightBand ? "text-zinc-950" : "text-white"
+                      }`}
+                    >
+                      <span className="font-mono text-[9px] font-bold tracking-tight">
+                        {sCode}
+                      </span>
+                      <span
+                        style={{ writingMode: "vertical-rl" }}
+                        className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[160px]"
+                      >
+                        {member.name}
+                      </span>
+                      <span
+                        style={{ writingMode: "vertical-rl" }}
+                        className="rotate-180 font-mono text-[7px] uppercase tracking-[0.2em] opacity-80"
+                      >
+                        COSMO
+                      </span>
+                    </div>
+
+                    {/* Clean Identity Only: Stage Name + Single-Line Hangul */}
+                    <div className="absolute inset-x-0 bottom-0 z-20 p-5 pr-10 flex items-baseline gap-2.5">
+                      <h3 className="text-xl lg:text-2xl font-display font-black tracking-tight text-white leading-none whitespace-nowrap">
+                        {member.name}
+                      </h3>
+                      {member.hangul ? (
+                        <span className="text-sm font-medium text-white/80 shrink-0 whitespace-nowrap">
+                          {member.hangul}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+
+          {/* Mobile Single Physical Objekt Card */}
+          <div onKeyDown={handleKeyDown} className="sm:hidden">
+            <Link
+              href={`/members/${activeMember.slug}`}
+              aria-label={`View ${activeCode} ${activeMember.name} profile`}
+              className="group relative block w-full aspect-[2/3] rounded-2xl overflow-hidden bg-zinc-900 shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+            >
+              <Image
+                src={getMemberImageUrl(activeMember)}
+                alt={`${activeCode} ${activeMember.name} First Class Objekt portrait`}
+                fill
+                sizes="95vw"
+                className="object-cover object-top origin-top scale-[1.05]"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[26%] z-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent"
+              />
+              <div
+                aria-hidden="true"
+                style={{ backgroundColor: activeHex }}
+                className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[26px] flex flex-col items-center justify-between py-4 px-0.5 select-none ${
+                  activeLightBand ? "text-zinc-950" : "text-white"
+                }`}
+              >
+                <span className="font-mono text-[9px] font-bold">{activeCode}</span>
+                <span
+                  style={{ writingMode: "vertical-rl" }}
+                  className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[150px]"
                 >
-                  {step.cta}
-                  <ArrowUpRight className="btn-arrow w-4 h-4" aria-hidden="true" />
-                </Link>
-              )}
-            </li>
-          ))}
-        </ol>
+                  {activeMember.name}
+                </span>
+                <span
+                  style={{ writingMode: "vertical-rl" }}
+                  className="rotate-180 font-mono text-[7px] uppercase tracking-[0.2em] opacity-80"
+                >
+                  COSMO
+                </span>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 z-20 p-5 pr-10 flex items-baseline gap-2.5">
+                <h3 className="text-xl font-display font-black tracking-tight text-white leading-none whitespace-nowrap">
+                  {activeMember.name}
+                </h3>
+                {activeMember.hangul ? (
+                  <span className="text-sm font-medium text-white/80 shrink-0 whitespace-nowrap">
+                    {activeMember.hangul}
+                  </span>
+                ) : null}
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
-  )
+  );
 }

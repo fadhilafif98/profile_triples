@@ -84,7 +84,7 @@ export default function Navigation() {
               />
             </div>
             <div className="flex items-baseline gap-1.5 transition-all duration-300">
-              <span className={`font-extrabold tracking-tight font-pretendard transition-all duration-300 ${
+              <span className={`font-extrabold tracking-tight font-display transition-all duration-300 ${
                 scrolled ? "text-base sm:text-lg" : "text-lg sm:text-2xl"
               }`}>
                 tripleS
@@ -255,7 +255,7 @@ export default function Navigation() {
                         />
                       </div>
                       <div>
-                        <p className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white font-pretendard">
+                        <p className="text-lg font-bold tracking-tight text-zinc-950 dark:text-white font-display">
                           tripleS
                         </p>
                         <p className="text-[11px] font-mono text-zinc-500">The Idol of All Possibilities</p>

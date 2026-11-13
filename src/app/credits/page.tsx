@@ -45,7 +45,7 @@ export default function ThankYouPage() {
             </span>
           </h1>
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mt-3 leading-relaxed">
-            Direct gateways to tripleS official channels, COSMO application, music streaming, and project architecture details.
+            Direct links to official tripleS channels, COSMO : the Gate, music streaming, and fan project credits.
           </p>
         </div>
 
@@ -141,7 +141,7 @@ export default function ThankYouPage() {
         <div className="bg-zinc-100/70 dark:bg-zinc-900/30 rounded-2xl sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 p-5 sm:p-8 md:p-12 shadow-sm">
           <div className="flex items-center gap-3 mb-8">
             <FaCode className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-            <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">Project Architecture & Credits</h2>
+            <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">Fan Project &amp; Data Sources</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-10">

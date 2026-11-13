@@ -334,7 +334,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
               <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-100/60 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10">
                 <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-sans">
                   {objekt.description ||
-                    "Authentic collectible photocard issued in MODHAUS COSMO decentralized fan network. Ownable, tradable, and eligible for Grand Gravity governance voting."}
+                    "Official tripleS collectible photocard on COSMO : the Gate. Collect Objekts to earn COMO and vote in Grand Gravity."}
                 </p>
               </div>
 
@@ -378,10 +378,10 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-200/60 dark:border-white/5">
                   <span className="text-zinc-500 dark:text-zinc-400">
-                    Governance / COMO:
+                    COMO:
                   </span>
                   <span className="text-zinc-900 dark:text-[#D4FF00] font-bold">
-                    {objekt.comoAmount ? `+${objekt.comoAmount} COMO` : "+1 COMO Vote Power"}
+                    {objekt.comoAmount ? `+${objekt.comoAmount} COMO` : "+1 COMO"}
                   </span>
                 </div>
 

@@ -52,6 +52,10 @@ function getUnitLink(unit?: string): { href: string; label: string } | null {
   if (unit.includes("Glow")) return { href: "/sub-units/glow", label: "Glow" }
   if (unit.includes("Vision@ry Vision") || unit.includes("Visionary Vision")) return { href: "/sub-units/visionary-vision", label: "Visionary Vision" }
   if (unit.includes("Hatch")) return { href: "/sub-units/hatchi", label: "∞! (Hatch!)" }
+  if (unit.includes("Moon")) return { href: "/sub-units/moon", label: "Moon (msnz)" }
+  if (unit.includes("Sun")) return { href: "/sub-units/sun", label: "Sun (msnz)" }
+  if (unit.includes("Neptune")) return { href: "/sub-units/neptune", label: "Neptune (msnz)" }
+  if (unit.includes("Zenith")) return { href: "/sub-units/zenith", label: "Zenith (msnz)" }
   if (unit.includes("msnz")) return { href: "/sub-units", label: "msnz Project" }
   return null
 }
@@ -226,7 +230,7 @@ export default function AlbumsClient() {
                 {/* Tactile Vinyl Disc sliding out */}
                 <div
                   aria-hidden="true"
-                  className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[8%] group-hover:translate-x-[16%] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] z-0"
+                  className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[8%] group-hover:translate-x-[16%] transition-transform duration-700 ease-out-expo shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] z-0"
                   style={{
                     background: "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
                   }}
@@ -465,7 +469,7 @@ export default function AlbumsClient() {
                       {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
                       <div
                         aria-hidden="true"
-                        className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)] z-0"
+                        className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-500 ease-out-expo shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)] z-0"
                         style={{
                           background:
                             "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
@@ -605,7 +609,7 @@ export default function AlbumsClient() {
                           {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
                           <div
                             aria-hidden="true"
-                            className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] z-0"
+                            className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-700 ease-out-expo shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] z-0"
                             style={{
                               background:
                                 "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",

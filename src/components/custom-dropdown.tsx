@@ -85,7 +85,7 @@ export default function CustomDropdown<T extends string = string>({
         onClick={() => setIsOpen((prev) => !prev)}
         className={`w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-all text-xs font-mono select-none ${
           isOpen
-            ? "bg-white dark:bg-[#151518] border-zinc-400 dark:border-zinc-600 shadow-md text-zinc-900 dark:text-white"
+            ? "bg-white dark:bg-[#151518] border-zinc-950 dark:border-[#D4FF00] shadow-sm text-zinc-900 dark:text-white"
             : "bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800/90 text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 dark:hover:border-zinc-700 shadow-sm"
         }`}
       >
@@ -136,7 +136,7 @@ export default function CustomDropdown<T extends string = string>({
                     }`}
                   >
                     <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                      <span className="text-xs sm:text-sm font-pretendard font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
+                      <span className="text-xs sm:text-sm font-sans font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
                         {option.label}
                       </span>
                       {option.subLabel && (
@@ -146,9 +146,9 @@ export default function CustomDropdown<T extends string = string>({
                       )}
                     </div>
 
-                    {/* Active Accent Dot (Purple/Theme) */}
+                    {/* Active Accent Dot (Carbon/Voltage Dual Theme) */}
                     {isSelected && (
-                      <span className="h-2 w-2 rounded-full bg-purple-600 dark:bg-[#8B5CF6] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+                      <span className="h-2 w-2 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0 shadow-xs" />
                     )}
                   </button>
                 );

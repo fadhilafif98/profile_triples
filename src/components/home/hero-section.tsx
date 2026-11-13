@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import gsap from "gsap"
 import { useReducedMotion } from "motion/react"
+import WavWordmark from "@/components/wav-wordmark"
 
 export default function HeroSection() {
   const containerRef = useRef<HTMLElement>(null)
@@ -21,7 +22,7 @@ export default function HeroSection() {
     gsap.to(imageRef.current, {
       x: x * 12,
       y: y * 12,
-      scale: 1.02,
+      scale: 1.03,
       duration: 1.2,
       ease: "power2.out",
     })
@@ -32,13 +33,12 @@ export default function HeroSection() {
     gsap.to(imageRef.current, {
       x: 0,
       y: 0,
-      scale: 1,
+      scale: 1.01,
       duration: 1.4,
       ease: "power2.out",
     })
   }
 
-  // Entrance animation respecting user prefers-reduced-motion
   useEffect(() => {
     if (shouldReduceMotion || !containerRef.current) return
 
@@ -52,15 +52,15 @@ export default function HeroSection() {
       )
         .fromTo(
           ".hero-main-title",
-          { opacity: 0, y: 28 },
-          { opacity: 1, y: 0, duration: 1.0 },
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.95 },
           "-=0.55"
         )
         .fromTo(
           ".hero-bottom-bar",
           { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 0.8 },
-          "-=0.6"
+          { opacity: 1, y: 0, duration: 0.75 },
+          "-=0.55"
         )
     }, containerRef)
 
@@ -73,34 +73,35 @@ export default function HeroSection() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       aria-labelledby="hero-main-heading"
-      className="relative h-[100dvh] min-h-[100dvh] w-full flex flex-col justify-end overflow-hidden select-none"
+      className="relative h-[100dvh] min-h-[100dvh] w-full flex flex-col justify-end overflow-hidden select-none bg-zinc-950"
     >
-      {/* ── 1. Full-Viewport 24-Member Group Photo with Screen Reader Context ── */}
+      {/* Full-Viewport 24-Member Group Portrait */}
       <div
         ref={imageRef}
         aria-hidden="true"
         className="absolute inset-0 z-0 will-change-transform scale-[1.01] origin-center"
       >
         <Image
-          src="/home/triples_group_3000.jpg"
+          src="/home/triples_hero.jpg"
           alt="tripleS 24-member full group assemble portrait"
           fill
           priority
-          unoptimized
+          sizes="100vw"
+          quality={90}
           className="object-cover object-[center_28%] sm:object-[center_28%] lg:object-[center_25%] brightness-[1.02] contrast-[1.04]"
         />
 
-        {/* Top Vignette: Guarantees WCAG AAA navbar contrast on white/bright portions */}
+        {/* Top Vignette: Preserves fixed navbar legibility */}
         <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
 
-        {/* Subtle Ambient Scrim across entire photo */}
+        {/* Subtle Ambient Scrim */}
         <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
-        {/* Engineered Optical Contrast Well: Ensures > 16:1 text contrast while preserving member visibility */}
+        {/* Optical Contrast Well: Keeps lower-third typography legible without hiding member styling */}
         <div className="absolute inset-x-0 bottom-0 h-[48vh] sm:h-[42vh] bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
       </div>
 
-      {/* Screen Reader Extended Announcement */}
+      {/* Screen Reader Group Roster Context */}
       <div className="sr-only">
         <p className="font-bold">tripleS: The Idol of All Possibilities</p>
         <p>
@@ -108,10 +109,8 @@ export default function HeroSection() {
         </p>
       </div>
 
-      {/* ── 2. Lower-Third Pure Editorial Typography & Brand Anchor ── */}
+      {/* Lower-Third Pure K-Pop Editorial Typography */}
       <div className="relative z-10 w-full px-5 sm:px-8 md:px-12 lg:px-16 pb-6 sm:pb-12 max-w-7xl mx-auto">
-        
-        {/* Semantic Eyebrow with Hangul Subtitle */}
         <div className="hero-eyebrow mb-1.5 sm:mb-2.5">
           <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] uppercase text-zinc-300/90 font-medium flex items-center gap-2">
             <span>The Idol of All Possibilities</span>
@@ -120,7 +119,6 @@ export default function HeroSection() {
           </p>
         </div>
 
-        {/* Balanced Editorial Display Title: Clean Unbounded Proportion */}
         <h1
           id="hero-main-heading"
           className="hero-main-title text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] 2xl:text-[7.5rem] font-black tracking-[-0.04em] leading-[0.9] sm:leading-[0.88] font-display text-white select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
@@ -128,40 +126,38 @@ export default function HeroSection() {
           tripleS
         </h1>
 
-        {/* ── 3. Bottom Accessible Navigation & Dimension Footprint ── */}
         <nav
           aria-label="Hero Dimension Quick Links"
           className="hero-bottom-bar mt-5 sm:mt-8 pt-3.5 sm:pt-5 border-t border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 text-xs font-mono text-zinc-300"
         >
-          {/* Identity & Status Tag */}
           <div className="flex items-center gap-2.5">
             <span
-              className="w-2 h-2 rounded-full bg-[#D4FF00] shrink-0 animate-pulse"
+              className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] shrink-0"
               aria-hidden="true"
             />
             <span className="tracking-widest uppercase font-semibold text-white text-[11px] sm:text-xs">
-              ASSEMBLE24 &bull; 24 MEMBERS COSMOS
+              ASSEMBLE24 &bull; 24 MEMBERS
             </span>
           </div>
 
-          {/* S01-S24 Direct Exploration Link with Full Keyboard Focus Ring (WCAG 2.4.7) */}
-          <div className="flex items-center gap-4 text-zinc-300">
-            <span className="text-[11px] uppercase tracking-wider text-zinc-400 hidden md:inline">
-              Decentralized Fan Governance
+          <div className="flex flex-wrap items-center gap-4 text-zinc-300">
+            <span className="text-[11px] tracking-wider text-zinc-300/85 hidden md:inline-flex items-center gap-2">
+              <span>S1 SeoYeon — S24 JiYeon</span>
+              <span className="text-white/35" aria-hidden="true">&bull;</span>
+              <span>MODHAUS</span>
             </span>
+            <WavWordmark className="h-3.5 text-white/90 hidden sm:inline-block" />
             <Link
               href="/members"
-              className="inline-flex items-center gap-2 text-white hover:text-[#D4FF00] focus-visible:text-[#D4FF00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm transition-colors font-medium underline underline-offset-4 pointer-events-auto text-xs"
+              className="group inline-flex items-center gap-2 text-white hover:text-[#D4FF00] focus-visible:text-[#D4FF00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm transition-colors font-medium underline underline-offset-4 pointer-events-auto text-xs"
               aria-label="Explore all 24 member profiles directory"
             >
               <span>Explore All 24 Members</span>
-              <span aria-hidden="true">&rarr;</span>
+              <span aria-hidden="true" className="inline-block transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
             </Link>
           </div>
         </nav>
-
       </div>
     </section>
   )
 }
-

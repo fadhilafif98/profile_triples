@@ -95,7 +95,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 20px 40px -15px rgba(0, 0, 0, 0.06);
 }
 
-/* LxL Style Spotlight & Bento Card (Theme Aware) */
+/* Spotlight & Bento Card (Theme Aware) */
 .spotlight-card {
   background: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -124,29 +124,22 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  background-image: linear-gradient(#09090B, #09090B);
+  background-position: 100% calc(50% + 0.65em);
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.nav-draw-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #09090B;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+.dark .nav-draw-link {
+  background-image: linear-gradient(#D4FF00, #D4FF00);
 }
 
-.dark .nav-draw-link::after {
-  background-color: #D4FF00;
-}
-
-.nav-draw-link:hover::after,
-.nav-draw-link.active::after {
-  transform: scaleX(1);
-  transform-origin: left;
+.nav-draw-link:hover,
+.nav-draw-link:focus-visible,
+.nav-draw-link.active {
+  background-position: 0% calc(50% + 0.65em);
+  background-size: 100% 2px;
 }
 
 /* Tactile Magnetic Button Hover Wiggle */
@@ -160,7 +153,131 @@
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Cursive Flourish Accent Typography */
+/* ── Standardized Action Buttons & Interactive Tokens ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background-color: #09090B;
+  color: #FFFFFF;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-mono), monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.btn-primary:hover {
+  background-color: #27272A;
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+.btn-primary:focus-visible {
+  outline: 2px solid #09090B;
+  outline-offset: 2px;
+}
+.dark .btn-primary {
+  background-color: #D4FF00;
+  color: #000000;
+}
+.dark .btn-primary:hover {
+  background-color: #E2FF33;
+}
+.dark .btn-primary:focus-visible {
+  outline: 2px solid #D4FF00;
+  outline-offset: 2px;
+}
+
+/* Secondary / Utility Pill Button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  color: #27272A;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.btn-secondary:hover {
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #000000;
+  background-color: #F8F8FA;
+}
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+.btn-secondary:focus-visible {
+  outline: 2px solid #09090B;
+  outline-offset: 2px;
+}
+.dark .btn-secondary {
+  background-color: #0D0D12;
+  color: #E4E4E7;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.dark .btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  background-color: #14141B;
+}
+.dark .btn-secondary:focus-visible {
+  outline: 2px solid #D4FF00;
+  outline-offset: 2px;
+}
+
+/* Category & Filter Tabs */
+.tab-pill-active {
+  background-color: #09090B;
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.dark .tab-pill-active {
+  background-color: #D4FF00;
+  color: #000000;
+}
+.tab-pill-inactive {
+  color: #71717A;
+}
+.tab-pill-inactive:hover {
+  color: #09090B;
+  background-color: #F4F4F6;
+}
+.dark .tab-pill-inactive {
+  color: #A1A1AA;
+}
+.dark .tab-pill-inactive:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dual-Theme Kinetic Indicator Dot */
+.kinetic-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background-color: #09090B;
+  flex-shrink: 0;
+}
+.dark .kinetic-dot {
+  background-color: #D4FF00;
+}
+
+/* Calligraphic Luxury Flourish (Pinyon Script) */
 .font-accent {
   font-family: var(--font-accent), cursive;
 }
@@ -222,12 +339,86 @@ html.lenis {
   scrollbar-width: none;
 }
 
-/* WCAG 2.3.3 Animation from Interactions: Honor reduced motion preference */
+/* Cosmic Stardust Floating Keyframes (Zero Main-Thread JS Overhead) */
+@keyframes stardust-drift {
+  0% {
+    transform: translate3d(0, -10px, 0) scale(0.6) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translate3d(0, -37.5px, 0) scale(1.1) rotate(45deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, -65px, 0) scale(0.7) rotate(90deg);
+    opacity: 0;
+  }
+}
+
+.animate-stardust {
+  animation: stardust-drift ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Hero entrance: pure CSS so it starts before hydration (no flash of visible-then-hidden content)
+   and never hides the LCP image. Stagger is driven per element via --hero-delay. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-settle {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero-rise {
+  animation: hero-rise 700ms cubic-bezier(0.23, 1, 0.32, 1) var(--hero-delay, 0ms) both;
+}
+
+.hero-settle {
+  animation: hero-settle 1600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* WCAG 2.3.3 Animation from Interactions: Honor reduced motion preference while preserving subtle opacity/color state feedback */
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .hero-rise {
+    animation: hero-fade 300ms ease var(--hero-delay, 0ms) both;
+  }
+  .hero-settle {
+    animation: none;
+  }
+  html {
     scroll-behavior: auto !important;
+  }
+  .animate-marquee,
+  .animate-stardust {
+    animation: none !important;
+  }
+  .parallax-card,
+  .btn-magnetic,
+  .btn-arrow,
+  .nav-draw-link::after {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
   }
 }

@@ -86,3 +86,32 @@ export const OFFICIAL_MEMBER_COLORS: Record<number, string> = {
 export function getMemberColor(id: number): string {
   return OFFICIAL_MEMBER_COLORS[id] || "#D4FF00"
 }
+
+/**
+ * Resolves official member portrait image URL using local Andless assets in public/members/.
+ */
+export function getMemberImageUrl(
+  memberOrImage?: { id?: number; image?: string; slug?: string } | string | null
+): string {
+  if (!memberOrImage) return ""
+
+  if (typeof memberOrImage === "string") {
+    if (memberOrImage.startsWith("/") || memberOrImage.startsWith("http")) {
+      return memberOrImage
+    }
+    return ""
+  }
+
+  if (memberOrImage.image) {
+    if (memberOrImage.image.startsWith("/") || memberOrImage.image.startsWith("http")) {
+      return memberOrImage.image
+    }
+  }
+
+  if (memberOrImage.id) {
+    return `/members/s${String(memberOrImage.id).padStart(2, "0")}.jpg`
+  }
+
+  return ""
+}
+

@@ -6,7 +6,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { Member } from "@/types/member"
-import { getAllMembers, getMemberColor } from "@/lib/members"
+import { getAllMembers, getMemberColor, getMemberImageUrl } from "@/lib/members"
 
 const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect: (member: Member) => void }) => {
   const memberColor = getMemberColor(member.id)
@@ -28,7 +28,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
 
       {/* Main portrait image */}
       <Image
-        src={`https://i.imgur.com/${member.image}`}
+        src={getMemberImageUrl(member)}
         alt={`${member.name} (${member.birthName || member.name}) portrait`}
         fill
         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
@@ -183,7 +183,7 @@ export default function MemberGrid() {
 
               {/* Full Portrait Photo */}
               <Image
-                src={`https://i.imgur.com/${selectedMember.image}`}
+                src={getMemberImageUrl(selectedMember)}
                 alt={`${selectedMember.name} (${selectedMember.birthName || selectedMember.name}) photocard portrait`}
                 fill
                 sizes="(max-width: 640px) 360px, 400px"
@@ -198,7 +198,7 @@ export default function MemberGrid() {
                     tripleS
                   </span>
                   <span className="text-[10px] font-mono text-white/60 tracking-wider">
-                    {"// OBJEKT"}
+                    OBJEKT
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-md">

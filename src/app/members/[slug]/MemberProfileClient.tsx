@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import TriplesLogo from "@/components/triples-logo"
 import { Member } from "@/types/member"
-import { members, getMemberBySlug, getMemberColor } from "@/lib/members"
+import { members, getMemberBySlug, getMemberColor, getMemberImageUrl } from "@/lib/members"
 import { getAllSubUnits } from "@/lib/sub-units"
 import Breadcrumb from "@/components/breadcrumb"
 
@@ -28,6 +28,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24 Leader)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25 Leader)",
     "2025.11 msnz ‘Beyond Beauty’ (neptune)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26 Leader)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   2: [
     "2022.11 Acid Angel from Asia ‘Generation’ (ACCESS)",
@@ -37,6 +40,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’ (Performante)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   3: [
     "2023.02 tripleS ‘Rising’ (ASSEMBLE)",
@@ -47,6 +53,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.11 ∞! (Hatchi!) ‘Untitled’ (Japan Debut)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   4: [
     "2023.02 tripleS ‘Rising’ (ASSEMBLE)",
@@ -57,6 +66,10 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.11 ∞! (Hatchi!) ‘Untitled’ (Japan Debut)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   5: [
     "2022.11 Acid Angel from Asia ‘Generation’ (Leader)",
@@ -67,6 +80,10 @@ const careerMap: Record<number, string[]> = {
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   6: [
     "2023.02 tripleS ‘Rising’ (ASSEMBLE)",
@@ -76,6 +93,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   7: [
     "2022.11 Acid Angel from Asia ‘Generation’",
@@ -86,6 +106,9 @@ const careerMap: Record<number, string[]> = {
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2024.12 Kim NaKyoung Solo Digital Single ‘Closer’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   8: [
     "2022.11 Acid Angel from Asia ‘Generation’",
@@ -95,6 +118,8 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   9: [
     "2023.02 tripleS ‘Rising’ (ASSEMBLE)",
@@ -103,6 +128,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   10: [
     "2023.02 tripleS ‘Rising’ (ASSEMBLE)",
@@ -110,6 +138,9 @@ const careerMap: Record<number, string[]> = {
     "2024.01 Aria ‘Door’ (Leader)",
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   11: [
     "2023.10 EVOLution ‘Invincible’",
@@ -118,12 +149,18 @@ const careerMap: Record<number, string[]> = {
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.10 ∞! (Hatchi!) ‘SecretHimitsuBimil’",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   12: [
     "2023.10 EVOLution ‘Invincible’",
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   13: [
     "2023.08 LOVElution ‘Girls' Capitalism’",
@@ -131,6 +168,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   14: [
     "2023.06 +(KR)ystal Eyes ‘Touch+’ (Featuring/Producer)",
@@ -138,6 +178,9 @@ const careerMap: Record<number, string[]> = {
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   15: [
     "2023.08 LOVElution ‘Girls' Capitalism’",
@@ -145,6 +188,9 @@ const careerMap: Record<number, string[]> = {
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.11 msnz ‘Beyond Beauty’ (Leader)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   16: [
     "2023.10 EVOLution ‘Invincible’",
@@ -152,22 +198,33 @@ const careerMap: Record<number, string[]> = {
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.10 ∞! (Hatchi!) ‘SecretHimitsuBimil’",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   17: [
     "2023.12 tripleS NXT ‘Just Do It’",
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   18: [
     "2023.12 tripleS NXT ‘Just Do It’",
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   19: [
     "2023.12 tripleS NXT ‘Just Do It’",
     "2024.05 tripleS ‘Girls Never Die’ (ASSEMBLE24)",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   20: [
     "2023.12 tripleS NXT ‘Just Do It’",
@@ -175,28 +232,45 @@ const careerMap: Record<number, string[]> = {
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.10 ∞! (Hatchi!) ‘SecretHimitsuBimil’",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   21: [
     "2024.06 tripleS Glow ‘Inner Dance’",
     "2024.11 ∞! (Hatchi!) ‘Untitled’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.10 ∞! (Hatchi!) ‘SecretHimitsuBimil’",
+    "2026.02 ∞! (Hatchi!) ‘Tokimetick’",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.09 msnz Sun ‘DNA’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   22: [
     "2024.06 tripleS Glow ‘Inner Dance’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.11 msnz ‘Beyond Beauty’ (moon Leader)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   23: [
     "2024.06 tripleS Glow ‘Inner Dance’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.11 msnz ‘Beyond Beauty’ (neptune)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.10 msnz Neptune ‘Welcome to Heaven’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
   24: [
     "2024.06 tripleS Glow ‘Inner Dance’",
     "2024.10 Visionary Vision ‘Hit the Floor’",
     "2025.05 tripleS ‘Are You Alive’ (ASSEMBLE25)",
     "2025.11 msnz ‘Beyond Beauty’ (moon)",
+    "2026.06 tripleS ‘Baby Flower’ (ASSEMBLE26)",
+    "2026.08 msnz Moon ‘Dream Dress’",
+    "2026.10 tripleS ‘ANDLESS’ 4th World Tour",
   ],
 }
 
@@ -419,13 +493,13 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               className="lg:col-span-5"
             >
               <div
-                onClick={() => setActivePhoto(`https://i.imgur.com/${member.image}`)}
+                onClick={() => setActivePhoto(getMemberImageUrl(member))}
                 className="spotlight-card group relative aspect-[3/4] w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden shadow-md border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0D0D12] cursor-zoom-in"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    setActivePhoto(`https://i.imgur.com/${member.image}`)
+                    setActivePhoto(getMemberImageUrl(member))
                   }
                 }}
                 aria-label={`Enlarge official portrait photo of ${member.name}`}
@@ -451,7 +525,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
                 {/* Portrait Image */}
                 <Image
-                  src={`https://i.imgur.com/${member.image}`}
+                  src={getMemberImageUrl(member)}
                   alt={`${member.name} (${member.birthName || member.name}) official profile portrait`}
                   fill
                   priority
@@ -554,10 +628,10 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     </dd>
                   </div>
 
-                  {/* 2. Homeland & Origin */}
+                  {/* 2. Birthplace & Nationality */}
                   <div className="space-y-1">
                     <dt className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-semibold">
-                      Homeland &amp; Origin
+                      Birthplace &amp; Nationality
                     </dt>
                     <dd className="text-sm sm:text-base font-bold text-zinc-950 dark:text-white flex items-baseline gap-2">
                       <span className="truncate">{member.birthplace || member.nationality}</span>
@@ -597,7 +671,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-semibold">
-                    Active Formations &bull; {matchedUnits.length} Units
+                    Dimensions &bull; {matchedUnits.length} Units
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -645,25 +719,25 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10">
             <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight flex items-baseline gap-2.5">
-              <span>Trajectory &amp; Lore</span>
+              <span>Career &amp;</span>
               <span className="font-accent text-xl sm:text-2xl font-normal text-zinc-500 dark:text-zinc-400">
-                chronicles
+                Facts
               </span>
             </h2>
             <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1 uppercase tracking-wider">
-              Discography Milestones &bull; Unit Formations &bull; Archival Field Notes
+              Releases &bull; Dimensions &bull; SIGNAL Trivia
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            {/* Left: Career Chronology (Timeline) */}
+            {/* Left: Career Timeline */}
             <div className="lg:col-span-7 space-y-5">
               <div>
                 <h3 className="text-lg font-bold font-display text-zinc-950 dark:text-white tracking-tight">
-                  Career Chronology
+                  Career Timeline
                 </h3>
                 <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  Chronological release trajectory and unit activations
+                  Album releases, Dimension debuts, and world tours
                 </p>
               </div>
 
@@ -699,18 +773,18 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               )}
             </div>
 
-            {/* Right: Curated Lore & Field Notes */}
+            {/* Right: Member Trivia & Facts */}
             <div className="lg:col-span-5 space-y-5">
               <div>
                 <h3 className="text-lg font-bold font-display text-zinc-950 dark:text-white tracking-tight">
-                  Archival Lore &amp; Notes
+                  Member Trivia &amp; Facts
                 </h3>
                 <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  Official MODHAUS trivia and Signal memories
+                  Official profile facts and SIGNAL highlights
                 </p>
               </div>
 
-              {/* Signal Reveal Dispatch Card */}
+              {/* SIGNAL Reveal Highlight Card */}
               {member.funFacts && member.funFacts[0] && (
                 <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10 shadow-sm relative overflow-hidden">
                   <div
@@ -724,7 +798,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       aria-hidden="true"
                     />
                     <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-semibold">
-                      Signal Reveal Dispatch
+                      SIGNAL Reveal Highlight
                     </span>
                   </div>
                   <blockquote className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-sans italic">
@@ -764,26 +838,26 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               Visual Archive
             </h2>
             <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1 uppercase tracking-wider">
-              Concept Photography &bull; Live Motion Capture &bull; Digital Collectibles
+              Concept Photography &bull; SIGNAL Moments &bull; Digital Objekts
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* 1. Official Concept Portrait */}
             <div
-              onClick={() => setActivePhoto(`https://i.imgur.com/${member.image}`)}
+              onClick={() => setActivePhoto(getMemberImageUrl(member))}
               className="spotlight-card relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  setActivePhoto(`https://i.imgur.com/${member.image}`)
+                  setActivePhoto(getMemberImageUrl(member))
                 }
               }}
               aria-label={`Enlarge official concept photo of ${member.name}`}
             >
               <Image
-                src={`https://i.imgur.com/${member.image}`}
+                src={getMemberImageUrl(member)}
                 alt={`${member.name} official concept portrait`}
                 fill
                 loading="lazy"
@@ -817,7 +891,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               >
                 <img
                   src={`https://i.giphy.com/media/v1.${member.gif}`}
-                  alt={`${member.name} daily live motion clip`}
+                  alt={`${member.name} daily SIGNAL clip`}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-3.5 left-3.5">
@@ -827,7 +901,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   </span>
                 </div>
                 <div className="absolute bottom-3.5 left-4 text-[11px] font-mono text-white drop-shadow-md">
-                  Daily Live Motion Capture
+                  Daily SIGNAL Moment
                 </div>
               </div>
             ) : null}
@@ -861,7 +935,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 </h3>
 
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-sans">
-                  Browse official First Class Objekts, Special Class editions, and seasonal photocards registered in the MODHAUS ecosystem.
+                  Browse {member.name}&apos;s official First Class, Special Class, and Double Class Objekts across all COSMO seasons.
                 </p>
               </div>
 
@@ -1074,7 +1148,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       aria-hidden="true"
                     />
                     <Image
-                      src={`https://i.imgur.com/${m.image}`}
+                      src={getMemberImageUrl(m)}
                       alt={`${m.name} (S${m.id}) profile photo`}
                       fill
                       sizes="(max-width: 640px) 130px, 180px"

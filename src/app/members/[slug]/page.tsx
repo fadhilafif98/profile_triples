@@ -1,6 +1,6 @@
 import { use } from "react"
 import { notFound } from "next/navigation"
-import { getMemberBySlug } from "@/utils/members"
+import { getMemberBySlug, getMemberImageUrl } from "@/utils/members"
 import MemberProfileClient from "./MemberProfileClient"
 import type { Metadata } from "next"
 
@@ -19,6 +19,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${member.name} (${member.mbti}) | tripleS Member Profile`
   const description = `Explore full profile, roles, and stats for tripleS member ${member.name} (${member.representativeEmoji}). Role: ${member.role}. Nationality: ${member.nationality}.`
+  const rawImageUrl = getMemberImageUrl(member)
+  const fullImageUrl = rawImageUrl.startsWith("http")
+    ? rawImageUrl
+    : `https://profile-triples.vercel.app${rawImageUrl.startsWith("/") ? "" : "/"}${rawImageUrl}`
 
   return {
     title,
@@ -30,7 +34,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName: "tripleS Profile DB",
       images: [
         {
-          url: `https://i.imgur.com/${member.image}`,
+          url: fullImageUrl,
           alt: `${member.name} Profile Photo`,
         },
       ],
@@ -41,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: "summary_large_image",
       title,
       description,
-      images: [`https://i.imgur.com/${member.image}`],
+      images: [fullImageUrl],
     },
   }
 }

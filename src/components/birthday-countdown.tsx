@@ -1,235 +1,247 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { RefreshCcw, RefreshCwOff, ArrowRight, Cake } from "lucide-react"
-import type { Member } from "@/utils/members"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowUpRight,
+  Cake,
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+} from "lucide-react";
+import { OFFICIAL_MEMBER_COLORS, getMemberImageUrl } from "@/lib/members";
+import type { Member } from "@/types/member";
 
 interface BirthdayCountdownProps {
-  members: Member[]
+  members: Member[];
 }
 
 interface MemberBirthdayMeta extends Member {
-  nextBirthday: Date
-  daysUntil: number
-  isToday: boolean
-  isRecent: boolean
-  daysSince: number
-  turningAge: number
-  formattedDate: string
-  birthMonth: number
-  birthDay: number
-  isThisMonth: boolean
-  hasPassedThisYear: boolean
+  nextBirthday: Date;
+  daysUntil: number;
+  isToday: boolean;
+  turningAge: number;
+  formattedDate: string;
+  shortDate: string;
+  birthMonth: number;
+  birthDay: number;
+  isThisMonth: boolean;
+  hasPassedThisYear: boolean;
 }
 
-// 8 lightweight GPU-accelerated Stardust particles (zero CPU overhead for mobile)
-const STARDUST_PARTICLES = [
-  { left: "12%", top: "75%", size: "text-xs", delay: 0, duration: 4.2 },
-  { left: "28%", top: "65%", size: "text-[10px]", delay: 1.4, duration: 4.8 },
-  { left: "48%", top: "80%", size: "text-sm", delay: 0.6, duration: 3.9 },
-  { left: "68%", top: "70%", size: "text-xs", delay: 2.2, duration: 4.5 },
-  { left: "82%", top: "75%", size: "text-sm", delay: 1.1, duration: 4.6 },
-  { left: "92%", top: "60%", size: "text-[10px]", delay: 2.7, duration: 3.7 },
-  { left: "22%", top: "35%", size: "text-xs", delay: 3.1, duration: 4.1 },
-  { left: "78%", top: "30%", size: "text-xs", delay: 1.8, duration: 4.3 },
-]
-
-function CosmicStardust() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl z-0" aria-hidden="true">
-      {STARDUST_PARTICLES.map((p, i) => (
-        <motion.span
-          key={i}
-          initial={{ y: 0, opacity: 0, scale: 0.6 }}
-          animate={{
-            y: [-10, -65],
-            opacity: [0, 0.85, 0],
-            scale: [0.6, 1.1, 0.7],
-            rotate: [0, 45, 90],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            delay: p.delay,
-            ease: "easeInOut",
-          }}
-          style={{ left: p.left, top: p.top }}
-          className={`absolute text-amber-400 dark:text-amber-300 select-none ${p.size}`}
-        >
-          ✦
-        </motion.span>
-      ))}
-    </div>
-  )
+function getContrastingInk(hex: string): string {
+  const clean = hex.replace("#", "");
+  if (clean.length !== 6) return "#FFFFFF";
+  const r = parseInt(clean.slice(0, 2), 16) || 0;
+  const g = parseInt(clean.slice(2, 4), 16) || 0;
+  const b = parseInt(clean.slice(4, 6), 16) || 0;
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 155 ? "#09090B" : "#FFFFFF";
 }
 
-// 24 Official Member Colors (MODHAUS Identity from GEMINI.md)
-const MEMBER_ACCENTS: Record<number, { hex: string; name: string; border: string; glow: string }> = {
-  1: { hex: "#17A7FE", name: "Azure Blue", border: "rgba(23,167,254,0.45)", glow: "rgba(23,167,254,0.18)" },
-  2: { hex: "#8801FF", name: "Electric Violet", border: "rgba(136,1,255,0.45)", glow: "rgba(136,1,255,0.18)" },
-  3: { hex: "#FFD800", name: "Warm Yellow", border: "rgba(255,216,0,0.5)", glow: "rgba(255,216,0,0.18)" },
-  4: { hex: "#76C722", name: "Leaf Green", border: "rgba(118,199,34,0.45)", glow: "rgba(118,199,34,0.18)" },
-  5: { hex: "#D10A70", name: "Vivid Magenta", border: "rgba(209,10,112,0.45)", glow: "rgba(209,10,112,0.18)" },
-  6: { hex: "#FF95C8", name: "Soft Pink", border: "rgba(255,149,200,0.45)", glow: "rgba(255,149,200,0.18)" },
-  7: { hex: "#538FC8", name: "Cerulean Blue", border: "rgba(83,143,200,0.45)", glow: "rgba(83,143,200,0.18)" },
-  8: { hex: "#FF8AB8", name: "Blush Rose", border: "rgba(255,138,184,0.45)", glow: "rgba(255,138,184,0.18)" },
-  9: { hex: "#FFA947", name: "Bright Tangerine", border: "rgba(255,169,71,0.45)", glow: "rgba(255,169,71,0.18)" },
-  10: { hex: "#FF73B3", name: "Neon Rose", border: "rgba(255,115,179,0.45)", glow: "rgba(255,115,179,0.18)" },
-  11: { hex: "#FFF554", name: "Lemon Yellow", border: "rgba(255,245,84,0.5)", glow: "rgba(255,245,84,0.18)" },
-  12: { hex: "#4243A2", name: "Deep Indigo", border: "rgba(66,67,162,0.5)", glow: "rgba(66,67,162,0.2)" },
-  13: { hex: "#FF9649", name: "Sunset Orange", border: "rgba(255,150,73,0.45)", glow: "rgba(255,150,73,0.18)" },
-  14: { hex: "#2255A4", name: "Midnight Navy", border: "rgba(34,85,164,0.5)", glow: "rgba(34,85,164,0.2)" },
-  15: { hex: "#D51312", name: "Scarlet Red", border: "rgba(213,19,18,0.45)", glow: "rgba(213,19,18,0.18)" },
-  16: { hex: "#F88059", name: "Coral Apricot", border: "rgba(248,128,89,0.45)", glow: "rgba(248,128,89,0.18)" },
-  17: { hex: "#7EAEF5", name: "Sky Glaze", border: "rgba(126,174,245,0.45)", glow: "rgba(126,174,245,0.18)" },
-  18: { hex: "#C9FF50", name: "Lime Volt", border: "rgba(201,255,80,0.5)", glow: "rgba(201,255,80,0.2)" },
-  19: { hex: "#85E3B3", name: "Sea Mint", border: "rgba(133,227,179,0.45)", glow: "rgba(133,227,179,0.18)" },
-  20: { hex: "#FFAFD3", name: "Cherry Blossom", border: "rgba(255,175,211,0.45)", glow: "rgba(255,175,211,0.18)" },
-  21: { hex: "#BEE6B5", name: "Pale Pistachio", border: "rgba(190,230,181,0.45)", glow: "rgba(190,230,181,0.18)" },
-  22: { hex: "#FD82B8", name: "Bubblegum Pink", border: "rgba(253,130,184,0.45)", glow: "rgba(253,130,184,0.18)" },
-  23: { hex: "#E2E8F0", name: "Pure Pearl", border: "rgba(226,232,240,0.5)", glow: "rgba(226,232,240,0.2)" },
-  24: { hex: "#C99DF3", name: "Cosmic Lilac", border: "rgba(201,157,243,0.45)", glow: "rgba(201,157,243,0.18)" },
+function getVisibleSwatch(hex: string): string {
+  const upper = hex.toUpperCase();
+  if (upper === "#FFFFFF" || upper === "#FFECF3") return "#A1A1AA";
+  return hex;
 }
 
-// Generate consistent celebration message
-const getBirthdayMessage = (member: Member): string => {
-  const messages = [
-    `Happy Birthday to our incredible ${member.role || "member"}, ${member.name}! 🎉 Wishing you boundless joy, good health, and memorable moments!`,
-    `Today we celebrate ${member.name}'s special day! 🎂 Thank you for illuminating tripleS with your talent and charm!`,
-    `It's ${member.name}'s birthday! 🎈 May your new year be as radiant and inspiring as your stage performances!`,
-    `Happy Birthday, ${member.name}! 💖 Your hard work and dedication continue to inspire WAV all around the world!`,
-    `Celebrating the birth of our wonderful ${member.name}! 🌟 Here's to another unforgettable year in the cosmos!`,
-  ]
-  return messages[member.id % messages.length]
-}
-
-// Compute deterministic birthday metadata for a member
-const computeBirthdayMeta = (member: Member, now: Date): MemberBirthdayMeta | null => {
-  if (!member.birthday) return null
-  const [bYear, bMonth, bDay] = member.birthday.split("-").map(Number)
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1
-  const todayMidnight = new Date(currentYear, now.getMonth(), now.getDate())
-
-  const thisYearBirthday = new Date(currentYear, bMonth - 1, bDay)
-  const isToday = thisYearBirthday.getTime() === todayMidnight.getTime()
-  const hasPassedThisYear = thisYearBirthday < todayMidnight && !isToday
-  const isThisMonth = bMonth === currentMonth
-
-  let nextBirthday = thisYearBirthday
-  if (hasPassedThisYear) {
-    nextBirthday = new Date(currentYear + 1, bMonth - 1, bDay)
+function getOrdinalSuffix(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1:
+      return `${n}st`;
+    case 2:
+      return `${n}nd`;
+    case 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
   }
+}
 
-  const daysUntil = isToday ? 0 : Math.round((nextBirthday.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24))
-  
-  const lastBirthday = new Date(nextBirthday)
-  if (!isToday) {
-    lastBirthday.setFullYear(lastBirthday.getFullYear() - 1)
-  }
-  const daysSince = Math.floor((todayMidnight.getTime() - lastBirthday.getTime()) / (1000 * 60 * 60 * 24))
-  const isRecent = daysSince >= 0 && daysSince <= 7
+function computeBirthdayMeta(
+  member: Member,
+  now: Date
+): MemberBirthdayMeta | null {
+  if (!member.birthday) return null;
+  const [bYear, bMonth, bDay] = member.birthday.split("-").map(Number);
+  if (!bYear || !bMonth || !bDay) return null;
 
-  const displayDate = (isThisMonth && hasPassedThisYear) ? thisYearBirthday : nextBirthday
-  const turningAge = displayDate.getFullYear() - bYear
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const todayMidnight = new Date(currentYear, now.getMonth(), now.getDate());
+
+  const thisYearBirthday = new Date(currentYear, bMonth - 1, bDay);
+  const isToday = thisYearBirthday.getTime() === todayMidnight.getTime();
+  const hasPassedThisYear = thisYearBirthday < todayMidnight && !isToday;
+  const isThisMonth = bMonth === currentMonth;
+
+  const nextBirthday = hasPassedThisYear
+    ? new Date(currentYear + 1, bMonth - 1, bDay)
+    : thisYearBirthday;
+
+  const daysUntil = isToday
+    ? 0
+    : Math.round(
+        (nextBirthday.getTime() - todayMidnight.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+  const displayDate =
+    isThisMonth && hasPassedThisYear ? thisYearBirthday : nextBirthday;
+  const turningAge = displayDate.getFullYear() - bYear;
+
   const formattedDate = displayDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
-  })
+  });
+
+  const shortDate = displayDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 
   return {
     ...member,
     nextBirthday,
     daysUntil,
     isToday,
-    isRecent,
-    daysSince,
     turningAge,
     formattedDate,
+    shortDate,
     birthMonth: bMonth,
     birthDay: bDay,
     isThisMonth,
     hasPassedThisYear,
-  }
+  };
 }
 
 export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null)
-  const [viewCelebration, setViewCelebration] = useState(true)
-  const [autoRotate, setAutoRotate] = useState(true)
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState<Date>(() => new Date());
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
-  const now = useMemo(() => new Date(), [])
-  const currentMonthName = useMemo(() => {
-    return now.toLocaleDateString("en-US", { month: "long" })
-  }, [now])
+  const queueRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const drag = useRef({
+    down: false,
+    startX: 0,
+    scrollLeft: 0,
+    moved: false,
+  });
 
-  // Process all members sorted by closest upcoming birthday
+  useEffect(() => {
+    setMounted(true);
+    setNow(new Date());
+  }, []);
+
+  const currentMonthName = useMemo(
+    () => now.toLocaleDateString("en-US", { month: "long" }),
+    [now]
+  );
+
   const processedMembers = useMemo(() => {
-    const nowDate = new Date()
     return members
-      .map((m) => computeBirthdayMeta(m, nowDate))
+      .map((m) => computeBirthdayMeta(m, now))
       .filter((m): m is MemberBirthdayMeta => m !== null)
-      .sort((a, b) => a.daysUntil - b.daysUntil)
-  }, [members])
+      .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
+  }, [members, now]);
 
-  // Active birthday members (today)
-  const todayMembers = useMemo(() => {
-    return processedMembers.filter((m) => m.isToday)
-  }, [processedMembers])
+  const { rosterQueue, priorityQueue, defaultMember } = useMemo(() => {
+    const todayMembers = processedMembers.filter((m) => m.isToday);
+    const sameMonthUpcoming = processedMembers
+      .filter((m) => m.isThisMonth && !m.hasPassedThisYear && !m.isToday)
+      .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
+    const sameMonthPassed = processedMembers
+      .filter((m) => m.isThisMonth && m.hasPassedThisYear && !m.isToday)
+      .sort((a, b) => a.birthDay - b.birthDay || a.id - b.id);
+    const imminentNext30 = processedMembers
+      .filter((m) => !m.isThisMonth && m.daysUntil > 0 && m.daysUntil <= 30)
+      .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
 
-  // This current month's celebrants
-  const currentMonthCelebrants = useMemo(() => {
-    return processedMembers
-      .filter((m) => m.isThisMonth)
-      .sort((a, b) => a.birthDay - b.birthDay)
-  }, [processedMembers])
-
-  // Imminent upcoming birthdays (<= 30 days ahead and not passed this month)
-  const imminentUpcoming = useMemo(() => {
-    return processedMembers
-      .filter((m) => m.daysUntil > 0 && m.daysUntil <= 30)
-      .sort((a, b) => a.daysUntil - b.daysUntil)
-  }, [processedMembers])
-
-  // Combined Active Pipeline Queue
-  const pipelineQueue = useMemo(() => {
-    const list = [...currentMonthCelebrants]
-    imminentUpcoming.forEach((imm) => {
-      if (!list.some((item) => item.id === imm.id)) {
-        list.push(imm)
+    const priority: MemberBirthdayMeta[] = [];
+    const seenPriority = new Set<number>();
+    const addPriority = (list: MemberBirthdayMeta[]) => {
+      for (const item of list) {
+        if (!seenPriority.has(item.id)) {
+          seenPriority.add(item.id);
+          priority.push(item);
+        }
       }
-    })
-    if (list.length === 0) return processedMembers.slice(0, 4)
-    return list
-  }, [currentMonthCelebrants, imminentUpcoming, processedMembers])
+    };
 
-  // Determine active member
+    addPriority(todayMembers);
+    addPriority(sameMonthUpcoming);
+    addPriority(imminentNext30);
+    addPriority(sameMonthPassed);
+    if (priority.length === 0) {
+      addPriority(processedMembers.slice(0, 4));
+    }
+
+    const roster: MemberBirthdayMeta[] = [];
+    const seenRoster = new Set<number>();
+    const addRoster = (list: MemberBirthdayMeta[]) => {
+      for (const item of list) {
+        if (!seenRoster.has(item.id)) {
+          seenRoster.add(item.id);
+          roster.push(item);
+        }
+      }
+    };
+
+    addRoster(todayMembers);
+    addRoster(sameMonthUpcoming);
+    addRoster(imminentNext30);
+    addRoster(sameMonthPassed);
+    addRoster(processedMembers);
+
+    const fallbackDefault =
+      todayMembers[0] ??
+      sameMonthUpcoming[0] ??
+      imminentNext30[0] ??
+      sameMonthPassed[0] ??
+      roster[0];
+
+    return {
+      rosterQueue: roster,
+      priorityQueue: priority,
+      defaultMember: fallbackDefault,
+    };
+  }, [processedMembers]);
+
   const activeMember = useMemo(() => {
     if (selectedMemberId !== null) {
-      const found = processedMembers.find((m) => m.id === selectedMemberId)
-      if (found) return found
+      const found = rosterQueue.find((m) => m.id === selectedMemberId);
+      if (found) return found;
     }
-    if (todayMembers.length > 0 && viewCelebration) return todayMembers[0]
-    if (imminentUpcoming.length > 0) return imminentUpcoming[0]
-    if (currentMonthCelebrants.length > 0) return currentMonthCelebrants[0]
-    return processedMembers[0]
-  }, [selectedMemberId, todayMembers, viewCelebration, imminentUpcoming, currentMonthCelebrants, processedMembers])
+    return defaultMember;
+  }, [selectedMemberId, rosterQueue, defaultMember]);
 
-  // Timer countdown updater
+  const activeIndex = useMemo(() => {
+    if (!activeMember) return 0;
+    const idx = rosterQueue.findIndex((m) => m.id === activeMember.id);
+    return idx >= 0 ? idx : 0;
+  }, [activeMember, rosterQueue]);
+
   const updateCountdown = useCallback(() => {
-    if (!activeMember) return
-    const nowDate = new Date()
-    const target = new Date(activeMember.nextBirthday)
-    const diff = target.getTime() - nowDate.getTime()
+    if (!activeMember) return;
+    const current = new Date();
+    const diff = activeMember.nextBirthday.getTime() - current.getTime();
 
     if (diff <= 0 || activeMember.isToday) {
-      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
-      return
+      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      return;
     }
 
     setTimeLeft({
@@ -237,429 +249,514 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
       hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
       minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
       seconds: Math.floor((diff % (1000 * 60)) / 1000),
-    })
-  }, [activeMember])
+    });
+  }, [activeMember]);
 
   useEffect(() => {
-    updateCountdown()
-    const interval = setInterval(updateCountdown, 1000)
-    return () => clearInterval(interval)
-  }, [updateCountdown])
+    updateCountdown();
+    const interval = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(interval);
+  }, [updateCountdown]);
 
-  // Auto-rotate within active pipeline queue
   useEffect(() => {
-    if (!autoRotate || pipelineQueue.length <= 1) return
-    const timer = setInterval(() => {
+    if (!autoRotate || priorityQueue.length <= 1) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    const timer = window.setInterval(() => {
       setSelectedMemberId((prev) => {
-        const currentIdx = pipelineQueue.findIndex((m) => m.id === (prev ?? activeMember?.id))
-        const nextIdx = (currentIdx + 1) % pipelineQueue.length
-        return pipelineQueue[nextIdx].id
-      })
-    }, 8000)
-    return () => clearInterval(timer)
-  }, [autoRotate, pipelineQueue, activeMember])
+        const currentId = prev ?? activeMember?.id;
+        const currentIdx = priorityQueue.findIndex((m) => m.id === currentId);
+        const nextIdx = (currentIdx + 1) % priorityQueue.length;
+        return priorityQueue[nextIdx]?.id ?? null;
+      });
+    }, 8000);
 
-  // 24 Member dynamic accent & live interactive wish state
-  const memberAccent = activeMember
-    ? (MEMBER_ACCENTS[activeMember.id] || { hex: "#D4FF00", name: "Acid Voltage", border: "rgba(212,255,0,0.45)", glow: "rgba(212,255,0,0.18)" })
-    : { hex: "#D4FF00", name: "Acid Voltage", border: "rgba(212,255,0,0.45)", glow: "rgba(212,255,0,0.18)" }
+    return () => window.clearInterval(timer);
+  }, [autoRotate, priorityQueue, activeMember]);
 
-  const [wished, setWished] = useState(false)
-  const [wishCount, setWishCount] = useState(128 + (activeMember?.id || 1) * 7)
-
-  // Reset wish state on active member switch
   useEffect(() => {
-    setWished(false)
-    if (activeMember) {
-      setWishCount(128 + activeMember.id * 7)
+    const container = queueRef.current;
+    const item = itemRefs.current[activeIndex];
+    if (!container || !item) return;
+
+    const targetLeft =
+      item.offsetLeft - container.clientWidth / 2 + item.clientWidth / 2;
+    const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+    const clampedLeft = Math.max(0, Math.min(targetLeft, maxScroll));
+
+    if (Math.abs(container.scrollLeft - clampedLeft) < 2) return;
+
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    container.scrollTo({
+      left: clampedLeft,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, [activeIndex]);
+
+  if (!activeMember || rosterQueue.length === 0) return null;
+
+  const officialColor = OFFICIAL_MEMBER_COLORS[activeMember.id] || "#18181B";
+  const sidebandInk = getContrastingInk(officialColor);
+  const sCode = `S${String(activeMember.id).padStart(2, "0")}`;
+  const isTodayCelebrating = activeMember.isToday;
+  const isThisMonthPassed =
+    activeMember.isThisMonth &&
+    activeMember.hasPassedThisYear &&
+    !activeMember.isToday;
+
+  const stepMember = (delta: number) => {
+    const nextIdx =
+      (activeIndex + delta + rosterQueue.length) % rosterQueue.length;
+    setSelectedMemberId(rosterQueue[nextIdx].id);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      stepMember(-1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      stepMember(1);
     }
-  }, [activeMember])
+  };
 
-  const handleWish = () => {
-    if (!wished) {
-      setWished(true)
-      setWishCount((prev) => prev + 1)
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || e.pointerType === "touch") return;
+    const el = queueRef.current;
+    if (!el) return;
+
+    drag.current = {
+      down: true,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!drag.current.down) return;
+    const el = queueRef.current;
+    if (!el) return;
+
+    const delta = e.clientX - drag.current.startX;
+    if (Math.abs(delta) > 5) {
+      drag.current.moved = true;
     }
-  }
+    if (drag.current.moved) {
+      el.scrollLeft = drag.current.scrollLeft - delta;
+    }
+  };
 
-  if (!activeMember) return null
+  const endDrag = () => {
+    drag.current.down = false;
+    if (drag.current.moved) {
+      window.setTimeout(() => {
+        drag.current.moved = false;
+      }, 0);
+    }
+  };
 
-  const isTodayCelebrating = activeMember.isToday
-  const isThisMonthPassed = activeMember.isThisMonth && activeMember.hasPassedThisYear && !activeMember.isToday
-  const isCountdownActive = activeMember.daysUntil > 0 && activeMember.daysUntil <= 30 && !isThisMonthPassed
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
 
   return (
-    <div className="relative w-full py-4 sm:py-6">
-      <div className="max-w-5xl mx-auto">
-        {/* Borderless Floating Editorial Layout (No Outer Box, No Nested Card) */}
-        <div className="relative">
-          {/* Ambient Cosmic Member Glow Bleed (No Box Stroke) */}
-          <div
-            className="absolute -top-24 left-1/4 w-[480px] h-[480px] rounded-full blur-[120px] pointer-events-none transition-all duration-1000 opacity-20 dark:opacity-25"
-            style={{ backgroundColor: memberAccent.hex }}
-            aria-hidden="true"
-          />
+    <section
+      id="upcoming-birthdays"
+      aria-labelledby="birthday-heading"
+      onKeyDown={handleKeyDown}
+      className="relative flex flex-col justify-between lg:min-h-[calc(100dvh-4rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 gap-6 lg:gap-8 border-t border-zinc-200 dark:border-white/10 overflow-x-clip"
+    >
+      {/* Top Row: Asymmetrical Editorial Header & Controls */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-2">
+          <h2
+            id="birthday-heading"
+            className="text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]"
+          >
+            Upcoming{" "}
+            <span className="font-accent text-4xl sm:text-5xl lg:text-6xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
+              Birthdays
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl">
+            Count down to the next member birthday across the 24-member roster.
+          </p>
+        </div>
 
-          {isTodayCelebrating && <CosmicStardust />}
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          <span
+            aria-live="polite"
+            suppressHydrationWarning
+            className="font-mono text-xs tabular-nums tracking-[0.14em] text-zinc-500 dark:text-zinc-400 mr-1"
+          >
+            {String(activeIndex + 1).padStart(2, "0")} /{" "}
+            {String(rosterQueue.length).padStart(2, "0")}
+          </span>
 
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center">
-            
-            {/* ── Left Column: Standalone Physical Objekt Collectible Card ── */}
-            <div className="md:col-span-5 flex justify-center">
-              <motion.div
-                key={`photo-${activeMember.id}`}
-                initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="relative aspect-[3/4.25] w-full max-w-[300px] rounded-2xl overflow-hidden p-1.5 transition-all duration-500 group"
-                style={{
-                  background: `linear-gradient(135deg, ${memberAccent.hex} 0%, rgba(255,255,255,0.18) 45%, rgba(0,0,0,0.7) 100%)`,
-                  boxShadow: `0 24px 50px -12px rgba(0,0,0,0.55), 0 0 35px -5px ${memberAccent.glow}`,
-                }}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => stepMember(-1)}
+              aria-label="Previous member birthday"
+              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => stepMember(1)}
+              aria-label="Next member birthday"
+              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setAutoRotate((prev) => !prev)}
+              aria-label={
+                autoRotate ? "Pause queue rotation" : "Play queue rotation"
+              }
+              title={
+                autoRotate ? "Pause queue rotation" : "Play queue rotation"
+              }
+              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+            >
+              {autoRotate ? (
+                <Pause className="w-3.5 h-3.5" />
+              ) : (
+                <Play className="w-3.5 h-3.5" />
+              )}
+            </button>
+          </div>
+
+          <Link
+            href="/members"
+            className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+          >
+            All 24 Members
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Middle Row: 12-Column Unboxed Objekt + Monochrome Countdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto py-1">
+        {/* Left: Unboxed Physical First Class Objekt Card */}
+        <div className="lg:col-span-5 flex justify-center">
+          <div className="relative w-full max-w-[220px] sm:max-w-[250px] lg:max-w-[260px] aspect-[2/3] group">
+            {/* Subtle tight portrait ambient blur */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-5 rounded-3xl opacity-25 dark:opacity-20 blur-2xl overflow-hidden"
+            >
+              <Image
+                src={getMemberImageUrl(activeMember)}
+                alt=""
+                fill
+                sizes="260px"
+                className="object-cover object-top scale-125"
+              />
+            </div>
+
+            {/* Single-Declaration Shadow Frame */}
+            <Link
+              href={`/members/${activeMember.slug}`}
+              aria-label={`View ${sCode} ${activeMember.name} profile`}
+              className="relative z-10 block w-full h-full rounded-2xl overflow-hidden shadow-[0_24px_48px_-18px_rgba(9,9,11,0.45)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+            >
+              <Image
+                src={getMemberImageUrl(activeMember)}
+                alt={`${sCode} ${activeMember.name} First Class Objekt portrait`}
+                fill
+                sizes="(max-width: 640px) 220px, (max-width: 1024px) 250px, 260px"
+                className="object-cover object-top origin-top scale-[1.05] group-hover:scale-[1.07] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+              />
+
+              {/* Official MODHAUS COSMO Vertical Sideband */}
+              <div
+                aria-hidden="true"
+                style={{ backgroundColor: officialColor, color: sidebandInk }}
+                className="pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[26px] flex flex-col items-center justify-between py-4 px-0.5 select-none"
               >
-                {/* Physical Card Inner Core */}
-                <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-zinc-950 border border-black/40">
-                  <Link
-                    href={`/members/${activeMember.slug}`}
-                    className="absolute inset-0 z-30"
-                    aria-label={`View ${activeMember.name}'s profile`}
-                  />
-                  
-                  {/* Photo with Smooth Zoom */}
-                  <Image
-                    src={`https://i.imgur.com/${activeMember.image}`}
-                    alt={`${activeMember.name} (${activeMember.birthName || activeMember.name}) birthday portrait`}
-                    fill
-                    sizes="(max-width: 768px) 300px, 340px"
-                    className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  
-                  {/* Iridescent Foil Sheen Reflection */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/35 pointer-events-none" />
+                <span className="font-mono text-[9px] font-bold tracking-tight">
+                  {sCode}
+                </span>
+                <span
+                  style={{ writingMode: "vertical-rl" }}
+                  className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[160px]"
+                >
+                  {activeMember.name}
+                </span>
+                <span
+                  style={{ writingMode: "vertical-rl" }}
+                  className="rotate-180 font-mono text-[7px] uppercase tracking-[0.2em] opacity-80"
+                >
+                  COSMO
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
 
-                  {/* Top Objekt Header Foil Sheet */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 pointer-events-none">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="px-2 py-0.5 rounded text-[10px] font-mono font-black tracking-widest text-black shadow-sm"
-                        style={{ backgroundColor: memberAccent.hex }}
-                      >
-                        S{activeMember.id.toString().padStart(2, "0")}
-                      </span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider text-white/85 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded border border-white/15">
-                        FIRST CLASS
-                      </span>
-                    </div>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-black/65 backdrop-blur-md border border-white/15 text-white/90 shadow-sm">
-                      {activeMember.representativeEmoji}
+        {/* Right: Borderless Typographic Display (Zero Eyebrow Above H3) */}
+        <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left gap-4 lg:gap-5">
+          <h3 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.04] flex flex-wrap items-baseline justify-center lg:justify-start gap-x-3 gap-y-1">
+            <span>{activeMember.name}</span>
+            {activeMember.hangul ? (
+              <span
+                lang="ko"
+                className="text-xl sm:text-2xl font-sans font-normal text-zinc-400 dark:text-zinc-500"
+              >
+                {activeMember.hangul}
+              </span>
+            ) : null}
+          </h3>
+
+          <p
+            suppressHydrationWarning
+            className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center justify-center lg:justify-start gap-x-2.5 gap-y-1"
+          >
+            <span className="inline-flex items-center gap-1.5 text-zinc-950 dark:text-zinc-200 font-medium">
+              <span
+                className="w-2 h-2 rounded-full border border-black/15 dark:border-white/20 shrink-0"
+                style={{ backgroundColor: officialColor }}
+                aria-hidden="true"
+              />
+              {sCode}
+            </span>
+            <span aria-hidden="true">/</span>
+            <span className="text-zinc-950 dark:text-zinc-200 font-medium">
+              {activeMember.formattedDate}
+            </span>
+            <span aria-hidden="true">/</span>
+            <span>
+              {isThisMonthPassed ? "Turned" : "Turning"}{" "}
+              {activeMember.turningAge}
+            </span>
+            <span aria-hidden="true">/</span>
+            <span>{activeMember.birthplace || activeMember.nationality}</span>
+            <span aria-hidden="true">/</span>
+            {isTodayCelebrating ? (
+              <span className="inline-flex items-center gap-1 text-zinc-950 dark:text-[#D4FF00] font-semibold">
+                <Cake className="w-3.5 h-3.5" aria-hidden="true" />
+                Birthday Today
+              </span>
+            ) : isThisMonthPassed ? (
+              <span className="text-zinc-950 dark:text-[#D4FF00] font-semibold">
+                {currentMonthName} Celebrant
+              </span>
+            ) : (
+              <span className="tabular-nums text-zinc-950 dark:text-[#D4FF00] font-semibold">
+                D-{activeMember.daysUntil}
+              </span>
+            )}
+          </p>
+
+          {/* Monochrome Typographic Countdown Stream / Unboxed Celebration */}
+          <div className="py-1">
+            {isTodayCelebrating ? (
+              <div className="space-y-1.5">
+                <p className="inline-flex items-center gap-2 font-display text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
+                  <Cake
+                    className="w-5 h-5 text-zinc-950 dark:text-[#D4FF00]"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    Happy {getOrdinalSuffix(activeMember.turningAge)} Birthday,{" "}
+                    {activeMember.name}
+                  </span>
+                </p>
+                <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed">
+                  Celebrating {activeMember.name}&apos;s{" "}
+                  {getOrdinalSuffix(activeMember.turningAge)} birthday today
+                  across the tripleS roster.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div
+                  className="flex items-baseline justify-center lg:justify-start gap-3 sm:gap-5 font-mono tabular-nums"
+                  aria-label={`Countdown to ${activeMember.name}'s next birthday`}
+                >
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      suppressHydrationWarning
+                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
+                    >
+                      {mounted ? String(timeLeft.days).padStart(2, "0") : "00"}
+                    </span>
+                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
+                      d
                     </span>
                   </div>
-
-                  {/* Bottom Objekt Spec Foil Label */}
-                  <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-none">
-                    <div className="flex items-end justify-between border-t border-white/20 pt-2 text-white">
-                      <div>
-                        <p className="text-[10px] font-mono tracking-widest uppercase text-white/70">
-                          {activeMember.hangul} &bull; {memberAccent.name}
-                        </p>
-                        <p className="text-lg font-display font-black tracking-tight leading-none text-white drop-shadow-md">
-                          {activeMember.name}
-                        </p>
-                      </div>
-                      <span className="text-[10px] font-mono text-white/90 group-hover:text-white transition-colors flex items-center gap-1 font-semibold bg-white/15 px-2.5 py-1 rounded backdrop-blur-sm">
-                        Dossier <ArrowRight className="h-2.5 w-2.5" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* ── Right Column: Info & Typographic Floating Display ── */}
-            <div className="md:col-span-7 flex flex-col justify-center text-center md:text-left space-y-5">
-              
-              {/* Static Anchor Header */}
-              <div>
-                {/* Top Status Pill & Auto-rotate Toggle */}
-                <div className="flex flex-wrap items-center justify-center md:justify-between gap-3 mb-3">
-                  <div
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider shadow-sm border transition-all ${
-                      isTodayCelebrating
-                        ? "bg-amber-100 dark:bg-amber-950/70 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-200 font-bold"
-                        : isCountdownActive
-                          ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-600/50 text-emerald-800 dark:text-emerald-300 font-bold"
-                          : "bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300"
-                    }`}
+                  <span
+                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
+                    aria-hidden="true"
                   >
-                    {isTodayCelebrating ? (
-                      <>
-                        <Cake className="w-3.5 h-3.5 text-amber-500" />
-                        <span>TODAY&apos;S SOLAR RETURN</span>
-                      </>
-                    ) : isCountdownActive ? (
-                      <>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>COUNTDOWN ACTIVE &bull; D-{activeMember.daysUntil}</span>
-                      </>
-                    ) : isThisMonthPassed ? (
-                      <>
-                        <span className="text-amber-500">✦</span>
-                        <span>{currentMonthName.toUpperCase()} CELEBRANT</span>
-                      </>
-                    ) : (
-                      <>
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: memberAccent.hex }}
-                        />
-                        <span>ORBIT PIPELINE &bull; D-{activeMember.daysUntil}</span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Top Controls: Today star button & Auto rotate */}
-                  <div className="flex items-center gap-2">
-                    {todayMembers.length > 0 && (
-                      <button
-                        onClick={() => {
-                          setSelectedMemberId(todayMembers[0].id)
-                          setViewCelebration(true)
-                        }}
-                        className="px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-xs font-mono text-zinc-800 dark:text-zinc-200 transition-colors shadow-sm"
-                      >
-                        Today&apos;s Star
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => setAutoRotate(!autoRotate)}
-                      title={autoRotate ? "Pause radar rotation" : "Resume radar rotation"}
-                      className={`p-1.5 rounded-full border transition-all shadow-sm ${
-                        autoRotate
-                          ? "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white"
-                          : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
-                      }`}
-                      aria-label="Toggle auto-rotate"
-                    >
-                      {autoRotate ? <RefreshCcw className="h-3.5 w-3.5" /> : <RefreshCwOff className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Animated Member Title & Info Reveal (Fixed Height Container) */}
-                <div className="min-h-[82px] sm:min-h-[90px] flex flex-col justify-center">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={`header-${activeMember.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="flex items-baseline justify-center md:justify-start gap-3">
-                        <h3 className="text-4xl sm:text-5xl md:text-6xl font-display font-extrabold text-zinc-950 dark:text-white tracking-tight">
-                          {activeMember.name}
-                        </h3>
-                        {activeMember.hangul && (
-                          <span className="text-2xl sm:text-3xl font-mono text-zinc-400 dark:text-zinc-500 font-normal">
-                            {activeMember.hangul}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-xs sm:text-sm font-mono text-zinc-600 dark:text-zinc-400 mt-1.5 flex flex-wrap items-center justify-center md:justify-start gap-2">
-                        <span className="font-semibold text-zinc-950 dark:text-white">{activeMember.formattedDate}</span>
-                        <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
-                        <span>{isThisMonthPassed ? "Turned" : activeMember.isToday ? "Turning" : "Turns"} {activeMember.turningAge} years old</span>
-                        <span className="text-zinc-400 dark:text-zinc-600">&bull;</span>
-                        <span>{activeMember.birthplace || activeMember.nationality}</span>
-                      </p>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* ── Typographic Floating Time / Announcement (Strict Fixed Height - Zero Height Jump) ── */}
-              <div className="h-[64px] sm:h-[68px] flex flex-col justify-center">
-                <AnimatePresence mode="wait" initial={false}>
-                  {isTodayCelebrating ? (
-                    <motion.div
-                      key={`today-${activeMember.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="border-l-2 pl-4 text-left"
-                      style={{ borderColor: memberAccent.hex }}
-                    >
-                      <p className="text-[11px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 font-bold mb-0.5">
-                        Solar Return Announcement
-                      </p>
-                      <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 leading-snug font-pretendard line-clamp-2">
-                        &ldquo;{getBirthdayMessage(activeMember)}&rdquo;
-                      </p>
-                    </motion.div>
-                  ) : isCountdownActive ? (
-                    <motion.div
-                      key={`countdown-${activeMember.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="flex items-baseline justify-center md:justify-start gap-4 sm:gap-6 font-mono"
-                    >
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
-                          {timeLeft.days.toString().padStart(2, "0")}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">d</span>
-                      </div>
-                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
-                          {timeLeft.hours.toString().padStart(2, "0")}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">h</span>
-                      </div>
-                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white tracking-tight">
-                          {timeLeft.minutes.toString().padStart(2, "0")}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">m</span>
-                      </div>
-                      <span className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700">&bull;</span>
-                      <div className="flex items-baseline gap-1">
-                        <span
-                          className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight"
-                          style={{ color: memberAccent.hex }}
-                        >
-                          {timeLeft.seconds.toString().padStart(2, "0")}
-                        </span>
-                        <span className="text-[11px] sm:text-xs text-zinc-400 uppercase tracking-wider">s</span>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key={`star-${activeMember.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="border-l-2 pl-4 text-left border-zinc-300 dark:border-zinc-700"
-                    >
-                      <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-bold mb-0.5">
-                        {currentMonthName.toUpperCase()} CELEBRATION COMPLETED
-                      </p>
-                      <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300">
-                        Celebrated on {activeMember.formattedDate} &bull; Turned {activeMember.turningAge} years old.
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Shared Persistent Action Bar (Never shifts, responsive layout) */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 pt-1">
-                <button
-                  onClick={handleWish}
-                  className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-mono font-bold transition-all shrink-0 whitespace-nowrap ${
-                    wished
-                      ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
-                      : "bg-zinc-950 dark:bg-white text-white dark:text-black hover:scale-105 active:scale-95 shadow-md"
-                  }`}
-                >
-                  <span>{wished ? "Wished! 💖" : isTodayCelebrating ? "Send Wish ✦" : "Cheer Early ✦"}</span>
-                  <span className="text-[10px] opacity-80 font-normal">({wishCount})</span>
-                </button>
-                <Link
-                  href={`/members/${activeMember.slug}`}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full border border-zinc-200 dark:border-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shrink-0 whitespace-nowrap"
-                >
-                  <span>View Dossier</span>
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              </div>
-
-              {/* ── Active Pipeline Queue with Crisp Mini Avatars ── */}
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <p className="text-[10px] sm:text-[11px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                    {currentMonthName.toUpperCase()} STARS &bull; H-30 RADAR PIPELINE
-                  </p>
-                  <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 shrink-0">
-                    {pipelineQueue.length} Active
+                    &middot;
                   </span>
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      suppressHydrationWarning
+                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
+                    >
+                      {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
+                    </span>
+                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
+                      h
+                    </span>
+                  </div>
+                  <span
+                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
+                    aria-hidden="true"
+                  >
+                    &middot;
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      suppressHydrationWarning
+                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
+                    >
+                      {mounted
+                        ? String(timeLeft.minutes).padStart(2, "0")
+                        : "00"}
+                    </span>
+                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
+                      m
+                    </span>
+                  </div>
+                  <span
+                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
+                    aria-hidden="true"
+                  >
+                    &middot;
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      suppressHydrationWarning
+                      className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-950 dark:text-[#D4FF00]"
+                    >
+                      {mounted
+                        ? String(timeLeft.seconds).padStart(2, "0")
+                        : "00"}
+                    </span>
+                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
+                      s
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5 px-0.5 -mx-1 sm:mx-0 flex-nowrap justify-start">
-                  {pipelineQueue.map((m) => {
-                    const isSelected = m.id === activeMember.id
-                    const isPassedStar = m.isThisMonth && m.hasPassedThisYear && !m.isToday
-                    const isImminent = m.daysUntil > 0 && m.daysUntil <= 30 && !isPassedStar
-                    const itemAccent = MEMBER_ACCENTS[m.id] || { hex: "#D4FF00" }
-
-                    return (
-                      <button
-                        key={m.id}
-                        onClick={() => {
-                          setSelectedMemberId(m.id)
-                          setViewCelebration(false)
-                        }}
-                        className={`shrink-0 relative flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full border text-[11px] sm:text-xs font-mono transition-all whitespace-nowrap ${
-                          isSelected
-                            ? "border-transparent"
-                            : "bg-white/70 dark:bg-zinc-900/70 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:border-zinc-400 dark:hover:border-zinc-600 shadow-2xs"
-                        }`}
-                      >
-                        {/* Smooth Spring Gliding Capsule Pill */}
-                        {isSelected && (
-                          <motion.div
-                            layoutId="active-birthday-pill-indicator"
-                            className="absolute inset-0 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-black shadow-md z-0"
-                            transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                          />
-                        )}
-
-                        {/* Mini Circular Photo Avatar with Member Color Rim */}
-                        <div
-                          className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 z-10 border bg-zinc-800"
-                          style={{ borderColor: itemAccent.hex }}
-                        >
-                          <Image
-                            src={`https://i.imgur.com/${m.image}`}
-                            alt={`${m.name} (S${m.id}) avatar`}
-                            fill
-                            sizes="24px"
-                            unoptimized
-                            className="object-cover object-top"
-                          />
-                        </div>
-
-                        <span className={`relative z-10 font-semibold ${isSelected ? "text-white dark:text-black" : ""}`}>
-                          {m.name}
-                        </span>
-
-                        <span className={`relative z-10 text-[10px] ${
-                          isSelected
-                            ? "text-zinc-300 dark:text-zinc-600 font-medium"
-                            : isImminent
-                              ? "text-emerald-600 dark:text-emerald-400 font-bold"
-                              : "text-zinc-500"
-                        }`}>
-                          {m.isToday ? "🎂 Today!" : isPassedStar ? `${currentMonthName.slice(0, 3)} ${m.birthDay} 🌟` : `D-${m.daysUntil}`}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
+                {isThisMonthPassed ? (
+                  <p
+                    suppressHydrationWarning
+                    className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400"
+                  >
+                    Celebrated this month on {activeMember.shortDate} &middot;
+                    counting down to next year
+                  </p>
+                ) : null}
               </div>
+            )}
+          </div>
 
-            </div>
+          {/* Distilled Single Primary CTA */}
+          <div className="pt-1">
+            <Link
+              href={`/members/${activeMember.slug}`}
+              className="btn-primary btn-magnetic inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono uppercase tracking-[0.15em]"
+            >
+              <span>View {activeMember.name} Profile</span>
+              <ArrowUpRight className="btn-arrow w-3.5 h-3.5" aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </div>
-    </div>
-  )
+
+      {/* Bottom Row: Horizontal Draggable 24-Member Birthday Lineup Strip */}
+      <div className="w-full">
+        <div
+          ref={queueRef}
+          role="listbox"
+          aria-label="Birthday lineup across all 24 members"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onPointerLeave={endDrag}
+          onClickCapture={handleClickCapture}
+          className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-2 px-1 cursor-grab active:cursor-grabbing select-none"
+        >
+          {rosterQueue.map((m, idx) => {
+            const isSelected = m.id === activeMember.id;
+            const mColor = OFFICIAL_MEMBER_COLORS[m.id] || "#D4FF00";
+            const mRing = getVisibleSwatch(mColor);
+            const isPassed = m.isThisMonth && m.hasPassedThisYear && !m.isToday;
+            const statusText = m.isToday
+              ? "Today"
+              : isPassed
+                ? m.shortDate
+                : `D-${m.daysUntil}`;
+
+            return (
+              <button
+                key={m.id}
+                ref={(el) => {
+                  itemRefs.current[idx] = el;
+                }}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                aria-label={`${m.name} (${statusText})`}
+                draggable={false}
+                onClick={() => setSelectedMemberId(m.id)}
+                className={`shrink-0 inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full text-xs font-mono transition-[background-color,color,border-color] duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none ${
+                  isSelected
+                    ? "ring-2 ring-zinc-950 dark:ring-[#D4FF00] bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
+                    : "border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30 hover:text-zinc-950 dark:hover:text-white"
+                }`}
+              >
+                <span
+                  className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 border-[1.5px] bg-zinc-900"
+                  style={{ borderColor: mRing }}
+                >
+                  <Image
+                    src={getMemberImageUrl(m)}
+                    alt=""
+                    fill
+                    sizes="24px"
+                    draggable={false}
+                    className="object-cover object-top scale-[1.05] pointer-events-none"
+                  />
+                </span>
+                <span className="font-semibold tracking-tight">{m.name}</span>
+                <span
+                  suppressHydrationWarning
+                  className={`text-[10px] tabular-nums ${
+                    isSelected
+                      ? "text-zinc-300 dark:text-zinc-600"
+                      : m.isToday || (m.daysUntil <= 30 && !isPassed)
+                        ? "text-zinc-950 dark:text-[#D4FF00] font-semibold"
+                        : "text-zinc-400 dark:text-zinc-500"
+                  }`}
+                >
+                  {statusText}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
 }

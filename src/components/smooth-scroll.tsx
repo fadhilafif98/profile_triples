@@ -28,6 +28,9 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
 
     // Synchronize Lenis with GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update)
+    if (typeof window !== "undefined") {
+      ;(window as unknown as { lenis?: Lenis }).lenis = lenis
+    }
 
     const updateLenis = (time: number) => {
       lenis.raf(time * 1000)
@@ -38,6 +41,9 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
     gsap.ticker.lagSmoothing(500, 33)
 
     return () => {
+      if (typeof window !== "undefined") {
+        ;(window as unknown as { lenis?: Lenis }).lenis = undefined
+      }
       gsap.ticker.remove(updateLenis)
       lenis.destroy()
     }
