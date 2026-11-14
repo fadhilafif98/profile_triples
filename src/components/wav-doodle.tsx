@@ -1,6 +1,7 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
+import { useSafeReducedMotion } from "@/lib/a11y"
 
 export type WavDoodleVariant =
   | "members"
@@ -72,7 +73,9 @@ export default function WavDoodle({
   animate = true,
   variant = "members",
 }: WavDoodleProps) {
+  const shouldReduceMotion = useSafeReducedMotion()
   const doodlePath = DOODLE_PATHS[variant] || DOODLE_PATHS.members
+  const shouldAnimate = animate && !shouldReduceMotion
 
   return (
     <svg
@@ -89,12 +92,12 @@ export default function WavDoodle({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
-        initial={animate ? { pathLength: 0, opacity: 0 } : { pathLength: 1, opacity: 1 }}
+        initial={shouldAnimate ? { pathLength: 0, opacity: 0 } : { pathLength: 1, opacity: 1 }}
         animate={{ pathLength: 1, opacity: 1 }}
-        exit={{ pathLength: 0, opacity: 0 }}
+        exit={shouldAnimate ? { pathLength: 0, opacity: 0 } : { opacity: 0 }}
         transition={{
-          pathLength: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
-          opacity: { duration: 0.16 },
+          pathLength: { duration: shouldAnimate ? 0.32 : 0.01, ease: [0.16, 1, 0.3, 1] },
+          opacity: { duration: shouldAnimate ? 0.16 : 0.01 },
         }}
       />
     </svg>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getInitialObjektsSnapshot } from "@/lib/objekts";
 import ObjektsClient from "./ObjektsClient";
 
 export const metadata: Metadata = {
@@ -32,10 +33,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ObjektsPage() {
+export default async function ObjektsPage() {
+  const initialData = await getInitialObjektsSnapshot();
+
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#fafafa] dark:bg-[#050505]" />}>
-      <ObjektsClient />
+    <Suspense fallback={<div className="min-h-screen bg-[#fafafa] dark:bg-[#08080A]" />}>
+      <ObjektsClient
+        initialObjekts={initialData.objekts}
+        initialTotalCount={initialData.totalCount}
+        initialSeasons={initialData.seasons}
+        initialClasses={initialData.classes}
+      />
     </Suspense>
   );
 }

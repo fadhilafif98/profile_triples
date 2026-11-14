@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    optimizePackageImports: ["react-icons", "lucide-react", "motion"],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 2592000, // 30 days (1 month edge cache)

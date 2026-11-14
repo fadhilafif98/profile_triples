@@ -87,6 +87,53 @@ export function getMemberColor(id: number): string {
   return OFFICIAL_MEMBER_COLORS[id] || "#D4FF00"
 }
 
+function parseHexRgb(hex: string): [number, number, number] | null {
+  const clean = hex.replace("#", "").trim()
+  if (clean.length !== 6) return null
+  const r = parseInt(clean.slice(0, 2), 16)
+  const g = parseInt(clean.slice(2, 4), 16)
+  const b = parseInt(clean.slice(4, 6), 16)
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return null
+  return [r, g, b]
+}
+
+function mixHex(rgb: [number, number, number], target: [number, number, number], factor: number): string {
+  const mix = (c: number, t: number) => Math.round(c + (t - c) * factor)
+  return `#${mix(rgb[0], target[0]).toString(16).padStart(2, "0")}${mix(rgb[1], target[1]).toString(16).padStart(2, "0")}${mix(rgb[2], target[2]).toString(16).padStart(2, "0")}`
+}
+
+export function getContrastingInk(hex: string): string {
+  const rgb = parseHexRgb(hex)
+  if (!rgb) return "#FFFFFF"
+  const yiq = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
+  return yiq >= 155 ? "#09090B" : "#FFFFFF"
+}
+
+/**
+ * Ensures member text/dot accents remain WCAG-legible against dark or light surfaces
+ * (e.g. S14 #082855 navy on obsidian or S23 #FFFFFF white on alabaster).
+ */
+export function getReadableMemberColor(hex: string, onDark = true): string {
+  const upper = hex.toUpperCase()
+  const rgb = parseHexRgb(upper)
+  if (!rgb) return onDark ? "#F4F4F6" : "#09090B"
+
+  const toLinear = (c: number) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  }
+  const lum = 0.2126 * toLinear(rgb[0]) + 0.7152 * toLinear(rgb[1]) + 0.0722 * toLinear(rgb[2])
+
+  if (onDark) {
+    if (upper === "#FFFFFF") return "#F4F4F6"
+    if (lum < 0.16) return mixHex(rgb, [255, 255, 255], 0.56)
+    return hex
+  }
+
+  if (lum > 0.72) return mixHex(rgb, [9, 9, 11], 0.52)
+  return hex
+}
+
 /**
  * Resolves official member portrait image URL using local Andless assets in public/members/.
  */

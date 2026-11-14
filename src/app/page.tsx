@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 import dynamic from "next/dynamic"
 import HeroSection from "@/components/home/hero-section"
-import VideoShowreelSection from "@/components/home/video-showreel-section"
 import { getAllMembers } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { getAllSubUnits } from "@/lib/sub-units"
 
+const VideoShowreelSection = dynamic(() => import("@/components/home/video-showreel-section"), { ssr: true })
 const HowItWorksSection = dynamic(() => import("@/components/home/how-it-works-section"), { ssr: true })
 const MusicArchiveSection = dynamic(() => import("@/components/home/music-archive-section"), { ssr: true })
 const DimensionsCardStack = dynamic(() => import("@/components/home/dimensions-card-stack"), { ssr: true })

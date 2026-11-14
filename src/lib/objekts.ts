@@ -1,5 +1,58 @@
 import { Objekt, ObjektSide } from "@/types/objekt";
 
+export type ObjektSortOption =
+  | "newest"
+  | "oldest"
+  | "collectionNoAsc"
+  | "collectionNoDesc"
+  | "memberAsc"
+  | "memberDesc";
+
+const OBJEKT_COLLATOR = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base",
+});
+
+export function compareObjekts(a: Objekt, b: Objekt, sortBy: ObjektSortOption): number {
+  if (sortBy === "newest") {
+    const batchA = Math.floor((a.createdAt || 0) / 43200000);
+    const batchB = Math.floor((b.createdAt || 0) / 43200000);
+    if (batchB !== batchA) return batchB - batchA;
+    const memberDiff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
+    if (memberDiff !== 0) return memberDiff;
+    return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+  }
+  if (sortBy === "oldest") {
+    const batchA = Math.floor((a.createdAt || 0) / 43200000);
+    const batchB = Math.floor((b.createdAt || 0) / 43200000);
+    if (batchA !== batchB) return batchA - batchB;
+    const memberDiff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
+    if (memberDiff !== 0) return memberDiff;
+    return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+  }
+  if (sortBy === "collectionNoAsc") {
+    const cmp = OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+    if (cmp !== 0) return cmp;
+    return (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
+  }
+  if (sortBy === "collectionNoDesc") {
+    const cmp = OBJEKT_COLLATOR.compare(b.collectionNo || "", a.collectionNo || "");
+    if (cmp !== 0) return cmp;
+    return (b.memberSortOrder || 0) - (a.memberSortOrder || 0);
+  }
+  if (sortBy === "memberAsc") {
+    const diff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
+    if (diff !== 0) return diff;
+    return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+  }
+  if (sortBy === "memberDesc") {
+    const diff = (b.memberSortOrder || 0) - (a.memberSortOrder || 0);
+    if (diff !== 0) return diff;
+    return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+  }
+  return 0;
+}
+
 export const HF_CDN_BASE =
   "https://huggingface.co/datasets/fadhilafif98/triples-objekts/resolve/main";
 
@@ -38,13 +91,89 @@ export function getObjektBackUrl(objekt: {
   return getObjektImageUrl(objekt.season, objekt.member, objekt.slug, "back");
 }
 
+export interface ObjektsInitialSnapshot {
+  objekts: Objekt[];
+  totalCount: number;
+  seasons: string[];
+  classes: string[];
+}
+
+const SNAPSHOT_TTL_MS = 24 * 60 * 60 * 1000;
+let cachedSnapshot: (ObjektsInitialSnapshot & { expiresAt: number }) | null = null;
+let snapshotInFlight: Promise<ObjektsInitialSnapshot> | null = null;
+
+/**
+ * Fetches a compact SSR preview slice (first 30 newest Objekts + facet counts)
+ * cached in server memory so Next.js does not retain or log 2MB+ fetch cache limits.
+ */
+export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapshot> {
+  const now = Date.now();
+  if (cachedSnapshot && now < cachedSnapshot.expiresAt) {
+    return {
+      objekts: cachedSnapshot.objekts,
+      totalCount: cachedSnapshot.totalCount,
+      seasons: cachedSnapshot.seasons,
+      classes: cachedSnapshot.classes,
+    };
+  }
+
+  if (!snapshotInFlight) {
+    snapshotInFlight = fetch(ALL_OBJEKTS_JSON_URL, {
+      cache: "no-store",
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch Objekts snapshot: ${res.status}`);
+        }
+        const data: Objekt[] = await res.json();
+        const sortedNewest = [...data].sort((a, b) => compareObjekts(a, b, "newest"));
+        const snapshot: ObjektsInitialSnapshot = {
+          objekts: sortedNewest.slice(0, 30),
+          totalCount: data.length,
+          seasons: getObjektSeasons(data),
+          classes: getObjektClasses(data),
+        };
+        cachedSnapshot = {
+          ...snapshot,
+          expiresAt: Date.now() + SNAPSHOT_TTL_MS,
+        };
+        return snapshot;
+      })
+      .catch(() => ({
+        objekts: [],
+        totalCount: 0,
+        seasons: DEFAULT_SEASONS,
+        classes: DEFAULT_CLASSES,
+      }))
+      .finally(() => {
+        snapshotInFlight = null;
+      });
+  }
+
+  return Promise.race([
+    snapshotInFlight,
+    new Promise<ObjektsInitialSnapshot>((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            objekts: [],
+            totalCount: 0,
+            seasons: DEFAULT_SEASONS,
+            classes: DEFAULT_CLASSES,
+          }),
+        900
+      )
+    ),
+  ]);
+}
+
 /**
  * Fetches the entire collection of Objekts from the Hugging Face dataset repository.
  */
 export async function fetchAllObjekts(): Promise<Objekt[]> {
   try {
     const res = await fetch(ALL_OBJEKTS_JSON_URL, {
-      next: { revalidate: 86400 }, // Cache on edge for 24 hours
+      cache: "no-store",
     });
     if (!res.ok) {
       throw new Error(`Failed to fetch Objekts: ${res.status} ${res.statusText}`);
@@ -133,9 +262,9 @@ export function getClassBadgeStyle(objektClass: string): {
     case "special":
     case "special class":
       return {
-        bg: "bg-purple-500/10 dark:bg-purple-500/20",
-        text: "text-purple-700 dark:text-purple-300",
-        border: "border-purple-500/30",
+        bg: "bg-[#7C3AED]/10 dark:bg-[#8B5CF6]/20",
+        text: "text-[#6D28D9] dark:text-[#C4B5FD]",
+        border: "border-[#7C3AED]/30",
       };
     case "double":
     case "double class":

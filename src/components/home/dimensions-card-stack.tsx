@@ -3,9 +3,9 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useReducedMotion } from "motion/react"
+import { useSafeReducedMotion } from "@/lib/a11y"
 import type { SubUnit } from "@/types/sub-unit"
-import { ChevronLeft, ChevronRight, ArrowUpRight, Pause, Play } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 import WavWordmark from "@/components/wav-wordmark"
 
 interface DimensionsCardStackProps {
@@ -24,7 +24,10 @@ const CURATED_SLUGS = [
 
 export default function DimensionsCardStack({ subUnits }: DimensionsCardStackProps) {
   const sectionRef = useRef<HTMLElement>(null)
-  const reduceMotion = useReducedMotion()
+  const touchStartXRef = useRef<number | null>(null)
+  const touchStartYRef = useRef<number | null>(null)
+  const touchSwipedRef = useRef(false)
+  const reduceMotion = useSafeReducedMotion()
 
   const showcaseUnits = useMemo(() => {
     const list = CURATED_SLUGS
@@ -137,65 +140,97 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
               </p>
             </div>
 
-            {/* Active Dimension Metadata + Controls */}
-            <div className="space-y-4 pt-1">
-              <div className="flex items-center gap-5">
-                <div className="font-mono text-xs tracking-widest font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 tabular-nums">
-                  <span className="text-zinc-950 dark:text-[#D4FF00]">
-                    {String(currentIndex + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-zinc-400">/</span>
-                  <span className="text-zinc-500">
-                    {String(showcaseUnits.length).padStart(2, "0")}
-                  </span>
-                </div>
-
-                {/* GPU scaleX progress bar */}
-                <div className="flex-1 max-w-[140px] h-1 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full w-full bg-zinc-950 dark:bg-[#D4FF00] origin-left transition-transform duration-300 ease-out"
-                    style={{
-                      transform: `scaleX(${(currentIndex + 1) / showcaseUnits.length})`,
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsAutoplayPaused((p) => !p)}
-                    aria-label={isAutoplayPaused ? "Resume autoplay" : "Pause autoplay"}
-                    title={isAutoplayPaused ? "Resume autoplay" : "Pause autoplay"}
-                    className="w-10 h-10 rounded-full border border-zinc-200 dark:border-white/15 bg-white dark:bg-[#14141B] flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-[#D4FF00] hover:border-zinc-400 dark:hover:border-[#D4FF00]/50 transition-[border-color,color,transform] duration-200 ease-out shadow-sm active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-                  >
-                    {isAutoplayPaused ? (
-                      <Play className="w-3.5 h-3.5 translate-x-0.5" aria-hidden="true" />
-                    ) : (
-                      <Pause className="w-3.5 h-3.5" aria-hidden="true" />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handlePrev}
-                    aria-label="Previous dimension"
-                    className="w-10 h-10 rounded-full border border-zinc-200 dark:border-white/15 bg-white dark:bg-[#14141B] flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-[#D4FF00] hover:border-zinc-400 dark:hover:border-[#D4FF00]/50 transition-[border-color,color,transform] duration-200 ease-out shadow-sm active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-                  >
-                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    aria-label="Next dimension"
-                    className="w-10 h-10 rounded-full border border-zinc-200 dark:border-white/15 bg-white dark:bg-[#14141B] flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-[#D4FF00] hover:border-zinc-400 dark:hover:border-[#D4FF00]/50 transition-[border-color,color,transform] duration-200 ease-out shadow-sm active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-                  >
-                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                </div>
+            {/* Active Dimension Editorial Index (Desktop Grid + Mobile Swipeable Pills) */}
+            <div className="space-y-3 pt-1">
+              <div
+                className="flex lg:hidden items-center gap-2 overflow-x-auto snap-x snap-mandatory overscroll-x-contain no-scrollbar -mx-4 sm:-mx-6 px-4 sm:px-6 py-1"
+                role="tablist"
+                aria-label="Featured Dimensions"
+              >
+                {showcaseUnits.map((unit, idx) => {
+                  const isActive = idx === currentIndex
+                  return (
+                    <button
+                      key={unit.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => {
+                        goToIndex(idx)
+                        setIsAutoplayPaused(true)
+                      }}
+                      className={`snap-start shrink-0 min-h-10 px-3.5 py-2 rounded-full text-xs font-mono inline-flex items-center gap-2 border transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] ${
+                        isActive
+                          ? "border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950 font-semibold"
+                          : "border-zinc-200 dark:border-white/15 bg-white dark:bg-[#14141B] text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30"
+                      }`}
+                    >
+                      <span
+                        className={`tabular-nums ${
+                          isActive
+                            ? "text-[#D4FF00] dark:text-zinc-950"
+                            : "text-zinc-400 dark:text-zinc-500"
+                        }`}
+                      >
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <span>{unit.name}</span>
+                    </button>
+                  )
+                })}
               </div>
 
-              <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+              <div
+                className="hidden lg:grid lg:grid-cols-2 gap-x-6 gap-y-2 pt-3 border-t border-zinc-200/80 dark:border-white/10"
+                role="tablist"
+                aria-label="Featured Dimensions index"
+              >
+                {showcaseUnits.map((unit, idx) => {
+                  const isActive = idx === currentIndex
+                  return (
+                    <button
+                      key={unit.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => {
+                        goToIndex(idx)
+                        setIsAutoplayPaused(true)
+                      }}
+                      className="group/idx flex items-center gap-2.5 py-1.5 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] rounded-md"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${
+                          isActive
+                            ? "bg-zinc-950 dark:bg-[#D4FF00]"
+                            : "bg-zinc-300 dark:bg-zinc-700 group-hover/idx:bg-zinc-500 dark:group-hover/idx:bg-zinc-400"
+                        }`}
+                      />
+                      <span
+                        className={`font-mono text-[11px] tabular-nums shrink-0 ${
+                          isActive
+                            ? "text-zinc-950 dark:text-[#D4FF00] font-bold"
+                            : "text-zinc-400 dark:text-zinc-500"
+                        }`}
+                      >
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        className={`text-xs xl:text-[13px] truncate transition-colors ${
+                          isActive
+                            ? "text-zinc-950 dark:text-white font-semibold"
+                            : "text-zinc-600 dark:text-zinc-400 group-hover/idx:text-zinc-950 dark:group-hover/idx:text-white"
+                        }`}
+                      >
+                        {unit.name}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 flex items-center gap-2 pt-1">
                 <span className="kinetic-dot" aria-hidden="true" />
                 <span className="truncate">
                   <strong className="text-zinc-950 dark:text-white font-semibold">
@@ -219,11 +254,62 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
 
           {/* Right Column: Interactive 3D Perspective Card Stack */}
           <div
-            className="lg:col-span-7 flex items-center justify-center relative"
+            className="lg:col-span-7 flex items-center justify-center relative touch-pan-y"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onTouchStart={() => setIsHovered(true)}
-            onTouchEnd={() => setIsHovered(false)}
+            onTouchStart={(e) => {
+              setIsHovered(true)
+              const touch = e.touches[0]
+              if (!touch) return
+              touchStartXRef.current = touch.clientX
+              touchStartYRef.current = touch.clientY
+              touchSwipedRef.current = false
+            }}
+            onTouchMove={(e) => {
+              const startX = touchStartXRef.current
+              const startY = touchStartYRef.current
+              const touch = e.touches[0]
+              if (startX === null || startY === null || !touch) return
+              const dx = touch.clientX - startX
+              const dy = touch.clientY - startY
+              if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+                touchSwipedRef.current = true
+              }
+            }}
+            onTouchEnd={(e) => {
+              const startX = touchStartXRef.current
+              const startY = touchStartYRef.current
+              const touch = e.changedTouches[0]
+              if (startX !== null && touch) {
+                const dx = touch.clientX - startX
+                const dy = touch.clientY - (startY ?? touch.clientY)
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                  if (dx < 0) handleNext()
+                  else handlePrev()
+                  setIsAutoplayPaused(true)
+                  touchSwipedRef.current = true
+                  window.setTimeout(() => {
+                    touchSwipedRef.current = false
+                  }, 150)
+                }
+              }
+              touchStartXRef.current = null
+              touchStartYRef.current = null
+              setIsHovered(false)
+            }}
+            onTouchCancel={() => {
+              touchStartXRef.current = null
+              touchStartYRef.current = null
+              touchSwipedRef.current = false
+              setIsHovered(false)
+            }}
+            onClickCapture={(e) => {
+              if (touchSwipedRef.current) {
+                e.preventDefault()
+                e.stopPropagation()
+                touchSwipedRef.current = false
+              }
+            }}
           >
             <div
               className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] [perspective:1200px]"
@@ -300,7 +386,6 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                           alt={`tripleS ${unit.name} concept photo`}
                           fill
                           sizes="(max-width: 768px) 90vw, 450px"
-                          priority={offset === 0}
                           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                         />
 

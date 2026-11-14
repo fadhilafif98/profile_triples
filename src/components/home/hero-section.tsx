@@ -1,75 +1,41 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type CSSProperties, type MouseEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import gsap from "gsap"
-import { useReducedMotion } from "motion/react"
 import WavWordmark from "@/components/wav-wordmark"
 
 export default function HeroSection() {
-  const containerRef = useRef<HTMLElement>(null)
   const imageRef = useRef<HTMLDivElement>(null)
-  const shouldReduceMotion = useReducedMotion()
+  const reduceMotionRef = useRef(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)")
+    reduceMotionRef.current = query.matches
+    const handleChange = () => {
+      reduceMotionRef.current = query.matches
+    }
+    query.addEventListener("change", handleChange)
+    return () => query.removeEventListener("change", handleChange)
+  }, [])
 
   // Subtle natural mouse movement for photographic depth (disabled on reduced motion & touch)
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (shouldReduceMotion || !imageRef.current || window.innerWidth < 1024) return
+  const handleMouseMove = (e: MouseEvent<HTMLElement>) => {
+    if (reduceMotionRef.current || !imageRef.current || window.innerWidth < 1024) return
     const rect = e.currentTarget.getBoundingClientRect()
     const x = (e.clientX - rect.left) / rect.width - 0.5
     const y = (e.clientY - rect.top) / rect.height - 0.5
-
-    gsap.to(imageRef.current, {
-      x: x * 12,
-      y: y * 12,
-      scale: 1.03,
-      duration: 1.2,
-      ease: "power2.out",
-    })
+    imageRef.current.style.transform = `translate3d(${(x * 12).toFixed(2)}px, ${(y * 12).toFixed(2)}px, 0) scale(1.03)`
   }
 
   const handleMouseLeave = () => {
-    if (shouldReduceMotion || !imageRef.current) return
-    gsap.to(imageRef.current, {
-      x: 0,
-      y: 0,
-      scale: 1.01,
-      duration: 1.4,
-      ease: "power2.out",
-    })
+    if (reduceMotionRef.current || !imageRef.current) return
+    imageRef.current.style.transform = "translate3d(0px, 0px, 0) scale(1.01)"
   }
-
-  useEffect(() => {
-    if (shouldReduceMotion || !containerRef.current) return
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
-
-      tl.fromTo(
-        ".hero-eyebrow",
-        { opacity: 0, y: 12 },
-        { opacity: 1, y: 0, duration: 0.75, delay: 0.1 }
-      )
-        .fromTo(
-          ".hero-main-title",
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.95 },
-          "-=0.55"
-        )
-        .fromTo(
-          ".hero-bottom-bar",
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 0.75 },
-          "-=0.55"
-        )
-    }, containerRef)
-
-    return () => ctx.revert()
-  }, [shouldReduceMotion])
 
   return (
     <section
-      ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       aria-labelledby="hero-main-heading"
@@ -79,7 +45,7 @@ export default function HeroSection() {
       <div
         ref={imageRef}
         aria-hidden="true"
-        className="absolute inset-0 z-0 will-change-transform scale-[1.01] origin-center"
+        className="absolute inset-0 z-0 scale-[1.01] origin-center transition-transform duration-700 ease-out"
       >
         <Image
           src="/home/triples_hero.jpg"
@@ -111,7 +77,10 @@ export default function HeroSection() {
 
       {/* Lower-Third Pure K-Pop Editorial Typography */}
       <div className="relative z-10 w-full px-5 sm:px-8 md:px-12 lg:px-16 pb-6 sm:pb-12 max-w-7xl mx-auto">
-        <div className="hero-eyebrow mb-1.5 sm:mb-2.5">
+        <div
+          className="hero-eyebrow hero-rise mb-1.5 sm:mb-2.5"
+          style={{ "--hero-delay": "80ms" } as CSSProperties}
+        >
           <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] uppercase text-zinc-300/90 font-medium flex items-center gap-2">
             <span>The Idol of All Possibilities</span>
             <span className="text-white/40" aria-hidden="true">&bull;</span>
@@ -121,14 +90,16 @@ export default function HeroSection() {
 
         <h1
           id="hero-main-heading"
-          className="hero-main-title text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] 2xl:text-[7.5rem] font-black tracking-[-0.04em] leading-[0.9] sm:leading-[0.88] font-display text-white select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
+          className="hero-main-title hero-rise text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[6.5rem] 2xl:text-[7.5rem] font-black tracking-[-0.04em] leading-[0.9] sm:leading-[0.88] font-display text-white select-none drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
+          style={{ "--hero-delay": "160ms" } as CSSProperties}
         >
           tripleS
         </h1>
 
         <nav
           aria-label="Hero Dimension Quick Links"
-          className="hero-bottom-bar mt-5 sm:mt-8 pt-3.5 sm:pt-5 border-t border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 text-xs font-mono text-zinc-300"
+          className="hero-bottom-bar hero-rise mt-5 sm:mt-8 pt-3.5 sm:pt-5 border-t border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 text-xs font-mono text-zinc-300"
+          style={{ "--hero-delay": "240ms" } as CSSProperties}
         >
           <div className="flex items-center gap-2.5">
             <span

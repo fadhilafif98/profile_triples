@@ -1,3 +1,71 @@
+---
+name: tripleS Fan Directory
+description: Dual-Theme Synergy editorial design system for the tripleS 24-member profile and COSMO directory.
+colors:
+  carbon-ink: "#09090B"
+  acid-voltage: "#D4FF00"
+  void-base-light: "#FAFAFA"
+  void-base-dark: "#08080A"
+  void-surface-light: "#FFFFFF"
+  void-surface-dark: "#0D0D12"
+  void-elevated-light: "#F4F4F6"
+  void-elevated-dark: "#14141B"
+  text-muted-light: "#71717A"
+  text-muted-dark: "#8E8E99"
+  cosmo-violet: "#7C3AED"
+typography:
+  display:
+    fontFamily: "Syne, Pretendard, sans-serif"
+    fontSize: "3rem"
+    fontWeight: 900
+    lineHeight: 1.05
+    letterSpacing: "-0.025em"
+  accent:
+    fontFamily: "Pinyon Script, cursive"
+    fontSize: "3.75rem"
+    fontWeight: 400
+    lineHeight: 1.05
+    letterSpacing: "0em"
+  body:
+    fontFamily: "Manrope, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.625
+    letterSpacing: "0em"
+  mono:
+    fontFamily: "JetBrains Mono, monospace"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1.33
+    letterSpacing: "0.14em"
+rounded:
+  card: "16px"
+  pill: "9999px"
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "16px"
+  lg: "24px"
+  xl: "48px"
+components:
+  button-primary:
+    backgroundColor: "{colors.carbon-ink}"
+    textColor: "{colors.void-surface-light}"
+    rounded: "{rounded.pill}"
+    padding: "12px 24px"
+  button-primary-hover:
+    backgroundColor: "#27272A"
+  button-secondary:
+    backgroundColor: "{colors.void-surface-light}"
+    textColor: "#27272A"
+    rounded: "{rounded.pill}"
+    padding: "8px 16px"
+  tab-pill-active:
+    backgroundColor: "{colors.carbon-ink}"
+    textColor: "{colors.void-surface-light}"
+    rounded: "{rounded.pill}"
+---
+
 # tripleS Fan Directory — Design System & Visual Lock Guide (`DESIGN.md`)
 
 Official design lock, visual token system, editorial typography, *Dual-Theme Synergy* color palette, kinetic micro-interactions, and component architecture for the **tripleS Profile & Fan Directory** (`profile-triples.vercel.app`).
@@ -6,7 +74,7 @@ Official design lock, visual token system, editorial typography, *Dual-Theme Syn
 
 ---
 
-## 1. Core Dials & Tri-Skill Design Protocol
+## Overview
 
 The user interface of this project is locked to three high-conviction visual dial values:
 
@@ -22,7 +90,7 @@ This project synthesizes three frontend design skills (`.agents/skills/`):
 
 ---
 
-## 2. Locked Color Palette (*Dual-Theme Synergy*)
+## Colors
 
 The color palette is strictly locked, adapting the creative standards of high-fashion agency *LxL Creative* harmonized with the official visual identity of tripleS & MODHAUS:
 
@@ -63,7 +131,9 @@ The color palette is strictly locked, adapting the creative standards of high-fa
 
 ---
 
-## 3. Locked Typography Stack (4-Tier Editorial Architecture)
+## Typography
+
+### A. 4-Tier Editorial Stack
 
 | Role | Font Family | Variable / Utility | Character & Usage Rules |
 | :--- | :--- | :--- | :--- |
@@ -74,9 +144,7 @@ The color palette is strictly locked, adapting the creative standards of high-fa
 
 > **BANNED TYPOGRAPHY**: Using `Inter`, `Fraunces`, `font-pretendard` indiscriminately (Pretendard is only a Korean Hangul system fallback), or generic serifs without brand justification is strictly prohibited.
 
----
-
-## 4. Locked Heading Scale & Hierarchy Architecture
+### B. Locked Heading Scale & Hierarchy Architecture
 
 | Level | Token / CSS Classes | Font & Weight | Scope / Purpose |
 | :--- | :--- | :--- | :--- |
@@ -98,7 +166,9 @@ The color palette is strictly locked, adapting the creative standards of high-fa
 
 ---
 
-## 5. Standardized Button & Interactive Component Tokens
+## Components
+
+### Standardized Button & Interactive Tokens
 
 All button and interactive components are consolidated in official utility classes defined in `src/app/globals.css`:
 
@@ -230,7 +300,7 @@ All button and interactive components are consolidated in official utility class
 
 ---
 
-## 6. Motion & Micro-Interactions Standards
+### Motion & Micro-Interactions Standards
 
 * **Interactive Underline Draw (`.nav-draw-link`)**:
   * All navbar links and tabs use an animated kinetic underline that draws from left to right on hover (`scaleX(0)` ➔ `scaleX(1)`). Light: `#09090B`, Dark: `#D4FF00`.
@@ -246,9 +316,7 @@ All button and interactive components are consolidated in official utility class
 * **GSAP + ScrollTrigger Isolation**:
   * Must be isolated within Client leaf components (`"use client"`) using `gsap.context()` inside `useEffect`, and must include `ctx.revert()` on unmount cleanup.
 
----
-
-## 7. Purposeful Iconography Architecture
+### Purposeful Iconography Architecture
 
 * **Banned Generic AI Icons**:
   * **Prohibited**: Using `Sparkles` icon as generic filler or magic-wand aesthetic.
@@ -261,11 +329,9 @@ All button and interactive components are consolidated in official utility class
   * **Empty Search State**: Must use `SearchX` for empty search or filter results.
   * **Dimension Concept Tags**: Must use minimal kinetic indicator dots (`.kinetic-dot`), never decorative sparkles.
 
----
+### Page & Component Specific Locks
 
-## 8. Page & Component Specific Locks
-
-### A. Member Profile Pages (`/members/[slug]`)
+#### A. Member Profile Pages (`/members/[slug]`)
 * **Zero-Scroll Above-the-Fold**: Official concept photo, stage name, S-number, emoji badge, MBTI, and specification matrix integrated directly in the upper viewport.
 * **Specification Table**:
   1. `Stage Name (예명 / 활동명)`: Stage name + Hangul.
@@ -277,24 +343,24 @@ All button and interactive components are consolidated in official utility class
   7. `History & Bio (이력)`: Curated bio facts.
 * **More tripleS Slider**: Touch & mouse drag responsive horizontal slider (`cursor-grab active:cursor-grabbing`) with auto-centering on active member without triggering vertical window scroll jumps.
 
-### B. Birthday Countdown Component (`<BirthdayCountdown />`)
-* **Borderless Editorial Layout**: Replaced heavy container boxes and generic timer cards with a typographic time stream (`03d · 03h · 44m · 25s`).
-* **Dynamic Member Accent**: Ambient lighting glow and inner rim match the active member's official MODHAUS color.
-* **Height Stability**: Fixed height slots for header and announcement text to prevent layout shifts (CLS = 0).
-* **Action Buttons**: Uses tokenized `.btn-primary` (Send Wish) and `.btn-secondary` (View Dossier).
+#### B. Birthday Countdown Component (`<BirthdayCountdown />`)
+* **Borderless Editorial Layout**: Replaced heavy container boxes and generic timer cards with an architectural 4-column typographic countdown (`DAYS / HRS / MIN / SEC`) and hairline dividers.
+* **Dynamic Member Accent**: MODHAUS COSMO vertical sideband and ring markers match the active member's official MODHAUS color.
+* **Height Stability**: Fixed `min-h-[88px]` slot for countdown/announcement blocks to prevent layout shifts (CLS = 0).
+* **Action Buttons**: Uses tokenized `.btn-primary` for primary profile CTA.
 
-### C. Objekts Vault (`/objekts`) & Photocard Modal
+#### C. Objekts Vault (`/objekts`) & Photocard Modal
 * **Collector's Atelier 3D Flip Card**: Showcase pedestal with 3D card flip (front/back) and MODHAUS top foil line.
 * **Dropdown Filters**: Standardized trigger buttons and popover options using `font-sans` and Carbon/Voltage active states. No SaaS purple glow.
 * **Verified Action Dock**: Shortcode copy action, official COSMO App link, and Apollo Cafe Explorer deep-link.
 
-### D. Consistent Breadcrumb Navigation (`<Breadcrumb />`)
+#### D. Consistent Breadcrumb Navigation (`<Breadcrumb />`)
 * Centralized in `src/components/breadcrumb.tsx`.
 * All subpages must include the breadcrumb beneath the navbar.
 * Semantic markup `<nav aria-label="Breadcrumb">` with `<ol>` and `<li>`, separator chevron `aria-hidden="true"`.
 * Supports optional action slot (`action?: React.ReactNode`) for contextual controls such as `Prev S# Next` switcher.
 
-### E. 404 Page (`/not-found`)
+#### E. 404 Page (`/not-found`)
 * Must be theme-adaptive (`bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-950 dark:text-[#F4F4F6]`).
 * Clean metadata tag without brackets: `404 • Dimension Not Found`.
 * Title typography for `404` must use `font-display font-black`.
@@ -302,7 +368,9 @@ All button and interactive components are consolidated in official utility class
 
 ---
 
-## 9. Pre-Flight Anti-Slop Quality Gate
+## Do's and Don'ts
+
+### Pre-Flight Anti-Slop Quality Gate
 
 Before submitting or committing interface changes, verify this checklist:
 - [ ] No unauthorized fonts used (`font-pretendard`, `font-inter`, or generic serifs); only `Syne`, `Manrope`, `Pinyon Script`, and `JetBrains Mono`.

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   X,
   ExternalLink,
@@ -17,6 +17,7 @@ import ObjektImage from "./objekt-image";
 import CosmoLogo from "./cosmo-logo";
 import { getClassBadgeStyle } from "@/lib/objekts";
 import { getAllMembers, getMemberColor } from "@/lib/members";
+import { useDialogA11y } from "@/lib/a11y";
 
 interface ObjektModalProps {
   objekt: Objekt | null;
@@ -26,6 +27,8 @@ interface ObjektModalProps {
 export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
   const [activeSide, setActiveSide] = useState<ObjektSide>("front");
   const [copied, setCopied] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Reset states when selected objekt changes
   useEffect(() => {
@@ -33,24 +36,11 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
     setCopied(false);
   }, [objekt?.id]);
 
-  // Handle Escape key to close modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+  const handleClose = useCallback(() => {
+    onClose();
   }, [onClose]);
 
-  // Lock background scroll when modal is open
-  useEffect(() => {
-    if (!objekt) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [objekt]);
+  useDialogA11y(Boolean(objekt), modalRef, handleClose);
 
   if (!objekt) return null;
 
@@ -86,7 +76,9 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-y-auto"
+        ref={modalRef}
+        tabIndex={-1}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-y-auto focus:outline-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="objekt-modal-title"
@@ -96,16 +88,21 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
           onClick={onClose}
           className="fixed inset-0 bg-black/60 dark:bg-black/85 backdrop-blur-md transition-opacity"
         />
 
         {/* Modal Window — Editorial Collector's Atelier Frame */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 16 }}
-          transition={{ type: "spring", damping: 26, stiffness: 320 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0.01 }
+              : { type: "spring", damping: 26, stiffness: 320 }
+          }
           onClick={(e) => e.stopPropagation()}
           className="relative w-full max-w-lg md:max-w-4xl lg:max-w-5xl max-h-[92vh] bg-white dark:bg-[#0D0D12] border border-zinc-200/90 dark:border-white/10 rounded-3xl shadow-2xl shadow-zinc-950/15 dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col md:flex-row overflow-hidden z-10 text-zinc-950 dark:text-zinc-100 my-auto"
         >
@@ -142,7 +139,10 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
 
               <motion.div
                 animate={{ rotateY: activeSide === "front" ? 0 : 180 }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                transition={{
+                  duration: shouldReduceMotion ? 0.01 : 0.5,
+                  ease: [0.23, 1, 0.32, 1],
+                }}
                 className="w-full h-full relative"
                 style={{ transformStyle: "preserve-3d" }}
               >
@@ -225,7 +225,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
 
               {/* Motion Badge Indicator */}
               {objekt.frontMedia && activeSide === "front" && (
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/20 text-[9px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/20 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Motion MP4</span>
                 </div>
@@ -238,7 +238,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                 <button
                   type="button"
                   onClick={() => setActiveSide("front")}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
                     activeSide === "front"
                       ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
@@ -249,7 +249,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                 <button
                   type="button"
                   onClick={() => setActiveSide("back")}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
                     activeSide === "back"
                       ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
@@ -425,7 +425,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                   href="https://bit.ly/4hQegaj"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] dark:bg-[#8B5CF6] dark:hover:bg-[#7C3AED] text-white text-xs font-mono font-bold transition-all shadow-md shadow-purple-500/20 active:scale-95 truncate text-center group"
+                  className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] dark:bg-[#7C3AED] dark:hover:bg-[#6D28D9] text-white text-xs font-mono font-bold transition-[background-color,transform] shadow-sm active:scale-95 truncate text-center group"
                 >
                   <CosmoLogo width={14} height={14} className="shrink-0" />
                   <span className="truncate">COSMO App</span>
@@ -439,7 +439,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                   )}&season=${encodeURIComponent(objekt.season)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl bg-zinc-950 hover:bg-black text-white dark:bg-white/10 dark:hover:bg-white/20 dark:text-white text-xs font-mono font-bold transition-all border border-transparent dark:border-white/10 active:scale-95 truncate text-center group"
+                  className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl bg-zinc-950 hover:bg-black text-white dark:bg-white/10 dark:hover:bg-white/20 dark:text-white text-xs font-mono font-bold transition-[background-color,transform] border border-transparent dark:border-white/10 active:scale-95 truncate text-center group"
                 >
                   <span className="truncate">Apollo Cafe</span>
                   <ExternalLink className="h-3 w-3 shrink-0 opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />

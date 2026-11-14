@@ -1,13 +1,7 @@
 "use client"
 
 import { type ReactNode, useEffect } from "react"
-import Lenis from "@studio-freight/lenis"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
+import type Lenis from "@studio-freight/lenis"
 
 interface SmoothScrollProps {
   children: ReactNode
@@ -15,37 +9,75 @@ interface SmoothScrollProps {
 
 export default function SmoothScroll({ children }: SmoothScrollProps) {
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 0.8,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      syncTouch: false,
-      touchMultiplier: 1.0,
-      wheelMultiplier: 1.0,
+    if (typeof window === "undefined") return
+
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const finePointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)")
+
+    // Skip smooth-wheel inertia on touch devices or when reduced motion is preferred
+    if (reducedMotionQuery.matches || !finePointerQuery.matches) {
+      return
+    }
+
+    let cancelled = false
+    let rafId = 0
+    let lenis: Lenis | null = null
+
+    const stopLoop = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+        rafId = 0
+      }
+    }
+
+    const startLoop = () => {
+      if (cancelled || document.hidden || !lenis || rafId) return
+      const raf = (time: number) => {
+        if (cancelled || document.hidden || !lenis) {
+          rafId = 0
+          return
+        }
+        lenis.raf(time)
+        rafId = requestAnimationFrame(raf)
+      }
+      rafId = requestAnimationFrame(raf)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopLoop()
+      } else {
+        startLoop()
+      }
+    }
+
+    import("@studio-freight/lenis").then(({ default: LenisConstructor }) => {
+      if (cancelled) return
+
+      lenis = new LenisConstructor({
+        duration: 0.8,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: "vertical",
+        gestureOrientation: "vertical",
+        smoothWheel: true,
+        syncTouch: false,
+        touchMultiplier: 1.0,
+        wheelMultiplier: 1.0,
+      })
+
+      ;(window as unknown as { lenis?: Lenis }).lenis = lenis
+      document.addEventListener("visibilitychange", handleVisibilityChange)
+      startLoop()
     })
 
-    // Synchronize Lenis with GSAP ScrollTrigger
-    lenis.on("scroll", ScrollTrigger.update)
-    if (typeof window !== "undefined") {
-      ;(window as unknown as { lenis?: Lenis }).lenis = lenis
-    }
-
-    const updateLenis = (time: number) => {
-      lenis.raf(time * 1000)
-    }
-
-    gsap.ticker.add(updateLenis)
-    // Restore default lag smoothing (prevents frame drop cascading on heavy scroll)
-    gsap.ticker.lagSmoothing(500, 33)
-
     return () => {
-      if (typeof window !== "undefined") {
+      cancelled = true
+      stopLoop()
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      if (lenis) {
         ;(window as unknown as { lenis?: Lenis }).lenis = undefined
+        lenis.destroy()
       }
-      gsap.ticker.remove(updateLenis)
-      lenis.destroy()
     }
   }, [])
 
