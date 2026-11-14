@@ -70,31 +70,6 @@
   }
 }
 
-/* Custom Styles */
-.parallax-card {
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease;
-}
-
-.parallax-card:hover {
-  transform: translateZ(20px);
-}
-
-/* Glassmorphism panel with crisp hairline border and soft inner highlight */
-.glass-panel {
-  background: rgba(13, 13, 18, 0.75);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 20px 40px -15px rgba(0, 0, 0, 0.8);
-}
-
-.light .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 20px 40px -15px rgba(0, 0, 0, 0.06);
-}
-
 /* Spotlight & Bento Card (Theme Aware) */
 .spotlight-card {
   background: #FFFFFF;
@@ -339,27 +314,6 @@ html.lenis {
   scrollbar-width: none;
 }
 
-/* Cosmic Stardust Floating Keyframes (Zero Main-Thread JS Overhead) */
-@keyframes stardust-drift {
-  0% {
-    transform: translate3d(0, -10px, 0) scale(0.6) rotate(0deg);
-    opacity: 0;
-  }
-  50% {
-    transform: translate3d(0, -37.5px, 0) scale(1.1) rotate(45deg);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translate3d(0, -65px, 0) scale(0.7) rotate(90deg);
-    opacity: 0;
-  }
-}
-
-.animate-stardust {
-  animation: stardust-drift ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
 /* Hero entrance: pure CSS so it starts before hydration (no flash of visible-then-hidden content)
    and never hides the LCP image. Stagger is driven per element via --hero-delay. */
 @keyframes hero-rise {
@@ -410,11 +364,9 @@ html.lenis {
   html {
     scroll-behavior: auto !important;
   }
-  .animate-marquee,
-  .animate-stardust {
+  .animate-marquee {
     animation: none !important;
   }
-  .parallax-card,
   .btn-magnetic,
   .btn-arrow,
   .nav-draw-link::after {

@@ -1,27 +1,44 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useCallback, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "motion/react"
 import { X, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { Member } from "@/types/member"
-import { getAllMembers, getMemberColor, getMemberImageUrl } from "@/lib/members"
+import { getAllMembers, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members"
+import { useDialogA11y } from "@/lib/a11y"
 
 const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect: (member: Member) => void }) => {
   const memberColor = getMemberColor(member.id)
   const formattedId = member.id < 10 ? `0${member.id}` : `${member.id}`
+  const [hoverGifReady, setHoverGifReady] = useState(false)
+
+  const activateHoverGif = () => {
+    if (
+      !hoverGifReady &&
+      member.gif &&
+      typeof window !== "undefined" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setHoverGifReady(true)
+    }
+  }
 
   return (
     <button
       type="button"
       onClick={() => onSelect(member)}
-      className="spotlight-card group relative aspect-[3/4] w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+      onPointerEnter={(e) => {
+        if (e.pointerType === "mouse") activateHoverGif()
+      }}
+      onFocus={activateHoverGif}
+      className="spotlight-card group relative aspect-[3/4] w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
       aria-label={`View quick profile for S${member.id} ${member.name}`}
     >
       {/* 4px side-band in official MODHAUS member color */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 z-20 transition-all duration-300 group-hover:w-2"
+        className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 z-20 transition-[width] duration-300 group-hover:w-2"
         style={{ backgroundColor: memberColor }}
         aria-hidden="true"
       />
@@ -31,18 +48,22 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
         src={getMemberImageUrl(member)}
         alt={`${member.name} (${member.birthName || member.name}) portrait`}
         fill
+        priority={member.id <= 6}
         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
         className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
       />
 
       {/* SIGNAL highlight GIF preview on hover */}
-      <img
-        src={`https://i.giphy.com/media/v1.${member.gif}`}
-        alt=""
-        loading="lazy"
-        className="absolute inset-0 object-cover w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        aria-hidden="true"
-      />
+      {hoverGifReady && member.gif && (
+        <img
+          src={`https://i.giphy.com/media/v1.${member.gif}`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 object-cover w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          aria-hidden="true"
+        />
+      )}
 
       {/* Editorial bottom gradient scrim */}
       <div
@@ -54,7 +75,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
       <div className="absolute inset-x-0 bottom-0 pl-3.5 pr-2.5 pb-2.5 sm:pl-4 sm:pr-3 sm:pb-3 z-10 flex flex-col justify-end pointer-events-none">
         <span
           className="text-[11px] font-mono font-bold tracking-wider mb-0.5"
-          style={{ color: memberColor === "#FFFFFF" ? "#F4F4F6" : memberColor }}
+          style={{ color: getReadableMemberColor(memberColor, true) }}
         >
           S{formattedId}
         </span>
@@ -76,6 +97,8 @@ MemberCard.displayName = "MemberCard"
 export default function MemberGrid() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const allMembers = getAllMembers()
+  const modalRef = useRef<HTMLDivElement>(null)
+  const shouldReduceMotion = useReducedMotion()
 
   const handleClose = useCallback(() => {
     setSelectedMember(null)
@@ -86,14 +109,10 @@ export default function MemberGrid() {
   const nextMember = currentIndex >= 0 && currentIndex < allMembers.length - 1 ? allMembers[currentIndex + 1] : allMembers[0]
   const selectedMemberColor = selectedMember ? getMemberColor(selectedMember.id) : "#FFFFFF"
 
-  // Close modal on Escape, navigate with ArrowLeft/ArrowRight
-  useEffect(() => {
-    if (!selectedMember) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        handleClose()
-      } else if (e.key === "ArrowLeft") {
+  const handleModalKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!selectedMember) return
+      if (e.key === "ArrowLeft") {
         const idx = allMembers.findIndex((m) => m.id === selectedMember.id)
         const prev = idx > 0 ? allMembers[idx - 1] : allMembers[allMembers.length - 1]
         setSelectedMember(prev)
@@ -102,11 +121,13 @@ export default function MemberGrid() {
         const next = idx >= 0 && idx < allMembers.length - 1 ? allMembers[idx + 1] : allMembers[0]
         setSelectedMember(next)
       }
-    }
+    },
+    [selectedMember, allMembers]
+  )
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [selectedMember, handleClose, allMembers])
+  useDialogA11y(Boolean(selectedMember), modalRef, handleClose, {
+    onKeyDown: handleModalKeyDown,
+  })
 
   return (
     <>
@@ -120,10 +141,13 @@ export default function MemberGrid() {
       <AnimatePresence>
         {selectedMember && (
           <motion.div
+            ref={modalRef}
+            tabIndex={-1}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md focus:outline-none"
             onClick={handleClose}
             role="dialog"
             aria-modal="true"
@@ -167,10 +191,14 @@ export default function MemberGrid() {
 
             {/* Vertical Objekt Photocard */}
             <motion.div
-              initial={{ scale: 0.92, y: 16, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.92, y: 16, opacity: 0 }}
-              transition={{ type: "spring", damping: 28, stiffness: 350 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.92, y: 16, opacity: 0 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, y: 0, opacity: 1 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0.92, y: 16, opacity: 0 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0.01 }
+                  : { type: "spring", damping: 28, stiffness: 350 }
+              }
               className="relative w-full max-w-[330px] xs:max-w-[360px] sm:max-w-[390px] aspect-[1/1.5] max-h-[85vh] rounded-2xl overflow-hidden bg-zinc-950 border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.9)]"
               onClick={(e) => e.stopPropagation()}
             >
@@ -204,12 +232,12 @@ export default function MemberGrid() {
                 <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-md">
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: selectedMemberColor }}
+                    style={{ backgroundColor: getReadableMemberColor(selectedMemberColor, true) }}
                     aria-hidden="true"
                   />
                   <span
                     className="text-xs font-mono font-bold tracking-tight"
-                    style={{ color: selectedMemberColor === "#FFFFFF" ? "#F4F4F6" : selectedMemberColor }}
+                    style={{ color: getReadableMemberColor(selectedMemberColor, true) }}
                   >
                     S{selectedMember.id < 10 ? `0${selectedMember.id}` : selectedMember.id}
                   </span>
@@ -259,7 +287,7 @@ export default function MemberGrid() {
 
                 <Link
                   href={`/members/${selectedMember.slug}`}
-                  className="btn-magnetic group/btn w-full inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 active:bg-white/20 text-white/95 border border-white/20 hover:border-white/40 backdrop-blur-md py-2.5 rounded-xl text-xs font-mono font-medium tracking-wide transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
+                  className="btn-magnetic group/btn w-full inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 active:bg-white/20 text-white/95 border border-white/20 hover:border-white/40 backdrop-blur-md py-2.5 rounded-xl text-xs font-mono font-medium tracking-wide transition-[background-color,border-color,transform] duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
                 >
                   <span>View Full Profile</span>
                   <ArrowUpRight className="btn-arrow h-3.5 w-3.5 text-white/70 group-hover/btn:text-white transition-colors" />

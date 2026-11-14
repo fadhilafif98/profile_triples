@@ -6,10 +6,6 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   Cake,
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
 } from "lucide-react";
 import { OFFICIAL_MEMBER_COLORS, getMemberImageUrl } from "@/lib/members";
 import type { Member } from "@/types/member";
@@ -124,7 +120,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date>(() => new Date());
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
-  const [autoRotate, setAutoRotate] = useState(true);
+  const [viewCelebration, setViewCelebration] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -132,6 +128,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     seconds: 0,
   });
 
+  const sectionRef = useRef<HTMLElement | null>(null);
   const queueRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const drag = useRef({
@@ -158,81 +155,67 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
       .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
   }, [members, now]);
 
-  const { rosterQueue, priorityQueue, defaultMember } = useMemo(() => {
-    const todayMembers = processedMembers.filter((m) => m.isToday);
-    const sameMonthUpcoming = processedMembers
-      .filter((m) => m.isThisMonth && !m.hasPassedThisYear && !m.isToday)
-      .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
-    const sameMonthPassed = processedMembers
-      .filter((m) => m.isThisMonth && m.hasPassedThisYear && !m.isToday)
+  const {
+    todayMembers,
+    currentMonthCelebrants,
+    imminentUpcoming,
+    pipelineQueue,
+  } = useMemo(() => {
+    const today = processedMembers.filter((m) => m.isToday);
+    const monthCelebrants = processedMembers
+      .filter((m) => m.isThisMonth)
       .sort((a, b) => a.birthDay - b.birthDay || a.id - b.id);
-    const imminentNext30 = processedMembers
-      .filter((m) => !m.isThisMonth && m.daysUntil > 0 && m.daysUntil <= 30)
+    const imminent = processedMembers
+      .filter((m) => m.daysUntil > 0 && m.daysUntil <= 30)
       .sort((a, b) => a.daysUntil - b.daysUntil || a.id - b.id);
 
-    const priority: MemberBirthdayMeta[] = [];
-    const seenPriority = new Set<number>();
-    const addPriority = (list: MemberBirthdayMeta[]) => {
-      for (const item of list) {
-        if (!seenPriority.has(item.id)) {
-          seenPriority.add(item.id);
-          priority.push(item);
-        }
+    const queue: MemberBirthdayMeta[] = [...monthCelebrants];
+    const seen = new Set(queue.map((item) => item.id));
+    for (const item of imminent) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id);
+        queue.push(item);
       }
-    };
-
-    addPriority(todayMembers);
-    addPriority(sameMonthUpcoming);
-    addPriority(imminentNext30);
-    addPriority(sameMonthPassed);
-    if (priority.length === 0) {
-      addPriority(processedMembers.slice(0, 4));
     }
 
-    const roster: MemberBirthdayMeta[] = [];
-    const seenRoster = new Set<number>();
-    const addRoster = (list: MemberBirthdayMeta[]) => {
-      for (const item of list) {
-        if (!seenRoster.has(item.id)) {
-          seenRoster.add(item.id);
-          roster.push(item);
-        }
-      }
-    };
-
-    addRoster(todayMembers);
-    addRoster(sameMonthUpcoming);
-    addRoster(imminentNext30);
-    addRoster(sameMonthPassed);
-    addRoster(processedMembers);
-
-    const fallbackDefault =
-      todayMembers[0] ??
-      sameMonthUpcoming[0] ??
-      imminentNext30[0] ??
-      sameMonthPassed[0] ??
-      roster[0];
+    if (queue.length === 0) {
+      queue.push(...processedMembers.slice(0, 4));
+    }
 
     return {
-      rosterQueue: roster,
-      priorityQueue: priority,
-      defaultMember: fallbackDefault,
+      todayMembers: today,
+      currentMonthCelebrants: monthCelebrants,
+      imminentUpcoming: imminent,
+      pipelineQueue: queue,
     };
   }, [processedMembers]);
 
   const activeMember = useMemo(() => {
     if (selectedMemberId !== null) {
-      const found = rosterQueue.find((m) => m.id === selectedMemberId);
-      if (found) return found;
+      const fromQueue = pipelineQueue.find((m) => m.id === selectedMemberId);
+      if (fromQueue) return fromQueue;
+      const fromAll = processedMembers.find((m) => m.id === selectedMemberId);
+      if (fromAll) return fromAll;
     }
-    return defaultMember;
-  }, [selectedMemberId, rosterQueue, defaultMember]);
+    if (todayMembers.length > 0 && viewCelebration) return todayMembers[0];
+    if (imminentUpcoming.length > 0) return imminentUpcoming[0];
+    if (currentMonthCelebrants.length > 0) return currentMonthCelebrants[0];
+    return pipelineQueue[0] ?? processedMembers[0];
+  }, [
+    selectedMemberId,
+    pipelineQueue,
+    processedMembers,
+    todayMembers,
+    viewCelebration,
+    imminentUpcoming,
+    currentMonthCelebrants,
+  ]);
 
   const activeIndex = useMemo(() => {
     if (!activeMember) return 0;
-    const idx = rosterQueue.findIndex((m) => m.id === activeMember.id);
+    const idx = pipelineQueue.findIndex((m) => m.id === activeMember.id);
     return idx >= 0 ? idx : 0;
-  }, [activeMember, rosterQueue]);
+  }, [activeMember, pipelineQueue]);
 
   const updateCountdown = useCallback(() => {
     if (!activeMember) return;
@@ -254,28 +237,50 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
   useEffect(() => {
     updateCountdown();
-    const interval = window.setInterval(updateCountdown, 1000);
-    return () => window.clearInterval(interval);
-  }, [updateCountdown]);
 
-  useEffect(() => {
-    if (!autoRotate || priorityQueue.length <= 1) return;
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (!activeMember || activeMember.isToday || activeMember.nextBirthday.getTime() <= Date.now()) {
+      return;
+    }
 
-    const timer = window.setInterval(() => {
-      setSelectedMemberId((prev) => {
-        const currentId = prev ?? activeMember?.id;
-        const currentIdx = priorityQueue.findIndex((m) => m.id === currentId);
-        const nextIdx = (currentIdx + 1) % priorityQueue.length;
-        return priorityQueue[nextIdx]?.id ?? null;
-      });
-    }, 8000);
+    let isVisible = true;
+    let intervalId: number | null = null;
 
-    return () => window.clearInterval(timer);
-  }, [autoRotate, priorityQueue, activeMember]);
+    const syncInterval = () => {
+      const shouldRun = isVisible && !document.hidden;
+      if (shouldRun && intervalId === null) {
+        updateCountdown();
+        intervalId = window.setInterval(updateCountdown, 1000);
+      } else if (!shouldRun && intervalId !== null) {
+        window.clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const handleVisibilityChange = () => syncInterval();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    let observer: IntersectionObserver | null = null;
+    if (sectionRef.current && typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          isVisible = entries.some((entry) => entry.isIntersecting);
+          syncInterval();
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(sectionRef.current);
+    }
+
+    syncInterval();
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      observer?.disconnect();
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [updateCountdown, activeMember]);
 
   useEffect(() => {
     const container = queueRef.current;
@@ -299,7 +304,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     });
   }, [activeIndex]);
 
-  if (!activeMember || rosterQueue.length === 0) return null;
+  if (!activeMember || pipelineQueue.length === 0) return null;
 
   const officialColor = OFFICIAL_MEMBER_COLORS[activeMember.id] || "#18181B";
   const sidebandInk = getContrastingInk(officialColor);
@@ -309,11 +314,13 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     activeMember.isThisMonth &&
     activeMember.hasPassedThisYear &&
     !activeMember.isToday;
+  const isCountdownActive = !isTodayCelebrating && !isThisMonthPassed;
 
   const stepMember = (delta: number) => {
     const nextIdx =
-      (activeIndex + delta + rosterQueue.length) % rosterQueue.length;
-    setSelectedMemberId(rosterQueue[nextIdx].id);
+      (activeIndex + delta + pipelineQueue.length) % pipelineQueue.length;
+    setSelectedMemberId(pipelineQueue[nextIdx].id);
+    setViewCelebration(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -370,391 +377,334 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     }
   };
 
+  const countdownUnits = [
+    { value: timeLeft.days, label: "DAYS", highlight: false },
+    { value: timeLeft.hours, label: "HRS", highlight: false },
+    { value: timeLeft.minutes, label: "MIN", highlight: false },
+    { value: timeLeft.seconds, label: "SEC", highlight: true },
+  ];
+
   return (
     <section
+      ref={sectionRef}
       id="upcoming-birthdays"
       aria-labelledby="birthday-heading"
       onKeyDown={handleKeyDown}
-      className="relative flex flex-col justify-between lg:min-h-[calc(100dvh-4rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 gap-6 lg:gap-8 border-t border-zinc-200 dark:border-white/10 overflow-x-clip"
+      className="scroll-mt-16 relative py-16 sm:py-20 lg:py-16 px-4 sm:px-6 lg:px-8 lg:min-h-[calc(100dvh-4rem)] flex items-center border-t border-zinc-200 dark:border-white/10 overflow-x-clip"
     >
-      {/* Top Row: Asymmetrical Editorial Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="space-y-2">
-          <h2
-            id="birthday-heading"
-            className="text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]"
-          >
-            Upcoming{" "}
-            <span className="font-accent text-4xl sm:text-5xl lg:text-6xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
-              Birthdays
-            </span>
-          </h2>
-          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl">
-            Count down to the next member birthday across the 24-member roster.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
-          <span
-            aria-live="polite"
-            suppressHydrationWarning
-            className="font-mono text-xs tabular-nums tracking-[0.14em] text-zinc-500 dark:text-zinc-400 mr-1"
-          >
-            {String(activeIndex + 1).padStart(2, "0")} /{" "}
-            {String(rosterQueue.length).padStart(2, "0")}
-          </span>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => stepMember(-1)}
-              aria-label="Previous member birthday"
-              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+      <div className="max-w-7xl w-full mx-auto space-y-10 lg:space-y-12">
+        {/* Header Row: Streamlined Title & Roster Directory Link */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="space-y-2">
+            <h2
+              id="birthday-heading"
+              className="text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]"
             >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => stepMember(1)}
-              aria-label="Next member birthday"
-              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setAutoRotate((prev) => !prev)}
-              aria-label={
-                autoRotate ? "Pause queue rotation" : "Play queue rotation"
-              }
-              title={
-                autoRotate ? "Pause queue rotation" : "Play queue rotation"
-              }
-              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
-            >
-              {autoRotate ? (
-                <Pause className="w-3.5 h-3.5" />
-              ) : (
-                <Play className="w-3.5 h-3.5" />
-              )}
-            </button>
+              Upcoming{" "}
+              <span className="font-accent text-4xl sm:text-5xl lg:text-6xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1">
+                Birthdays
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl">
+              Celebrating this month&apos;s birthdays and upcoming milestones
+              within the next 30 days.
+            </p>
           </div>
 
           <Link
             href="/members"
-            className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+            className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 self-start sm:self-auto shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
           >
             All 24 Members
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </div>
-      </div>
 
-      {/* Middle Row: 12-Column Unboxed Objekt + Monochrome Countdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto py-1">
-        {/* Left: Unboxed Physical First Class Objekt Card */}
-        <div className="lg:col-span-5 flex justify-center">
-          <div className="relative w-full max-w-[220px] sm:max-w-[250px] lg:max-w-[260px] aspect-[2/3] group">
-            {/* Subtle tight portrait ambient blur */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-5 rounded-3xl opacity-25 dark:opacity-20 blur-2xl overflow-hidden"
-            >
-              <Image
-                src={getMemberImageUrl(activeMember)}
-                alt=""
-                fill
-                sizes="260px"
-                className="object-cover object-top scale-125"
-              />
-            </div>
-
-            {/* Single-Declaration Shadow Frame */}
-            <Link
-              href={`/members/${activeMember.slug}`}
-              aria-label={`View ${sCode} ${activeMember.name} profile`}
-              className="relative z-10 block w-full h-full rounded-2xl overflow-hidden shadow-[0_24px_48px_-18px_rgba(9,9,11,0.45)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-            >
-              <Image
-                src={getMemberImageUrl(activeMember)}
-                alt={`${sCode} ${activeMember.name} First Class Objekt portrait`}
-                fill
-                sizes="(max-width: 640px) 220px, (max-width: 1024px) 250px, 260px"
-                className="object-cover object-top origin-top scale-[1.05] group-hover:scale-[1.07] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
-              />
-
-              {/* Official MODHAUS COSMO Vertical Sideband */}
-              <div
-                aria-hidden="true"
-                style={{ backgroundColor: officialColor, color: sidebandInk }}
-                className="pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[26px] flex flex-col items-center justify-between py-4 px-0.5 select-none"
+        {/* Main 12-Column Editorial Spread */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-14 items-center">
+          {/* Left Column (5 Cols): Crisp Physical First Class Objekt Portrait */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="w-full max-w-[260px] sm:max-w-[300px] lg:max-w-[320px] aspect-[2/3] group">
+              <Link
+                href={`/members/${activeMember.slug}`}
+                aria-label={`View ${sCode} ${activeMember.name} profile`}
+                className="relative block w-full h-full rounded-2xl overflow-hidden shadow-[0_24px_48px_-14px_rgba(9,9,11,0.18)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
               >
-                <span className="font-mono text-[9px] font-bold tracking-tight">
-                  {sCode}
-                </span>
-                <span
-                  style={{ writingMode: "vertical-rl" }}
-                  className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[160px]"
+                <Image
+                  src={getMemberImageUrl(activeMember)}
+                  alt={`${sCode} ${activeMember.name} First Class Objekt portrait`}
+                  fill
+                  sizes="(max-width: 640px) 260px, (max-width: 1024px) 300px, 320px"
+                  className="object-cover object-top origin-top scale-[1.05] group-hover:scale-[1.07] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+                />
+
+                {/* Official MODHAUS COSMO Vertical Sideband */}
+                <div
+                  aria-hidden="true"
+                  style={{ backgroundColor: officialColor, color: sidebandInk }}
+                  className="pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[28px] flex flex-col items-center justify-between py-4 px-0.5 select-none"
                 >
-                  {activeMember.name}
-                </span>
-                <span
-                  style={{ writingMode: "vertical-rl" }}
-                  className="rotate-180 font-mono text-[7px] uppercase tracking-[0.2em] opacity-80"
-                >
-                  COSMO
-                </span>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Right: Borderless Typographic Display (Zero Eyebrow Above H3) */}
-        <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left gap-4 lg:gap-5">
-          <h3 className="text-3xl sm:text-5xl lg:text-[3.25rem] font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.04] flex flex-wrap items-baseline justify-center lg:justify-start gap-x-3 gap-y-1">
-            <span>{activeMember.name}</span>
-            {activeMember.hangul ? (
-              <span
-                lang="ko"
-                className="text-xl sm:text-2xl font-sans font-normal text-zinc-400 dark:text-zinc-500"
-              >
-                {activeMember.hangul}
-              </span>
-            ) : null}
-          </h3>
-
-          <p
-            suppressHydrationWarning
-            className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center justify-center lg:justify-start gap-x-2.5 gap-y-1"
-          >
-            <span className="inline-flex items-center gap-1.5 text-zinc-950 dark:text-zinc-200 font-medium">
-              <span
-                className="w-2 h-2 rounded-full border border-black/15 dark:border-white/20 shrink-0"
-                style={{ backgroundColor: officialColor }}
-                aria-hidden="true"
-              />
-              {sCode}
-            </span>
-            <span aria-hidden="true">/</span>
-            <span className="text-zinc-950 dark:text-zinc-200 font-medium">
-              {activeMember.formattedDate}
-            </span>
-            <span aria-hidden="true">/</span>
-            <span>
-              {isThisMonthPassed ? "Turned" : "Turning"}{" "}
-              {activeMember.turningAge}
-            </span>
-            <span aria-hidden="true">/</span>
-            <span>{activeMember.birthplace || activeMember.nationality}</span>
-            <span aria-hidden="true">/</span>
-            {isTodayCelebrating ? (
-              <span className="inline-flex items-center gap-1 text-zinc-950 dark:text-[#D4FF00] font-semibold">
-                <Cake className="w-3.5 h-3.5" aria-hidden="true" />
-                Birthday Today
-              </span>
-            ) : isThisMonthPassed ? (
-              <span className="text-zinc-950 dark:text-[#D4FF00] font-semibold">
-                {currentMonthName} Celebrant
-              </span>
-            ) : (
-              <span className="tabular-nums text-zinc-950 dark:text-[#D4FF00] font-semibold">
-                D-{activeMember.daysUntil}
-              </span>
-            )}
-          </p>
-
-          {/* Monochrome Typographic Countdown Stream / Unboxed Celebration */}
-          <div className="py-1">
-            {isTodayCelebrating ? (
-              <div className="space-y-1.5">
-                <p className="inline-flex items-center gap-2 font-display text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
-                  <Cake
-                    className="w-5 h-5 text-zinc-950 dark:text-[#D4FF00]"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    Happy {getOrdinalSuffix(activeMember.turningAge)} Birthday,{" "}
+                  <span className="font-mono text-[9px] font-bold tracking-tight">
+                    {sCode}
+                  </span>
+                  <span
+                    style={{ writingMode: "vertical-rl" }}
+                    className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[180px]"
+                  >
                     {activeMember.name}
                   </span>
-                </p>
-                <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed">
-                  Celebrating {activeMember.name}&apos;s{" "}
-                  {getOrdinalSuffix(activeMember.turningAge)} birthday today
-                  across the tripleS roster.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div
-                  className="flex items-baseline justify-center lg:justify-start gap-3 sm:gap-5 font-mono tabular-nums"
-                  aria-label={`Countdown to ${activeMember.name}'s next birthday`}
-                >
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      suppressHydrationWarning
-                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
-                    >
-                      {mounted ? String(timeLeft.days).padStart(2, "0") : "00"}
-                    </span>
-                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
-                      d
-                    </span>
-                  </div>
                   <span
-                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
-                    aria-hidden="true"
+                    style={{ writingMode: "vertical-rl" }}
+                    className="rotate-180 font-mono text-[7px] uppercase tracking-[0.2em] opacity-80"
                   >
-                    &middot;
+                    COSMO
                   </span>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      suppressHydrationWarning
-                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
-                    >
-                      {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
-                    </span>
-                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
-                      h
-                    </span>
-                  </div>
-                  <span
-                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
-                    aria-hidden="true"
-                  >
-                    &middot;
-                  </span>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      suppressHydrationWarning
-                      className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-950 dark:text-white tracking-tight"
-                    >
-                      {mounted
-                        ? String(timeLeft.minutes).padStart(2, "0")
-                        : "00"}
-                    </span>
-                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
-                      m
-                    </span>
-                  </div>
-                  <span
-                    className="text-xl sm:text-2xl text-zinc-300 dark:text-zinc-700"
-                    aria-hidden="true"
-                  >
-                    &middot;
-                  </span>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      suppressHydrationWarning
-                      className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-950 dark:text-[#D4FF00]"
-                    >
-                      {mounted
-                        ? String(timeLeft.seconds).padStart(2, "0")
-                        : "00"}
-                    </span>
-                    <span className="text-xs text-zinc-400 uppercase tracking-wider">
-                      s
-                    </span>
-                  </div>
                 </div>
+              </Link>
+            </div>
+          </div>
 
-                {isThisMonthPassed ? (
+          {/* Right Column (7 Cols): Member Dossier, Architectural Countdown & Integrated Pipeline Queue */}
+          <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left gap-5 lg:gap-6 min-w-0">
+            <div className="space-y-2.5 w-full">
+              <h3 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.02] flex flex-wrap items-baseline justify-center lg:justify-start gap-x-3 gap-y-1">
+                <span>{activeMember.name}</span>
+                {activeMember.hangul ? (
+                  <span
+                    lang="ko"
+                    className="text-xl sm:text-2xl lg:text-3xl font-sans font-normal text-zinc-400 dark:text-zinc-500"
+                  >
+                    {activeMember.hangul}
+                  </span>
+                ) : null}
+              </h3>
+
+              <p
+                suppressHydrationWarning
+                className="font-mono text-xs uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400 flex flex-wrap items-center justify-center lg:justify-start gap-x-2.5 gap-y-1.5"
+              >
+                <span className="inline-flex items-center gap-1.5 text-zinc-950 dark:text-zinc-200 font-medium">
+                  <span
+                    className="w-2 h-2 rounded-full border border-black/15 dark:border-white/20 shrink-0"
+                    style={{ backgroundColor: officialColor }}
+                    aria-hidden="true"
+                  />
+                  {sCode}
+                </span>
+                <span aria-hidden="true">/</span>
+                <span className="text-zinc-950 dark:text-zinc-200 font-medium">
+                  {activeMember.formattedDate}
+                </span>
+                <span aria-hidden="true">/</span>
+                <span>
+                  {isThisMonthPassed ? "Turned" : "Turning"}{" "}
+                  {activeMember.turningAge}
+                </span>
+                <span aria-hidden="true">/</span>
+                <span>{activeMember.birthplace || activeMember.nationality}</span>
+              </p>
+            </div>
+
+            {/* Architectural 3-State Countdown / Celebration Block */}
+            <div className="min-h-[88px] flex flex-col justify-center py-2 w-full">
+              {isTodayCelebrating ? (
+                <div className="space-y-1.5">
+                  <p className="inline-flex items-center justify-center lg:justify-start gap-2 font-display text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
+                    <Cake
+                      className="w-5 h-5 text-zinc-950 dark:text-[#D4FF00] shrink-0"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Happy {getOrdinalSuffix(activeMember.turningAge)} Birthday,{" "}
+                      {activeMember.name}
+                    </span>
+                  </p>
+                  <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed mx-auto lg:mx-0">
+                    Celebrating {activeMember.name}&apos;s{" "}
+                    {getOrdinalSuffix(activeMember.turningAge)} birthday today
+                    across the tripleS roster.
+                  </p>
+                </div>
+              ) : isThisMonthPassed ? (
+                <div className="space-y-1">
                   <p
                     suppressHydrationWarning
-                    className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400"
+                    className="font-display text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight"
                   >
-                    Celebrated this month on {activeMember.shortDate} &middot;
-                    counting down to next year
+                    {currentMonthName} Celebration
                   </p>
+                  <p
+                    suppressHydrationWarning
+                    className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed mx-auto lg:mx-0"
+                  >
+                    Celebrated on {activeMember.formattedDate} &middot; Turned{" "}
+                    {activeMember.turningAge} years old.
+                  </p>
+                </div>
+              ) : isCountdownActive ? (
+                <div
+                  className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 lg:gap-7 font-mono tabular-nums"
+                  aria-label={`Countdown to ${activeMember.name}'s next birthday`}
+                >
+                  {countdownUnits.map((unit, idx) => (
+                    <div
+                      key={unit.label}
+                      className="flex items-center gap-4 sm:gap-6 lg:gap-7"
+                    >
+                      {idx > 0 ? (
+                        <span
+                          aria-hidden="true"
+                          className="h-10 w-px bg-zinc-200 dark:bg-white/10 shrink-0"
+                        />
+                      ) : null}
+                      <div className="flex flex-col items-center lg:items-start">
+                        <span
+                          suppressHydrationWarning
+                          className={`text-3xl sm:text-5xl lg:text-[3.5rem] font-black tracking-tight leading-none ${
+                            unit.highlight
+                              ? "text-zinc-950 dark:text-[#D4FF00]"
+                              : "text-zinc-950 dark:text-white"
+                          }`}
+                        >
+                          {mounted
+                            ? String(unit.value).padStart(2, "0")
+                            : "00"}
+                        </span>
+                        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 mt-1.5">
+                          {unit.label}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Single Primary Profile CTA */}
+            <div>
+              <Link
+                href={`/members/${activeMember.slug}`}
+                className="btn-primary btn-magnetic inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono uppercase tracking-[0.15em]"
+              >
+                <span>View {activeMember.name} Profile</span>
+                <ArrowUpRight className="btn-arrow w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            {/* Integrated Curated Pipeline Queue (Colocated with Right Column) */}
+            <div className="w-full pt-6 border-t border-zinc-200 dark:border-white/10 space-y-3 text-left">
+              <div className="flex items-center justify-between gap-2 min-h-[28px]">
+                <p
+                  suppressHydrationWarning
+                  className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.16em] text-zinc-500 dark:text-zinc-400 truncate"
+                >
+                  {currentMonthName} &amp; Next 30 Days
+                </p>
+
+                {todayMembers.length > 0 && !isTodayCelebrating ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMemberId(todayMembers[0].id);
+                      setViewCelebration(true);
+                    }}
+                    className="shrink-0 px-3 py-1.5 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-[#D4FF00] hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 text-[11px] font-mono inline-flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
+                  >
+                    <Cake className="w-3 h-3" aria-hidden="true" />
+                    <span>Today&apos;s Birthday</span>
+                  </button>
                 ) : null}
               </div>
-            )}
-          </div>
 
-          {/* Distilled Single Primary CTA */}
-          <div className="pt-1">
-            <Link
-              href={`/members/${activeMember.slug}`}
-              className="btn-primary btn-magnetic inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-mono uppercase tracking-[0.15em]"
-            >
-              <span>View {activeMember.name} Profile</span>
-              <ArrowUpRight className="btn-arrow w-3.5 h-3.5" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Row: Horizontal Draggable 24-Member Birthday Lineup Strip */}
-      <div className="w-full">
-        <div
-          ref={queueRef}
-          role="listbox"
-          aria-label="Birthday lineup across all 24 members"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          onPointerLeave={endDrag}
-          onClickCapture={handleClickCapture}
-          className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-2 px-1 cursor-grab active:cursor-grabbing select-none"
-        >
-          {rosterQueue.map((m, idx) => {
-            const isSelected = m.id === activeMember.id;
-            const mColor = OFFICIAL_MEMBER_COLORS[m.id] || "#D4FF00";
-            const mRing = getVisibleSwatch(mColor);
-            const isPassed = m.isThisMonth && m.hasPassedThisYear && !m.isToday;
-            const statusText = m.isToday
-              ? "Today"
-              : isPassed
-                ? m.shortDate
-                : `D-${m.daysUntil}`;
-
-            return (
-              <button
-                key={m.id}
-                ref={(el) => {
-                  itemRefs.current[idx] = el;
-                }}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                aria-label={`${m.name} (${statusText})`}
-                draggable={false}
-                onClick={() => setSelectedMemberId(m.id)}
-                className={`shrink-0 inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full text-xs font-mono transition-[background-color,color,border-color] duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none ${
-                  isSelected
-                    ? "ring-2 ring-zinc-950 dark:ring-[#D4FF00] bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
-                    : "border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30 hover:text-zinc-950 dark:hover:text-white"
-                }`}
+              <div
+                ref={queueRef}
+                role="listbox"
+                aria-label="Birthday lineup for this month and the next 30 days"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+                onPointerLeave={endDrag}
+                onClickCapture={handleClickCapture}
+                className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto snap-x snap-mandatory overscroll-x-contain no-scrollbar py-1 cursor-grab active:cursor-grabbing select-none"
               >
-                <span
-                  className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 border-[1.5px] bg-zinc-900"
-                  style={{ borderColor: mRing }}
-                >
-                  <Image
-                    src={getMemberImageUrl(m)}
-                    alt=""
-                    fill
-                    sizes="24px"
-                    draggable={false}
-                    className="object-cover object-top scale-[1.05] pointer-events-none"
-                  />
-                </span>
-                <span className="font-semibold tracking-tight">{m.name}</span>
-                <span
-                  suppressHydrationWarning
-                  className={`text-[10px] tabular-nums ${
-                    isSelected
-                      ? "text-zinc-300 dark:text-zinc-600"
-                      : m.isToday || (m.daysUntil <= 30 && !isPassed)
-                        ? "text-zinc-950 dark:text-[#D4FF00] font-semibold"
-                        : "text-zinc-400 dark:text-zinc-500"
-                  }`}
-                >
-                  {statusText}
-                </span>
-              </button>
-            );
-          })}
+                {pipelineQueue.map((m, idx) => {
+                  const isSelected = m.id === activeMember.id;
+                  const mColor = OFFICIAL_MEMBER_COLORS[m.id] || "#D4FF00";
+                  const mRing = getVisibleSwatch(mColor);
+                  const isPassed =
+                    m.isThisMonth && m.hasPassedThisYear && !m.isToday;
+                  const statusText = m.isToday
+                    ? "Today"
+                    : isPassed
+                      ? "Celebrated"
+                      : `D-${m.daysUntil}`;
+
+                  return (
+                    <button
+                      key={m.id}
+                      ref={(el) => {
+                        itemRefs.current[idx] = el;
+                      }}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-label={`${m.name}, ${m.shortDate} (${statusText})`}
+                      draggable={false}
+                      onClick={() => {
+                        setSelectedMemberId(m.id);
+                        setViewCelebration(false);
+                      }}
+                      className={`snap-start shrink-0 min-h-11 inline-flex items-center gap-2 sm:gap-2.5 pl-1.5 pr-3 sm:pr-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-mono transition-[background-color,color,border-color] duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none ${
+                        isSelected
+                          ? "border border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950"
+                          : "border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30 hover:text-zinc-950 dark:hover:text-white"
+                      }`}
+                    >
+                      <span
+                        className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 border-[1.5px] bg-zinc-900"
+                        style={{ borderColor: mRing }}
+                      >
+                        <Image
+                          src={getMemberImageUrl(m)}
+                          alt=""
+                          fill
+                          sizes="28px"
+                          draggable={false}
+                          className="object-cover object-top scale-[1.05] pointer-events-none"
+                        />
+                      </span>
+                      <span className="font-semibold tracking-tight">
+                        {m.name}
+                      </span>
+                      <span
+                        suppressHydrationWarning
+                        className={`text-[10px] sm:text-[11px] tabular-nums ${
+                          isSelected
+                            ? "text-zinc-300 dark:text-zinc-600"
+                            : "text-zinc-400 dark:text-zinc-500"
+                        }`}
+                      >
+                        {m.shortDate}
+                      </span>
+                      <span
+                        suppressHydrationWarning
+                        className={`text-[10px] tabular-nums font-semibold ${
+                          isSelected
+                            ? "text-[#D4FF00] dark:text-zinc-950"
+                            : m.isToday || (m.daysUntil <= 30 && !isPassed)
+                              ? "text-zinc-950 dark:text-[#D4FF00]"
+                              : "text-zinc-500 dark:text-zinc-400"
+                        }`}
+                      >
+                        {statusText}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

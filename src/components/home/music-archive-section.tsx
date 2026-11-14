@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { Album } from "@/types/album";
 
 interface MusicArchiveSectionProps {
@@ -129,42 +129,13 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
-          <span
-            aria-live="polite"
-            className="font-mono text-xs tabular-nums tracking-[0.14em] text-zinc-500 dark:text-zinc-400 mr-1"
-          >
-            {String(activeIndex + 1).padStart(2, "0")} /{" "}
-            {String(albums.length).padStart(2, "0")}
-          </span>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => stepAlbum(-1)}
-              aria-label="Previous release"
-              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => stepAlbum(1)}
-              aria-label="Next release"
-              className="w-9 h-9 rounded-full border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] text-zinc-950 dark:text-white hover:border-zinc-950 dark:hover:border-[#D4FF00] transition-[border-color,color] duration-200 inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] motion-reduce:transition-none"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <Link
-            href="/albums"
-            className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-          >
-            All {albums.length} Releases
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+        <Link
+          href="/albums"
+          className="nav-draw-link inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.16em] text-zinc-950 dark:text-zinc-200 pb-0.5 self-start md:self-auto shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+        >
+          All {albums.length} Releases
+          <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+        </Link>
       </div>
 
       {/* Middle Row: Interactive Vinyl Sleeve Deck */}
@@ -282,7 +253,7 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
           onPointerCancel={endDrag}
           onPointerLeave={endDrag}
           onClickCapture={handleClickCapture}
-          className="flex items-start gap-3 overflow-x-auto no-scrollbar py-2 px-1 cursor-grab active:cursor-grabbing select-none"
+          className="flex items-start gap-3 overflow-x-auto snap-x snap-mandatory overscroll-x-contain no-scrollbar py-2 px-1 cursor-grab active:cursor-grabbing select-none"
         >
           {albums.map((album, idx) => {
             const isActive = idx === activeIndex;
@@ -298,7 +269,7 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
                 aria-label={`${String(idx + 1).padStart(2, "0")}. ${album.title}`}
                 draggable={false}
                 onClick={() => setActiveIndex(idx)}
-                className="w-16 sm:w-20 shrink-0 group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] rounded-lg"
+                className="snap-center w-16 sm:w-20 shrink-0 group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] rounded-lg"
               >
                 <div
                   className={`relative aspect-square w-full rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-900 transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none ${

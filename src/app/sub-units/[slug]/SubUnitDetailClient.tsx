@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import {
   ArrowRight,
   ChevronLeft,
@@ -15,11 +15,12 @@ import {
 } from "lucide-react"
 import { FaSpotify } from "react-icons/fa"
 import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"
-import { getMemberById, getMemberColor, getMemberImageUrl } from "@/lib/members"
+import { getMemberById, getMemberColor, getContrastingInk, getMemberImageUrl } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
+import { useSafeReducedMotion } from "@/lib/a11y"
 
 interface SubUnitDetailClientProps {
   slug: string
@@ -140,6 +141,7 @@ const UNIT_STORIES: Record<string, UnitStory> = {
 }
 
 export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) {
+  const shouldReduceMotion = useSafeReducedMotion()
   const unit = getSubUnitBySlug(slug)
   const allUnits = getAllSubUnits()
   const allAlbums = getAllAlbums()
@@ -270,12 +272,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
             
             {/* Left: Pure Concept Photography (No Overlaid Badges or Widgets) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="lg:col-span-7 relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-white/10 group"
-            >
+            <div className="lg:col-span-7 relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-white/10 group">
               <Image
                 src={unit.image || "/placeholder.svg"}
                 alt={`${unit.name} concept photo`}
@@ -284,13 +281,16 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
               />
-            </motion.div>
+            </div>
 
             {/* Right: Typography & Editorial Specification */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{
+                duration: shouldReduceMotion ? 0.01 : 0.5,
+                delay: shouldReduceMotion ? 0 : 0.1,
+              }}
               className="lg:col-span-5 space-y-6"
             >
               {/* Context Tag */}
@@ -310,7 +310,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]">
                   {unit.name}
                 </h1>
-                <p className="text-base sm:text-lg font-mono text-zinc-400 dark:text-zinc-500 mt-1">
+                <p className="text-base sm:text-lg font-mono text-zinc-500 dark:text-zinc-400 mt-1">
                   {unit.hangul}
                 </p>
               </div>
@@ -323,28 +323,28 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               {/* Editorial Specification (Clean Definition List, No Card Chrome) */}
               <dl className="grid grid-cols-2 gap-y-3.5 gap-x-6 pt-5 border-t border-zinc-200/70 dark:border-white/10 text-xs font-mono">
                 <div>
-                  <dt className="text-zinc-400 dark:text-zinc-500">Formation</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Formation</dt>
                   <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
                     {taggedMembers.length} Members {leaderName ? `(Leader: ${leaderName})` : ""}
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-zinc-400 dark:text-zinc-500">Debut Release</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Debut Release</dt>
                   <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
                     {unit.debutRelease}
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-zinc-400 dark:text-zinc-500">Signature Track</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Signature Track</dt>
                   <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
                     &ldquo;{story.leadSingle}&rdquo;
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-zinc-400 dark:text-zinc-500">Sound Concept</dt>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Sound Concept</dt>
                   <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
                     {unit.concept}
                   </dd>
@@ -402,7 +402,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 Lineup ({taggedMembers.length})
               </h2>
             </div>
-            <p className="text-xs font-mono text-zinc-400">
+            <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
               Official formation members
             </p>
           </div>
@@ -411,13 +411,16 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             {taggedMembers.map(({ member, isLeader, color }, index) => (
               <motion.div
                 key={member.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.04 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0.01 : 0.4,
+                  delay: shouldReduceMotion ? 0 : index * 0.04,
+                }}
               >
                 <Link
                   href={`/members/${member.slug}`}
-                  className="group block relative aspect-[3/4.25] rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 border border-zinc-200/50 dark:border-white/5"
+                  className="group block relative aspect-[3/4.25] rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 shadow-md hover:shadow-2xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1.5 border border-zinc-200/50 dark:border-white/5"
                 >
                   {/* Portrait Photograph */}
                   <Image
@@ -432,8 +435,8 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                   {/* S-Number Badge */}
                   <div className="absolute top-3 left-3 z-10 pointer-events-none">
                     <span
-                      className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded text-black shadow-xs"
-                      style={{ backgroundColor: color }}
+                      className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded shadow-xs"
+                      style={{ backgroundColor: color, color: getContrastingInk(color) }}
                     >
                       S{String(member.id).padStart(2, "0")}
                     </span>
@@ -462,7 +465,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
         {relatedReleases.length > 0 && (
           <section className="py-14 sm:py-20 border-b border-zinc-200/70 dark:border-white/10">
             <div className="mb-8 sm:mb-10">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 mb-1 flex items-center gap-1.5">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-1 flex items-center gap-1.5">
                 <Disc3 className="w-3.5 h-3.5" />
                 <span>Discography</span>
               </span>
@@ -549,7 +552,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               <Link
                 key={other.id}
                 href={`/sub-units/${other.slug}`}
-                className="group block relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-zinc-200/50 dark:border-white/5"
+                className="group block relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900 shadow-md hover:shadow-xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 border border-zinc-200/50 dark:border-white/5"
               >
                 <Image
                   src={other.image || "/placeholder.svg"}

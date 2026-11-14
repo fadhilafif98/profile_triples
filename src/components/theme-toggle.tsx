@@ -24,7 +24,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <button
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={`relative inline-flex items-center justify-center p-2 sm:p-2.5 rounded-full transition-all duration-300 
+      className={`relative inline-flex items-center justify-center p-2 sm:p-2.5 rounded-full transition-[background-color,border-color,color,transform] duration-300 
         bg-white/80 dark:bg-zinc-900/80 
         border border-zinc-300/80 dark:border-zinc-800 
         text-zinc-800 dark:text-zinc-200 
@@ -69,7 +69,7 @@ export function ThemePillToggle({ className = "" }: { className?: string }) {
         type="button"
         onClick={() => setTheme("light")}
         aria-pressed={!isDark}
-        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
+        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-[background-color,border-color,color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
           !isDark
             ? "bg-white text-zinc-900 font-bold shadow-md border border-zinc-200/90"
             : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"
@@ -83,7 +83,7 @@ export function ThemePillToggle({ className = "" }: { className?: string }) {
         type="button"
         onClick={() => setTheme("dark")}
         aria-pressed={isDark}
-        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
+        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-full text-xs font-mono transition-[background-color,border-color,color,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
           isDark
             ? "bg-zinc-800 text-white font-bold shadow-md border border-zinc-700"
             : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300"

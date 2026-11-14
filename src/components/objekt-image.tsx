@@ -109,7 +109,7 @@ export default function ObjektImage({
 
       {/* Fallback Graphic: pure clean official static tripleS logo */}
       {allFailed || !currentSrc ? (
-        <div className="w-full h-full flex items-center justify-center p-6 bg-[#0c0c0e] select-none border border-zinc-200/50 dark:border-white/5 relative overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center p-6 bg-[#08080A] select-none border border-zinc-200/50 dark:border-white/5 relative overflow-hidden">
           {/* Subtle radial glow */}
           <div className="absolute inset-0 bg-radial from-white/5 to-transparent pointer-events-none" />
 
@@ -128,7 +128,6 @@ export default function ObjektImage({
           src={currentSrc}
           alt={imageAlt}
           fill
-          unoptimized={true}
           priority={priority}
           sizes={sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"}
           referrerPolicy="no-referrer"
@@ -147,7 +146,6 @@ export default function ObjektImage({
           alt={imageAlt}
           width={width || 360}
           height={height || 560}
-          unoptimized={true}
           priority={priority}
           referrerPolicy="no-referrer"
           className={`transition-opacity duration-300 ${

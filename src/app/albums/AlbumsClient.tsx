@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import gsap from "gsap"
 import {
   Disc3,
@@ -17,6 +17,7 @@ import { FaSpotify } from "react-icons/fa"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
 import { albumsList } from "@/lib/albums"
+import { useSafeReducedMotion } from "@/lib/a11y"
 import type { Album } from "@/types/album"
 
 type CategoryFilter = "All" | "Full Group" | "Mini Album" | "Studio Album" | "Single" | "Japan"
@@ -73,6 +74,7 @@ export default function AlbumsClient() {
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<ViewMode>("crate")
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest")
+  const shouldReduceMotion = useSafeReducedMotion()
 
   // Featured Hero Record (defaults to newest: LOVE&POP pt. 1)
   const [featuredAlbum, setFeaturedAlbum] = useState<Album>(
@@ -83,6 +85,7 @@ export default function AlbumsClient() {
   const headerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!headerRef.current) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ".gsap-title-word",
@@ -107,7 +110,10 @@ export default function AlbumsClient() {
     setFeaturedAlbum(album)
     const el = document.getElementById("featured-record-section")
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" })
+      el.scrollIntoView({
+        behavior: shouldReduceMotion ? "auto" : "smooth",
+        block: "start",
+      })
     }
   }
 
@@ -223,7 +229,7 @@ export default function AlbumsClient() {
                     alt=""
                     fill
                     sizes="(max-width: 640px) 280px, (max-width: 1024px) 380px, 440px"
-                    className="object-cover blur-3xl scale-110 opacity-40 dark:opacity-35 saturate-150 transition-all duration-700"
+                    className="object-cover blur-3xl scale-110 opacity-40 dark:opacity-35 saturate-150 transition-opacity duration-700"
                   />
                 </div>
 
@@ -301,7 +307,7 @@ export default function AlbumsClient() {
                   href={featuredAlbum.spotifyLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-6 py-3 text-sm font-bold hover:bg-zinc-800 dark:hover:bg-[#E2FF33] active:scale-[0.98] transition-all shadow-sm"
+                  className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-6 py-3 text-sm font-bold hover:bg-zinc-800 dark:hover:bg-[#E2FF33] active:scale-[0.98] transition-[background-color,transform] shadow-sm"
                 >
                   <FaSpotify className="w-4 h-4 text-[#1DB954] dark:text-black" />
                   <span>Stream on Spotify</span>
@@ -340,7 +346,7 @@ export default function AlbumsClient() {
                 <button
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
-                  className={`px-4 py-2 rounded-full text-xs font-mono transition-all shrink-0 cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-mono transition-[background-color,color] shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-bold shadow-xs"
                       : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
@@ -362,7 +368,7 @@ export default function AlbumsClient() {
                 placeholder="Search album or song..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-[#D4FF00] font-mono transition-all"
+                className="w-full pl-9 pr-8 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-[#D4FF00] font-mono transition-[box-shadow,background-color]"
               />
               {searchQuery && (
                 <button
@@ -389,10 +395,10 @@ export default function AlbumsClient() {
               <button
                 onClick={() => setViewMode("crate")}
                 aria-label="Vinyl crate grid view"
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
                   viewMode === "crate"
                     ? "bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs"
-                    : "text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
                 title="Vinyl crate view"
               >
@@ -401,10 +407,10 @@ export default function AlbumsClient() {
               <button
                 onClick={() => setViewMode("spreads")}
                 aria-label="Editorial spreads view"
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
                   viewMode === "spreads"
                     ? "bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs"
-                    : "text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
                 title="Editorial spreads view"
               >
@@ -419,9 +425,10 @@ export default function AlbumsClient() {
           {filteredAlbums.length === 0 ? (
             /* Clean Empty State */
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={shouldReduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
               className="text-center py-24"
             >
               <Disc3 className="w-8 h-8 text-zinc-400 mx-auto mb-3 opacity-60" />
@@ -442,7 +449,7 @@ export default function AlbumsClient() {
           ) : viewMode === "crate" ? (
             /* ── A. Pure Vinyl Crate Archive (Unboxed 3-Column Luxury Grid) ── */
             <motion.div
-              layout
+              layout={!shouldReduceMotion}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 sm:gap-x-14 lg:gap-x-16 xl:gap-x-20 gap-y-14 sm:gap-y-18 lg:gap-y-20"
             >
               {filteredAlbums.map((album, index) => {
@@ -452,12 +459,15 @@ export default function AlbumsClient() {
 
                 return (
                   <motion.article
-                    layout
+                    layout={!shouldReduceMotion}
                     key={album.id}
                     id={album.id}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.02 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0.01 : 0.4,
+                      delay: shouldReduceMotion ? 0 : index * 0.02,
+                    }}
                     className="group scroll-mt-28 max-w-[320px] xs:max-w-[360px] sm:max-w-none mx-auto sm:mx-0 w-full"
                   >
                     {/* The Vinyl Sleeve (No Card Box, Floating Pure Physical Record) */}
@@ -480,6 +490,7 @@ export default function AlbumsClient() {
                             src={album.cover}
                             alt=""
                             fill
+                            priority={album.id === featuredAlbum.id}
                             sizes="100px"
                             className="object-cover"
                           />
@@ -499,6 +510,7 @@ export default function AlbumsClient() {
                           src={album.cover}
                           alt={`${album.title} album cover`}
                           fill
+                          priority={album.id === featuredAlbum.id}
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
@@ -582,7 +594,10 @@ export default function AlbumsClient() {
             </motion.div>
           ) : (
             /* ── B. Unboxed Lookbook Spreads (1:1 with Dimensions) ── */
-            <motion.div layout className="divide-y divide-zinc-200/70 dark:divide-white/10">
+            <motion.div
+              layout={!shouldReduceMotion}
+              className="divide-y divide-zinc-200/70 dark:divide-white/10"
+            >
               {filteredAlbums.map((album, index) => {
                 const catNo = getCatalogNo(album.id)
                 const unitLink = getUnitLink(album.unit)
@@ -591,12 +606,15 @@ export default function AlbumsClient() {
 
                 return (
                   <motion.article
-                    layout
+                    layout={!shouldReduceMotion}
                     key={album.id}
                     id={album.id}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.02 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0.01 : 0.4,
+                      delay: shouldReduceMotion ? 0 : index * 0.02,
+                    }}
                     className="py-12 sm:py-16 lg:py-20 first:pt-4 last:pb-12 scroll-mt-28"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -620,6 +638,7 @@ export default function AlbumsClient() {
                                 src={album.cover}
                                 alt=""
                                 fill
+                                priority={album.id === featuredAlbum.id}
                                 sizes="120px"
                                 className="object-cover"
                               />
@@ -639,6 +658,7 @@ export default function AlbumsClient() {
                               src={album.cover}
                               alt={`${album.title} album cover`}
                               fill
+                              priority={album.id === featuredAlbum.id}
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
                               className="object-cover"
                             />

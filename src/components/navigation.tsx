@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "motion/react"
 import { Menu, X, Home, Users, Info, Heart, Disc3, Layers, Boxes } from "lucide-react"
 import AnimatedLogo from "./animated-logo"
 import { ThemeToggle, ThemePillToggle } from "./theme-toggle"
 import WavDoodle from "./wav-doodle"
+import { useDialogA11y } from "@/lib/a11y"
 
 const NAV_LINKS = [
   { name: "Members", href: "/members", icon: Users },
@@ -23,6 +24,8 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const pathname = usePathname()
+  const drawerRef = useRef<HTMLElement>(null)
+  const shouldReduceMotion = useReducedMotion()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,24 +38,17 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const toggleMenu = () => setIsOpen(!isOpen)
+  const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), [])
+  const closeMenu = useCallback(() => setIsOpen(false), [])
   const isAtHero = pathname === "/" && !scrolled
 
-  // WCAG 2.1.2: Close mobile drawer on Escape key press
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false)
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen])
+  useDialogA11y(isOpen, drawerRef, closeMenu)
 
   return (
     <>
       {/* ── Main Top Navigation Bar (Full-Width Edge-to-Edge with max-w-7xl Grid Alignment) ── */}
       <header
-        className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${
+        className={`fixed top-0 inset-x-0 z-40 transition-[background-color,border-color,box-shadow] duration-300 ${
           isAtHero
             ? "bg-transparent border-b border-transparent shadow-none backdrop-blur-none"
             : scrolled
@@ -60,7 +56,7 @@ export default function Navigation() {
             : "bg-white/80 dark:bg-[#0c0c10]/80 border-b border-zinc-200/80 dark:border-white/10 backdrop-blur-xl"
         }`}
       >
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-[height] duration-300 ${
           scrolled ? "h-14 sm:h-16" : "h-16 sm:h-20"
         }`}>
           {/* Brand Mark (Left Aligned with Content Grid) */}
@@ -71,7 +67,7 @@ export default function Navigation() {
               isAtHero ? "text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" : "text-zinc-900 dark:text-white"
             }`}
           >
-            <div className={`transition-all duration-300 group-hover:scale-110 shrink-0 ${
+            <div className={`transition-[width,height,transform] duration-300 group-hover:scale-110 shrink-0 ${
               scrolled ? "w-6 h-6 sm:w-7 sm:h-7" : "w-8 h-8 sm:w-9 sm:h-9"
             }`}>
               <AnimatedLogo
@@ -83,14 +79,14 @@ export default function Navigation() {
                 loop={false}
               />
             </div>
-            <div className="flex items-baseline gap-1.5 transition-all duration-300">
-              <span className={`font-extrabold tracking-tight font-display transition-all duration-300 ${
+            <div className="flex items-baseline gap-1.5">
+              <span className={`font-extrabold tracking-tight font-display transition-[font-size] duration-300 ${
                 scrolled ? "text-base sm:text-lg" : "text-lg sm:text-2xl"
               }`}>
                 tripleS
               </span>
               <span
-                className={`font-mono tracking-widest uppercase transition-all duration-300 ${
+                className={`font-mono tracking-widest uppercase transition-[font-size,color] duration-300 ${
                   scrolled ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-xs"
                 } ${
                   isAtHero ? "text-zinc-300" : "text-zinc-400 dark:text-zinc-500"
@@ -137,7 +133,11 @@ export default function Navigation() {
                               ? "text-[#D4FF00] drop-shadow-[0_0_8px_rgba(212,255,0,0.7)]"
                               : "text-zinc-950 dark:text-[#D4FF00] dark:drop-shadow-[0_0_8px_rgba(212,255,0,0.5)]"
                           }`}
-                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                          transition={
+                            shouldReduceMotion
+                              ? { duration: 0 }
+                              : { type: "spring", stiffness: 380, damping: 30 }
+                          }
                         >
                           <WavDoodle animate={false} strokeWidth={2.2} variant={link.href} />
                         </motion.div>
@@ -150,7 +150,7 @@ export default function Navigation() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.16 }}
+                            transition={{ duration: shouldReduceMotion ? 0.01 : 0.16 }}
                             className={`absolute -bottom-2 inset-x-[-4px] h-2.5 pointer-events-none ${
                               isAtHero
                                 ? "text-white/80 drop-shadow-[0_0_6px_rgba(255,255,255,0.6)]"
@@ -185,7 +185,7 @@ export default function Navigation() {
             <Link
               href="/objekts"
               aria-label="Explore Objekts Vault"
-              className={`hidden lg:inline-flex btn-magnetic group items-center gap-1.5 rounded-full font-mono font-bold uppercase tracking-wider transition-all duration-300 shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
+              className={`hidden lg:inline-flex btn-magnetic group items-center gap-1.5 rounded-full font-mono font-bold uppercase tracking-wider transition-[background-color,color,box-shadow,padding,transform] duration-300 shadow-md active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
                 scrolled ? "px-4 py-1.5 text-[11px]" : "px-5 py-2 text-xs"
               } ${
                 isAtHero
@@ -204,7 +204,7 @@ export default function Navigation() {
               aria-expanded={isOpen}
               aria-controls="mobile-nav-drawer"
               aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
-              className={`lg:hidden p-2 sm:p-2.5 rounded-full transition-all duration-300 active:scale-95 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
+              className={`lg:hidden p-2 sm:p-2.5 rounded-full transition-[background-color,border-color,color,transform] duration-300 active:scale-95 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
                 isAtHero
                   ? "bg-black/40 border border-white/20 text-white backdrop-blur-md"
                   : "bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-zinc-900 dark:text-white"
@@ -225,20 +225,27 @@ export default function Navigation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={toggleMenu}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+              onClick={closeMenu}
               className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
               aria-hidden="true"
             />
             <motion.nav
+              ref={drawerRef}
               id="mobile-nav-drawer"
               role="dialog"
               aria-modal="true"
               aria-label="Mobile Navigation Menu"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 24, stiffness: 140 }}
-              className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-[#07070a]/95 border-l border-zinc-200 dark:border-white/10 shadow-2xl backdrop-blur-2xl lg:hidden"
+              tabIndex={-1}
+              initial={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0.01 }
+                  : { type: "spring", damping: 24, stiffness: 140 }
+              }
+              className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-[#07070a]/95 border-l border-zinc-200 dark:border-white/10 shadow-2xl backdrop-blur-2xl lg:hidden focus:outline-none"
             >
               <div className="flex flex-col h-full py-8 px-6 justify-between overflow-y-auto">
                 <div>
@@ -262,8 +269,8 @@ export default function Navigation() {
                       </div>
                     </div>
                     <button
-                      onClick={toggleMenu}
-                      className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors"
+                      onClick={closeMenu}
+                      className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00]"
                       aria-label="Close navigation menu"
                     >
                       <X className="h-5 w-5" aria-hidden="true" />
@@ -274,9 +281,9 @@ export default function Navigation() {
                     <li>
                       <Link
                         href="/"
-                        onClick={toggleMenu}
+                        onClick={closeMenu}
                         aria-current={pathname === "/" ? "page" : undefined}
-                        className="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00]"
+                        className="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00]"
                       >
                         <Home className="h-4 w-4 text-zinc-400" aria-hidden="true" />
                         <span>Home</span>
@@ -288,15 +295,18 @@ export default function Navigation() {
                       return (
                         <motion.li
                           key={item.name}
-                          initial={{ opacity: 0, x: 15 }}
+                          initial={shouldReduceMotion ? false : { opacity: 0, x: 15 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.04 }}
+                          transition={{
+                            duration: shouldReduceMotion ? 0.01 : 0.2,
+                            delay: shouldReduceMotion ? 0 : index * 0.04,
+                          }}
                         >
                           <Link
                             href={item.href}
-                            onClick={toggleMenu}
+                            onClick={closeMenu}
                             aria-current={isActive ? "page" : undefined}
-                            className={`flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
+                            className={`flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00] ${
                               isActive
                                 ? "bg-zinc-900 text-white dark:bg-white/15 dark:text-white font-semibold"
                                 : "text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"

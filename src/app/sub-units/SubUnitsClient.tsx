@@ -3,12 +3,13 @@
 import { useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import { ArrowRight, Search, Crown, Boxes } from "lucide-react"
 import { subUnits } from "@/lib/sub-units"
 import { getMemberById, getMemberColor, getMemberImageUrl } from "@/lib/members"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
+import { useSafeReducedMotion } from "@/lib/a11y"
 
 type CategoryFilter = "All" | "Main Dimension" | "msnz Project" | "Special & Genre" | "Introductory" | "Japan"
 
@@ -46,6 +47,7 @@ function parseUnitMembers(memberStrings: string[]): ParsedMember[] {
 export default function SubUnitsClient() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("All")
   const [searchQuery, setSearchQuery] = useState("")
+  const shouldReduceMotion = useSafeReducedMotion()
 
   const categories: { label: string; value: CategoryFilter }[] = [
     { label: "All Dimensions", value: "All" },
@@ -105,7 +107,7 @@ export default function SubUnitsClient() {
                 <button
                   key={cat.value}
                   onClick={() => setSelectedCategory(cat.value)}
-                  className={`px-4 py-2 rounded-full text-xs font-mono transition-all shrink-0 cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-mono transition-[background-color,color] shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-bold shadow-xs"
                       : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
@@ -125,7 +127,7 @@ export default function SubUnitsClient() {
               placeholder="Search unit or member..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-[#D4FF00] font-mono transition-all"
+              className="w-full pl-9 pr-8 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-[#D4FF00] font-mono transition-[box-shadow,background-color]"
             />
             {searchQuery && (
               <button
@@ -145,6 +147,7 @@ export default function SubUnitsClient() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
               className="text-center py-24"
             >
               <Boxes className="w-8 h-8 text-zinc-400 mx-auto mb-3 opacity-60" />
@@ -169,11 +172,14 @@ export default function SubUnitsClient() {
 
                 return (
                   <motion.article
-                    layout
+                    layout={!shouldReduceMotion}
                     key={unit.id}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={shouldReduceMotion || index === 0 ? false : { opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.02 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0.01 : 0.4,
+                      delay: shouldReduceMotion ? 0 : index * 0.02,
+                    }}
                     className="py-14 sm:py-20 lg:py-24 first:pt-2 last:pb-12"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -190,7 +196,7 @@ export default function SubUnitsClient() {
                             alt={`${unit.name} concept photo`}
                             fill
                             sizes="(max-width: 1024px) 100vw, 50vw"
-                            loading="lazy"
+                            priority={index === 0}
                             className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-103"
                           />
                         </Link>
@@ -241,7 +247,7 @@ export default function SubUnitsClient() {
                               <Link
                                 key={i}
                                 href={m.slug ? `/members/${m.slug}` : `/sub-units/${unit.slug}`}
-                                className="group/member flex items-center gap-2 pr-3 py-1 rounded-full transition-all hover:bg-zinc-200/50 dark:hover:bg-white/10"
+                                className="group/member flex items-center gap-2 pr-3 py-1 rounded-full transition-colors hover:bg-zinc-200/50 dark:hover:bg-white/10"
                                 title={`View ${m.name}`}
                               >
                                 <div
@@ -267,7 +273,7 @@ export default function SubUnitsClient() {
                                     {m.name}
                                     {m.isLeader && <Crown className="w-2.5 h-2.5 text-amber-500 shrink-0" />}
                                   </span>
-                                  <span className="text-[10px] font-mono text-zinc-400">
+                                  <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
                                     S{m.id}
                                   </span>
                                 </div>

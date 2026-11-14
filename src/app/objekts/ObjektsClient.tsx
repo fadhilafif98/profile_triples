@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
@@ -11,9 +11,11 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Objekt } from "@/types/objekt";
-import { membersList, getMemberColor, getMemberImageUrl } from "@/lib/members";
+import { membersList, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members";
 import {
   ALL_OBJEKTS_JSON_URL,
+  ObjektSortOption,
+  compareObjekts,
   getObjektSeasons,
   getObjektClasses,
   DEFAULT_SEASONS,
@@ -26,13 +28,7 @@ import SeasonDropdown from "@/components/season-dropdown";
 import Breadcrumb from "@/components/breadcrumb";
 import TriplesLogo from "@/components/triples-logo";
 
-type SortOption =
-  | "newest"
-  | "oldest"
-  | "collectionNoAsc"
-  | "collectionNoDesc"
-  | "memberAsc"
-  | "memberDesc";
+type SortOption = ObjektSortOption;
 
 const SORT_OPTIONS: DropdownOption<SortOption>[] = [
   { value: "newest", label: "Latest Drop", subLabel: "recent release → S1..S24" },
@@ -45,22 +41,36 @@ const SORT_OPTIONS: DropdownOption<SortOption>[] = [
 
 const ITEMS_PER_PAGE = 30; // Divisible by 3 (mobile 10 rows) and 5 (desktop 6 rows) - zero empty slots
 
-export default function ObjektsClient() {
+interface ObjektsClientProps {
+  initialObjekts?: Objekt[];
+  initialTotalCount?: number;
+  initialSeasons?: string[];
+  initialClasses?: string[];
+}
+
+export default function ObjektsClient({
+  initialObjekts = [],
+  initialTotalCount = 0,
+  initialSeasons = DEFAULT_SEASONS,
+  initialClasses = DEFAULT_CLASSES,
+}: ObjektsClientProps) {
   const searchParams = useSearchParams();
-  const [objekts, setObjekts] = useState<Objekt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [fullObjekts, setFullObjekts] = useState<Objekt[] | null>(null);
+  const [loadingFull, setLoadingFull] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Avatar strip horizontal drag state
   const avatarTrackRef = useRef<HTMLDivElement>(null);
 
   const availableSeasons = useMemo(() => {
-    return ["All", ...(objekts.length > 0 ? getObjektSeasons(objekts) : DEFAULT_SEASONS)];
-  }, [objekts]);
+    const base = fullObjekts && fullObjekts.length > 0 ? getObjektSeasons(fullObjekts) : initialSeasons;
+    return ["All", ...base];
+  }, [fullObjekts, initialSeasons]);
 
   const availableClasses = useMemo(() => {
-    return ["All", ...(objekts.length > 0 ? getObjektClasses(objekts) : DEFAULT_CLASSES)];
-  }, [objekts]);
+    const base = fullObjekts && fullObjekts.length > 0 ? getObjektClasses(fullObjekts) : initialClasses;
+    return ["All", ...base];
+  }, [fullObjekts, initialClasses]);
 
   const classOptions: DropdownOption[] = useMemo(() => {
     return [
@@ -87,6 +97,7 @@ export default function ObjektsClient() {
   const [selectedClass, setSelectedClass] = useState(searchParams?.get("class") || "All");
   const [selectedOnOffline, setSelectedOnOffline] = useState(searchParams?.get("format") || "All");
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams?.get("sort") as SortOption) || "newest"
   );
@@ -95,12 +106,24 @@ export default function ObjektsClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedObjekt, setSelectedObjekt] = useState<Objekt | null>(null);
 
-  // Fetch Objekts JSON from Hugging Face dataset
+  const isDefaultView =
+    selectedSeason === "All" &&
+    selectedMember === "All" &&
+    selectedClass === "All" &&
+    selectedOnOffline === "All" &&
+    deferredSearchQuery.trim() === "" &&
+    sortBy === "newest" &&
+    currentPage === 1;
+
+  const usingInitialPreview = fullObjekts === null && isDefaultView && initialObjekts.length > 0;
+  const loading = !usingInitialPreview && fullObjekts === null && loadingFull;
+
+  // Fetch complete Objekts JSON index in background for filtering, searching, and pagination
   useEffect(() => {
     let isMounted = true;
     const loadObjekts = async () => {
       try {
-        setLoading(true);
+        setLoadingFull(true);
 
         // 1. Try Cache API first (handles 11.8MB without 5MB sessionStorage quota error)
         if (typeof window !== "undefined" && "caches" in window) {
@@ -110,8 +133,8 @@ export default function ObjektsClient() {
             if (cachedRes) {
               const cachedData: Objekt[] = await cachedRes.json();
               if (isMounted && cachedData.length > 0) {
-                setObjekts(cachedData);
-                setLoading(false);
+                setFullObjekts(cachedData);
+                setLoadingFull(false);
                 return;
               }
             }
@@ -137,13 +160,15 @@ export default function ObjektsClient() {
         const data: Objekt[] = await res.json();
 
         if (isMounted) {
-          setObjekts(data);
-          setLoading(false);
+          setFullObjekts(data);
+          setLoadingFull(false);
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load Objekts dataset");
-          setLoading(false);
+          if (initialObjekts.length === 0) {
+            setError(err instanceof Error ? err.message : "Failed to load Objekts dataset");
+          }
+          setLoadingFull(false);
         }
       }
     };
@@ -152,7 +177,7 @@ export default function ObjektsClient() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialObjekts.length]);
 
   // Reset page to 1 when filters change
   useEffect(() => {
@@ -162,20 +187,24 @@ export default function ObjektsClient() {
     selectedMember,
     selectedClass,
     selectedOnOffline,
-    searchQuery,
+    deferredSearchQuery,
     sortBy,
   ]);
 
   // Client-side filtering & sorting
   const filteredObjekts = useMemo(() => {
-    return objekts
+    if (!fullObjekts) {
+      return usingInitialPreview ? initialObjekts : [];
+    }
+
+    const query = deferredSearchQuery.toLowerCase().trim();
+
+    return fullObjekts
       .filter((item) => {
-        // Season filter
         if (selectedSeason !== "All" && item.season !== selectedSeason) {
           return false;
         }
 
-        // Member filter
         if (
           selectedMember !== "All" &&
           item.member.toLowerCase() !== selectedMember.toLowerCase()
@@ -183,21 +212,17 @@ export default function ObjektsClient() {
           return false;
         }
 
-        // Class filter
         if (selectedClass !== "All" && item.class !== selectedClass) {
           return false;
         }
 
-        // Format (online / offline) filter
         if (selectedOnOffline !== "All") {
           const isOnline = selectedOnOffline === "online";
           if (isOnline && item.onOffline !== "online") return false;
           if (!isOnline && item.onOffline !== "offline") return false;
         }
 
-        // Search query (matches collection number, slug, member name, description)
-        if (searchQuery.trim()) {
-          const query = searchQuery.toLowerCase().trim();
+        if (query) {
           const matchNo = item.collectionNo?.toLowerCase().includes(query);
           const matchSlug = item.slug?.toLowerCase().includes(query);
           const matchMember = item.member?.toLowerCase().includes(query);
@@ -211,87 +236,32 @@ export default function ObjektsClient() {
 
         return true;
       })
-      .sort((a, b) => {
-        if (sortBy === "newest") {
-          // 12-hour drop release window grouping (Latest drop first)
-          const batchA = Math.floor((a.createdAt || 0) / 43200000);
-          const batchB = Math.floor((b.createdAt || 0) / 43200000);
-          if (batchB !== batchA) {
-            return batchB - batchA;
-          }
-          // Within same drop batch: Member order S1 -> S24
-          const memberDiff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
-          if (memberDiff !== 0) return memberDiff;
-          // Within same member in drop: Collection code ascending (e.g. 351A -> 352A)
-          return (a.collectionNo || "").localeCompare(b.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-        }
-        if (sortBy === "oldest") {
-          // 12-hour drop release window grouping (Earliest drop first)
-          const batchA = Math.floor((a.createdAt || 0) / 43200000);
-          const batchB = Math.floor((b.createdAt || 0) / 43200000);
-          if (batchA !== batchB) {
-            return batchA - batchB;
-          }
-          const memberDiff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
-          if (memberDiff !== 0) return memberDiff;
-          return (a.collectionNo || "").localeCompare(b.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-        }
-        if (sortBy === "collectionNoAsc") {
-          const cmp = (a.collectionNo || "").localeCompare(b.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-          if (cmp !== 0) return cmp;
-          return (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
-        }
-        if (sortBy === "collectionNoDesc") {
-          const cmp = (b.collectionNo || "").localeCompare(a.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-          if (cmp !== 0) return cmp;
-          return (b.memberSortOrder || 0) - (a.memberSortOrder || 0);
-        }
-        if (sortBy === "memberAsc") {
-          const diff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
-          if (diff !== 0) return diff;
-          return (a.collectionNo || "").localeCompare(b.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-        }
-        if (sortBy === "memberDesc") {
-          const diff = (b.memberSortOrder || 0) - (a.memberSortOrder || 0);
-          if (diff !== 0) return diff;
-          return (a.collectionNo || "").localeCompare(b.collectionNo || "", undefined, {
-            numeric: true,
-            sensitivity: "base",
-          });
-        }
-        return 0;
-      });
+      .sort((a, b) => compareObjekts(a, b, sortBy));
   }, [
-    objekts,
+    fullObjekts,
+    usingInitialPreview,
+    initialObjekts,
     selectedSeason,
     selectedMember,
     selectedClass,
     selectedOnOffline,
-    searchQuery,
+    deferredSearchQuery,
     sortBy,
   ]);
 
   // Pagination calculation
-  const totalPages = Math.ceil(filteredObjekts.length / ITEMS_PER_PAGE) || 1;
+  const displayCount =
+    fullObjekts === null && usingInitialPreview && initialTotalCount > 0
+      ? initialTotalCount
+      : filteredObjekts.length;
+  const totalPages = Math.ceil(displayCount / ITEMS_PER_PAGE) || 1;
   const paginatedObjekts = useMemo(() => {
+    if (usingInitialPreview && !fullObjekts) {
+      return initialObjekts;
+    }
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredObjekts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredObjekts, currentPage]);
+  }, [usingInitialPreview, fullObjekts, initialObjekts, filteredObjekts, currentPage]);
 
   const resetFilters = () => {
     setSelectedSeason("All");
@@ -344,7 +314,7 @@ export default function ObjektsClient() {
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-xs font-mono text-zinc-700 dark:text-zinc-300 w-fit shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0" aria-hidden="true" />
               <span className="font-bold text-zinc-950 dark:text-white">
-                {loading ? "..." : `${filteredObjekts.length.toLocaleString()} Objekts`}
+                {loading ? "..." : `${displayCount.toLocaleString()} Objekts`}
               </span>
               <span className="text-zinc-400 dark:text-zinc-500">&bull;</span>
               <span>{availableSeasons.length - 1} Seasons</span>
@@ -362,7 +332,7 @@ export default function ObjektsClient() {
               className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-none"
             >
               <div
-                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-all duration-200 ${
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-[transform,opacity,box-shadow] duration-200 ${
                   selectedMember === "All"
                     ? "ring-2 ring-zinc-950 dark:ring-[#D4FF00] scale-105"
                     : "opacity-80 hover:opacity-100"
@@ -396,7 +366,7 @@ export default function ObjektsClient() {
                   title={`${m.name} (S${m.id})`}
                 >
                   <div
-                    className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-all duration-200 ${
+                    className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-[transform,opacity] duration-200 ${
                       isSelected ? "scale-105" : "opacity-80 hover:opacity-100"
                     }`}
                     style={{
@@ -414,8 +384,8 @@ export default function ObjektsClient() {
                       />
                     </div>
                     <div
-                      className="absolute bottom-0 right-0 px-1 py-0.2 rounded-full text-[8px] font-mono font-bold text-white bg-black/85 border border-white/20 shadow-sm"
-                      style={{ color: mColor === "#FFFFFF" ? "#FFFFFF" : mColor }}
+                      className="absolute bottom-0 right-0 px-1 py-0.2 rounded-full text-[10px] font-mono font-bold bg-black/85 border border-white/20 shadow-sm"
+                      style={{ color: getReadableMemberColor(mColor, true) }}
                     >
                       S{m.id < 10 ? `0${m.id}` : m.id}
                     </div>
@@ -499,7 +469,7 @@ export default function ObjektsClient() {
           {hasActiveFilters && (
             <div className="pt-2.5 border-t border-zinc-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mr-1">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mr-1">
                   Active Filters:
                 </span>
                 {selectedMember !== "All" && (
@@ -639,7 +609,7 @@ export default function ObjektsClient() {
               <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-zinc-200/80 dark:border-white/10">
                 <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
                   Page <span className="font-bold text-zinc-950 dark:text-white">{currentPage}</span> of{" "}
-                  <span className="font-bold text-zinc-950 dark:text-white">{totalPages}</span> ({filteredObjekts.length.toLocaleString()} total items)
+                  <span className="font-bold text-zinc-950 dark:text-white">{totalPages}</span> ({displayCount.toLocaleString()} total items)
                 </div>
 
                 <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "motion/react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,9 +14,10 @@ import {
 } from "lucide-react"
 import TriplesLogo from "@/components/triples-logo"
 import { Member } from "@/types/member"
-import { members, getMemberBySlug, getMemberColor, getMemberImageUrl } from "@/lib/members"
+import { members, getMemberBySlug, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members"
 import { getAllSubUnits } from "@/lib/sub-units"
 import Breadcrumb from "@/components/breadcrumb"
+import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
 
 // ─── Career Activities Timeline Data ─────────────────────────────────────────
 const careerMap: Record<number, string[]> = {
@@ -316,55 +317,43 @@ interface MemberProfileClientProps {
 
 export default function MemberProfileClient({ slug }: MemberProfileClientProps) {
   const member = getMemberBySlug(slug)
-  const [mounted, setMounted] = useState(false)
+  const [gifActivated, setGifActivated] = useState(false)
   const [activePhoto, setActivePhoto] = useState<string | null>(null)
   const [dimensionPage, setDimensionPage] = useState(0)
-  const [hasMoved, setHasMoved] = useState(false)
+  const shouldReduceMotion = useSafeReducedMotion()
 
   // More tripleS Slider Drag State & Auto-Center
   const memberSliderRef = useRef<HTMLDivElement>(null)
+  const lightboxRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
+  const hasMovedRef = useRef(false)
   const startXRef = useRef(0)
   const scrollLeftRef = useRef(0)
 
+  // Reset hover GIF activation & scroll top on member change
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Keep window at top on member change
-  useEffect(() => {
-    if (mounted) {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" })
-    }
-  }, [mounted, member?.id])
+    setGifActivated(false)
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+  }, [member?.id])
 
   // Auto-center active member in slider horizontally without window jump
   useEffect(() => {
-    if (memberSliderRef.current && mounted) {
+    if (memberSliderRef.current) {
       const slider = memberSliderRef.current
       const activeEl = slider.querySelector<HTMLElement>('[data-active="true"]')
       if (activeEl) {
         const targetScroll =
           activeEl.offsetLeft - slider.clientWidth / 2 + activeEl.clientWidth / 2
-        slider.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" })
+        slider.scrollTo({
+          left: Math.max(0, targetScroll),
+          behavior: shouldReduceMotion ? "auto" : "smooth",
+        })
       }
     }
-  }, [mounted, member?.id])
+  }, [member?.id, shouldReduceMotion])
 
-  // Close lightbox on Escape key
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape" && activePhoto) {
-        setActivePhoto(null)
-      }
-    },
-    [activePhoto]
-  )
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [handleKeyDown])
+  const closeLightbox = useCallback(() => setActivePhoto(null), [])
+  useDialogA11y(Boolean(activePhoto), lightboxRef, closeLightbox)
 
   // Matched sub-units resolved from single source of truth
   const matchedUnits = useMemo(() => {
@@ -404,37 +393,39 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
     (dimensionPage + 1) * dimensionPageSize
   )
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!memberSliderRef.current) return
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch" || !memberSliderRef.current) return
     isDraggingRef.current = true
-    setHasMoved(false)
+    hasMovedRef.current = false
     startXRef.current = e.pageX - memberSliderRef.current.offsetLeft
     scrollLeftRef.current = memberSliderRef.current.scrollLeft
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current || !memberSliderRef.current) return
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch" || !isDraggingRef.current || !memberSliderRef.current) return
     e.preventDefault()
     const x = e.pageX - memberSliderRef.current.offsetLeft
     const walk = (x - startXRef.current) * 1.5
-    if (Math.abs(walk) > 5) setHasMoved(true)
+    if (Math.abs(walk) > 5) hasMovedRef.current = true
     memberSliderRef.current.scrollLeft = scrollLeftRef.current - walk
   }
 
-  const handleMouseUpOrLeave = () => {
+  const handlePointerUpOrCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
     isDraggingRef.current = false
-    setTimeout(() => setHasMoved(false), 80)
+    setTimeout(() => {
+      hasMovedRef.current = false
+    }, 80)
   }
 
   const scrollMemberSlider = (direction: "left" | "right") => {
     if (memberSliderRef.current) {
       const scrollAmount = direction === "left" ? -420 : 420
-      memberSliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
+      memberSliderRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: shouldReduceMotion ? "auto" : "smooth",
+      })
     }
-  }
-
-  if (!mounted) {
-    return <div className="min-h-screen bg-[#fafafa] dark:bg-[#08080A]" />
   }
 
   return (
@@ -450,7 +441,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             <div className="flex items-center justify-between w-full sm:w-auto gap-2">
               <Link
                 href={`/members/${prevMember.slug}`}
-                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm"
+                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm"
                 title={`Previous: S${prevMember.id} ${prevMember.name}`}
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -469,7 +460,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
               <Link
                 href={`/members/${nextMember.slug}`}
-                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm"
+                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm"
                 title={`Next: S${nextMember.id} ${nextMember.name}`}
               >
                 <span>S{nextMember.id < 10 ? `0${nextMember.id}` : nextMember.id}</span>
@@ -486,42 +477,50 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
             
             {/* Left Column: First Class Objekt Photocard */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="lg:col-span-5"
-            >
-              <div
+            <div className="lg:col-span-5">
+              <button
+                type="button"
                 onClick={() => setActivePhoto(getMemberImageUrl(member))}
-                className="spotlight-card group relative aspect-[3/4] w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden shadow-md border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0D0D12] cursor-zoom-in"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    setActivePhoto(getMemberImageUrl(member))
+                onPointerEnter={(e) => {
+                  if (
+                    e.pointerType === "mouse" &&
+                    member.gif &&
+                    !gifActivated &&
+                    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                  ) {
+                    setGifActivated(true)
                   }
                 }}
+                onFocus={() => {
+                  if (
+                    member.gif &&
+                    !gifActivated &&
+                    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                  ) {
+                    setGifActivated(true)
+                  }
+                }}
+                className="spotlight-card group relative block text-left aspect-[3/4] w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden shadow-md border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0D0D12] cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
                 aria-label={`Enlarge official portrait photo of ${member.name}`}
               >
                 {/* Signature Member Color Strip */}
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-1.5 z-30 transition-all duration-300 group-hover:w-2"
+                <span
+                  className="block absolute left-0 top-0 bottom-0 w-1.5 z-30 transition-[width] duration-300 group-hover:w-2"
                   style={{ backgroundColor: memberColor }}
                   aria-hidden="true"
                 />
 
                 {/* Top S-Number Tag */}
-                <div className="absolute top-3.5 right-3.5 z-20 pointer-events-none">
+                <span className="block absolute top-3.5 right-3.5 z-20 pointer-events-none">
                   <span className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-tight px-3 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white shadow-sm">
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: memberColor }}
+                      style={{ backgroundColor: getReadableMemberColor(memberColor, true) }}
                       aria-hidden="true"
                     />
                     <span>S{member.id < 10 ? `0${member.id}` : member.id}</span>
                   </span>
-                </div>
+                </span>
 
                 {/* Portrait Image */}
                 <Image
@@ -534,33 +533,38 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 />
 
                 {/* Silky Crossfade GIF on Hover */}
-                {member.gif && (
+                {gifActivated && member.gif && (
                   <img
                     src={`https://i.giphy.com/media/v1.${member.gif}`}
                     alt={`${member.name} highlight motion`}
+                    loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10"
                   />
                 )}
 
                 {/* Bottom Contrast Scrim */}
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none z-10" />
+                <span className="block absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none z-10" />
 
                 {/* Bottom Card Caption */}
-                <div className="absolute bottom-3.5 inset-x-4 flex items-center justify-between text-xs font-mono text-zinc-300 z-20 pointer-events-none">
+                <span className="flex absolute bottom-3.5 inset-x-4 items-center justify-between text-xs font-mono text-zinc-300 z-20 pointer-events-none">
                   <span className="truncate font-medium">{member.role}</span>
                   <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400 group-hover:text-white transition-colors shrink-0 ml-2">
                     <Maximize2 className="h-3 w-3" />
                     <span>Zoom</span>
                   </span>
-                </div>
-              </div>
-            </motion.div>
+                </span>
+              </button>
+            </div>
 
             {/* Right Column: Identity Masthead & Structured Bento Specifications */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08 }}
+              transition={{
+                duration: shouldReduceMotion ? 0.01 : 0.45,
+                delay: shouldReduceMotion ? 0 : 0.08,
+              }}
               className="lg:col-span-7 space-y-6"
             >
               {/* Masthead Header */}
@@ -568,7 +572,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-xs font-mono font-bold text-zinc-900 dark:text-zinc-100">
                     <span
-                      className="w-2 h-2 rounded-full shrink-0"
+                      className="w-2 h-2 rounded-full shrink-0 ring-1 ring-black/15 dark:ring-white/25"
                       style={{ backgroundColor: memberColor }}
                       aria-hidden="true"
                     />
@@ -622,7 +626,10 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     </dt>
                     <dd className="text-sm sm:text-base font-bold font-mono text-zinc-950 dark:text-white flex items-baseline gap-2">
                       <span>{member.birthday}</span>
-                      <span className="text-xs font-normal font-sans text-zinc-500 dark:text-zinc-400">
+                      <span
+                        suppressHydrationWarning
+                        className="text-xs font-normal font-sans text-zinc-500 dark:text-zinc-400"
+                      >
                         ({getAge(member.birthday)} yrs &bull; {getZodiac(member.birthday)})
                       </span>
                     </dd>
@@ -813,7 +820,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   {member.funFacts.slice(1).map((fact, idx) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-xl bg-white dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10 shadow-sm flex items-start gap-3.5 transition-all hover:border-zinc-300 dark:hover:border-white/20"
+                      className="p-4 rounded-xl bg-white dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10 shadow-sm flex items-start gap-3.5 transition-colors hover:border-zinc-300 dark:hover:border-white/20"
                     >
                       <span className="text-xs font-mono font-bold text-zinc-400 dark:text-zinc-500 mt-0.5 shrink-0">
                         0{idx + 1}
@@ -860,7 +867,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 src={getMemberImageUrl(member)}
                 alt={`${member.name} official concept portrait`}
                 fill
-                loading="lazy"
+                priority
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
@@ -892,6 +899,8 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 <img
                   src={`https://i.giphy.com/media/v1.${member.gif}`}
                   alt={`${member.name} daily SIGNAL clip`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-3.5 left-3.5">
@@ -909,7 +918,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {/* 3. Authentic First Class Digital Objekt Collectible Card */}
             <Link
               href={`/objekts?member=${encodeURIComponent(member.name)}`}
-              className="spotlight-card group relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] p-6 flex flex-col justify-between shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-all"
+              className="spotlight-card group relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] p-6 flex flex-col justify-between shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-[border-color,box-shadow]"
             >
               <div
                 className="absolute left-0 top-0 bottom-0 w-1.5 z-20"
@@ -978,7 +987,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     onClick={() =>
                       setDimensionPage((prev) => (prev > 0 ? prev - 1 : totalDimensionPages - 1))
                     }
-                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
                     aria-label="Previous Dimension page"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -987,7 +996,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     onClick={() =>
                       setDimensionPage((prev) => (prev < totalDimensionPages - 1 ? prev + 1 : 0))
                     }
-                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
                     aria-label="Next Dimension page"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -1000,16 +1009,16 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             <AnimatePresence mode="wait">
               <motion.div
                 key={dimensionPage}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 16 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -16 }}
+                transition={{ duration: shouldReduceMotion ? 0.01 : 0.35, ease: "easeInOut" }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {currentDimensionUnits.map((unit) => (
                   <div
                     key={unit.slug}
-                    className="spotlight-card group rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#0D0D12] transition-all flex flex-col justify-between shadow-sm"
+                    className="spotlight-card group rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#0D0D12] transition-[border-color,box-shadow] flex flex-col justify-between shadow-sm"
                   >
                     <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                       <Image
@@ -1064,7 +1073,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   <button
                     key={i}
                     onClick={() => setDimensionPage(i)}
-                    className={`h-1.5 rounded-full transition-all ${
+                    className={`h-1.5 rounded-full transition-[width,background-color] ${
                       dimensionPage === i
                         ? "w-8 bg-zinc-950 dark:bg-white"
                         : "w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-500"
@@ -1095,14 +1104,14 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => scrollMemberSlider("left")}
-                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
                 aria-label="Previous members"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={() => scrollMemberSlider("right")}
-                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all shadow-sm active:scale-95"
+                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
                 aria-label="Next members"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -1113,10 +1122,10 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
           {/* Smooth Horizontal Swiper / Drag Track */}
           <div
             ref={memberSliderRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUpOrLeave}
-            onMouseLeave={handleMouseUpOrLeave}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUpOrCancel}
+            onPointerCancel={handlePointerUpOrCancel}
             className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-3 pt-1 snap-x select-none cursor-grab active:cursor-grabbing overscroll-x-contain"
           >
             {allMembersList.map((m) => {
@@ -1128,13 +1137,13 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   href={`/members/${m.slug}`}
                   data-active={isCurrent ? "true" : undefined}
                   onClickCapture={(e) => {
-                    if (hasMoved) {
+                    if (hasMovedRef.current) {
                       e.preventDefault()
                       e.stopPropagation()
                     }
                   }}
                   draggable={false}
-                  className={`spotlight-card group shrink-0 w-32 sm:w-40 md:w-44 rounded-xl overflow-hidden border transition-all snap-start shadow-sm ${
+                  className={`spotlight-card group shrink-0 w-32 sm:w-40 md:w-44 rounded-xl overflow-hidden border transition-[border-color,box-shadow,transform] snap-start shadow-sm ${
                     isCurrent
                       ? "border-zinc-950 dark:border-white ring-2 ring-zinc-950/20 dark:ring-white/30 scale-[1.02]"
                       : "border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30"
@@ -1152,7 +1161,8 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       alt={`${m.name} (S${m.id}) profile photo`}
                       fill
                       sizes="(max-width: 640px) 130px, 180px"
-                      loading="lazy"
+                      priority={isCurrent}
+                      loading={isCurrent ? undefined : "lazy"}
                       className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
@@ -1161,7 +1171,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     <div className="absolute top-2 left-2.5 z-10 flex items-center gap-1 pointer-events-none">
                       <span
                         className="text-[11px] font-mono font-bold"
-                        style={{ color: mColor === "#FFFFFF" ? "#F4F4F6" : mColor }}
+                        style={{ color: getReadableMemberColor(mColor, true) }}
                       >
                         S{m.id < 10 ? `0${m.id}` : m.id}
                       </span>
@@ -1189,14 +1199,20 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       <AnimatePresence>
         {activePhoto && (
           <motion.div
+            ref={lightboxRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${member.name} photo viewer`}
+            tabIndex={-1}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md"
-            onClick={() => setActivePhoto(null)}
+            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#08080A]/95 backdrop-blur-md focus:outline-none"
+            onClick={closeLightbox}
           >
             <button
-              onClick={() => setActivePhoto(null)}
+              onClick={closeLightbox}
               className="absolute top-6 right-6 p-3 rounded-full bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 transition-colors z-10 focus-visible:ring-2 focus-visible:ring-[#D4FF00]"
               aria-label="Close image lightbox"
             >

@@ -1,11 +1,17 @@
 import { use } from "react"
 import { notFound } from "next/navigation"
-import { getMemberBySlug, getMemberImageUrl } from "@/utils/members"
+import { getAllMembers, getMemberBySlug, getMemberImageUrl } from "@/lib/members"
 import MemberProfileClient from "./MemberProfileClient"
 import type { Metadata } from "next"
 
 interface PageProps {
   params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  return getAllMembers().map((member) => ({
+    slug: member.slug,
+  }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

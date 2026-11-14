@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import AnimatedLogo from "@/components/animated-logo";
+import TriplesLogo from "@/components/triples-logo";
 import Breadcrumb from "@/components/breadcrumb";
 import { FaApple, FaCode, FaDiscord, FaGithub, FaGooglePlay, FaInstagram, FaLinkedin, FaSpotify, FaTiktok, FaTwitter, FaYoutube } from "react-icons/fa";
 
@@ -80,12 +80,10 @@ export default function ThankYouPage() {
                 name: "Official Site",
                 handle: "triplescosmos.com",
                 icon: (
-                  <AnimatedLogo
+                  <TriplesLogo
                     width={32}
                     height={32}
                     strokeWidth={180}
-                    duration={2000}
-                    loop={false}
                   />
                 ),
                 url: "https://www.triplescosmos.com/",
@@ -125,7 +123,7 @@ export default function ThankYouPage() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group p-5 rounded-2xl bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm dark:shadow-none transition-all flex flex-col justify-between min-h-[130px]"
+                className="group p-5 rounded-2xl bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 shadow-sm dark:shadow-none transition-[background-color,border-color] flex flex-col justify-between min-h-[130px]"
               >
                 <div className="text-zinc-700 dark:text-zinc-300 group-hover:text-black dark:group-hover:text-white transition-colors">{social.icon}</div>
                 <div>

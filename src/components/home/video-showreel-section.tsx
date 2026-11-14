@@ -5,14 +5,9 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useReducedMotion } from "motion/react"
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger)
-}
-
 export default function VideoShowreelSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const videoCardRef = useRef<HTMLDivElement>(null)
-  const borderCardRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const controlsRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -33,7 +28,7 @@ export default function VideoShowreelSection() {
     setIsMuted(nextMuted)
   }
 
-  // Play video only when section is visible in viewport (~0.15 threshold)
+  // Play video only when section is visible in viewport (~0.15 threshold) and motion is allowed
   useEffect(() => {
     const video = videoRef.current
     const section = sectionRef.current
@@ -41,6 +36,11 @@ export default function VideoShowreelSection() {
 
     video.defaultMuted = true
     video.muted = true
+
+    if (shouldReduceMotion) {
+      video.pause()
+      return
+    }
 
     if (typeof IntersectionObserver === "undefined") {
       video.play().catch(() => {})
@@ -67,13 +67,15 @@ export default function VideoShowreelSection() {
     return () => {
       observer.disconnect()
     }
-  }, [])
+  }, [shouldReduceMotion])
 
   // GPU-accelerated clip-path expansion (zero DOM reflow)
   useEffect(() => {
     if (shouldReduceMotion || !sectionRef.current || !videoCardRef.current) {
       return
     }
+
+    gsap.registerPlugin(ScrollTrigger)
 
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768
@@ -103,20 +105,6 @@ export default function VideoShowreelSection() {
         },
         0
       )
-
-      if (borderCardRef.current) {
-        tl.fromTo(
-          borderCardRef.current,
-          { clipPath: initialInset, opacity: 1 },
-          {
-            clipPath: finalInset,
-            opacity: 0,
-            ease: "power2.inOut",
-            duration: 0.9,
-          },
-          0
-        )
-      }
 
       if (overlayRef.current) {
         tl.fromTo(
@@ -178,12 +166,6 @@ export default function VideoShowreelSection() {
           <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
         </div>
-
-        <div
-          ref={borderCardRef}
-          aria-hidden="true"
-          className="absolute inset-0 pointer-events-none border border-white/20 shadow-2xl will-change-[clip-path,opacity]"
-        />
 
         {/* Compact Utility Controls */}
         <div
