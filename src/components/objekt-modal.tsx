@@ -33,6 +33,7 @@ export default function ObjektModal({
   onClose,
 }: ObjektModalProps) {
   const [activeSide, setActiveSide] = useState<ObjektSide>("front");
+  const [hasFlipped, setHasFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
   const [overrideVariant, setOverrideVariant] = useState<Objekt | null>(null);
   const [prevObjektId, setPrevObjektId] = useState<string | undefined>(objekt?.id);
@@ -43,6 +44,7 @@ export default function ObjektModal({
   if (objekt?.id !== prevObjektId) {
     setPrevObjektId(objekt?.id);
     setActiveSide("front");
+    setHasFlipped(false);
     setCopied(false);
     setOverrideVariant(null);
   }
@@ -53,25 +55,29 @@ export default function ObjektModal({
 
   useDialogA11y(Boolean(objekt), modalRef, handleClose);
 
-  if (!objekt) return null;
-
-  const activeObjekt = overrideVariant ?? objekt;
+  const activeObjekt = objekt ? (overrideVariant ?? objekt) : null;
   const hasMultipleVariants = Boolean(variants && variants.length > 1);
-  const badgeStyle = getClassBadgeStyle(activeObjekt.class);
+  const badgeStyle = activeObjekt ? getClassBadgeStyle(activeObjekt.class) : null;
 
   // Match official member data (S-number, color, slug)
   const allMembers = getAllMembers();
-  const memberData = allMembers.find(
-    (m) =>
-      m.name.toLowerCase() === activeObjekt.member.toLowerCase() ||
-      (m.birthName && m.birthName.toLowerCase().includes(activeObjekt.member.toLowerCase()))
-  );
+  const memberData = activeObjekt
+    ? allMembers.find(
+        (m) =>
+          m.name.toLowerCase() === activeObjekt.member.toLowerCase() ||
+          (m.birthName && m.birthName.toLowerCase().includes(activeObjekt.member.toLowerCase()))
+      )
+    : undefined;
   const memberColor = memberData
     ? getMemberColor(memberData.id)
-    : activeObjekt.accentColor || "#7C3AED";
+    : activeObjekt?.accentColor || "#7C3AED";
 
   const toggleFlip = () => {
-    setActiveSide((prev) => (prev === "front" ? "back" : "front"));
+    setActiveSide((prev) => {
+      const next = prev === "front" ? "back" : "front";
+      if (next === "back") setHasFlipped(true);
+      return next;
+    });
   };
 
   const handleSwitchVariant = (variant: Objekt) => {
@@ -84,6 +90,7 @@ export default function ObjektModal({
   };
 
   const handleCopyCode = async () => {
+    if (!activeObjekt) return;
     try {
       await navigator.clipboard.writeText(
         `#${activeObjekt.collectionNo} (${activeObjekt.member} · ${activeObjekt.season})`
@@ -97,7 +104,9 @@ export default function ObjektModal({
 
   return (
     <AnimatePresence>
+      {activeObjekt && badgeStyle && (
       <div
+        key="objekt-modal-root"
         ref={modalRef}
         tabIndex={-1}
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-y-auto focus:outline-none"
@@ -105,25 +114,25 @@ export default function ObjektModal({
         aria-modal="true"
         aria-labelledby="objekt-modal-title"
       >
-        {/* Backdrop */}
+        {/* Backdrop (solid translucent scrim without full-screen backdrop-blur flash) */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+          transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: "easeOut" }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 dark:bg-black/85 backdrop-blur-md transition-opacity"
+          className="fixed inset-0 bg-black/75 dark:bg-black/85"
         />
 
-        {/* Modal Window — Editorial Collector's Atelier Frame */}
+        {/* Modal Window — Editorial Collector's Atelier Frame (no outer scale() wrapping preserve-3d) */}
         <motion.div
-          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
-          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 16 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
           transition={
             shouldReduceMotion
               ? { duration: 0.01 }
-              : { type: "spring", damping: 26, stiffness: 320 }
+              : { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
           }
           onClick={(e) => e.stopPropagation()}
           className="relative w-full max-w-lg md:max-w-4xl lg:max-w-5xl max-h-[92vh] bg-white dark:bg-[#0D0D12] border border-zinc-200/90 dark:border-white/10 rounded-3xl shadow-2xl shadow-zinc-950/15 dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col md:flex-row overflow-hidden z-10 text-zinc-950 dark:text-zinc-100 my-auto"
@@ -131,7 +140,7 @@ export default function ObjektModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-white/10 dark:hover:bg-white/20 text-zinc-600 dark:text-zinc-200 backdrop-blur-md transition-colors z-40 shadow-sm border border-zinc-200/60 dark:border-white/10"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-200 transition-colors z-40 shadow-sm border border-zinc-200/60 dark:border-white/10"
             aria-label="Close modal"
           >
             <X className="h-4 w-4" />
@@ -139,17 +148,19 @@ export default function ObjektModal({
 
           {/* ── Left Column: Atelier Showcase Pedestal (3D Flip Photocard) ── */}
           <div className="w-full md:w-[46%] lg:w-[44%] p-5 sm:p-7 md:p-8 bg-zinc-50/90 dark:bg-[#08080A] flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-zinc-200/80 dark:border-white/10 shrink-0 relative bg-gradient-to-b from-zinc-100/60 to-zinc-50/90 dark:from-white/[0.02] dark:to-transparent">
-            {/* Ambient Lighting Ring Behind Card */}
+            {/* Ambient Radial Lighting Behind Card (zero blur filter repaint cost) */}
             <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20 dark:opacity-15"
-              style={{ backgroundColor: memberColor }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none opacity-20 dark:opacity-15"
+              style={{
+                background: `radial-gradient(circle, ${memberColor} 0%, transparent 70%)`,
+              }}
               aria-hidden="true"
             />
 
             {/* 3D Flip Card Frame */}
             <div
               onClick={toggleFlip}
-              className="group relative w-full max-w-[260px] sm:max-w-[290px] md:max-w-[310px] aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 cursor-pointer select-none transition-transform hover:scale-[1.015] z-10"
+              className="group relative w-full max-w-[260px] sm:max-w-[290px] md:max-w-[310px] aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 cursor-pointer select-none transition-transform hover:scale-[1.015] z-10 [perspective:1200px]"
               title="Click photo to flip front/back"
             >
               {/* Member Color Top Foil Line */}
@@ -159,14 +170,11 @@ export default function ObjektModal({
                 aria-hidden="true"
               />
 
-              <motion.div
-                animate={{ rotateY: activeSide === "front" ? 0 : 180 }}
-                transition={{
-                  duration: shouldReduceMotion ? 0.01 : 0.5,
-                  ease: [0.23, 1, 0.32, 1],
+              <div
+                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none [transform-style:preserve-3d]"
+                style={{
+                  transform: activeSide === "front" ? "rotateY(0deg)" : "rotateY(180deg)",
                 }}
-                className="w-full h-full relative"
-                style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Front Side */}
                 <div
@@ -190,7 +198,6 @@ export default function ObjektModal({
                       slug={activeObjekt.slug}
                       side="front"
                       fallbackSrc={activeObjekt.frontImage || activeObjekt.thumbnailImage}
-                      priority={true}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -213,7 +220,7 @@ export default function ObjektModal({
                   )}
                 </div>
 
-                {/* Back Side */}
+                {/* Back Side (Lazy mounted on first flip to prevent open-time blitz) */}
                 <div
                   className="absolute inset-0 w-full h-full"
                   style={{
@@ -221,33 +228,36 @@ export default function ObjektModal({
                     transform: "rotateY(180deg)",
                   }}
                 >
-                  {activeObjekt.backMedia ? (
-                    <video
-                      src={activeObjekt.backMedia}
-                      poster={activeObjekt.backImage}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
+                  {hasFlipped || activeSide === "back" ? (
+                    activeObjekt.backMedia ? (
+                      <video
+                        src={activeObjekt.backMedia}
+                        poster={activeObjekt.backImage}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ObjektImage
+                        season={activeObjekt.season}
+                        member={activeObjekt.member}
+                        slug={activeObjekt.slug}
+                        side="back"
+                        fallbackSrc={activeObjekt.backImage}
+                        className="w-full h-full object-cover"
+                      />
+                    )
                   ) : (
-                    <ObjektImage
-                      season={activeObjekt.season}
-                      member={activeObjekt.member}
-                      slug={activeObjekt.slug}
-                      side="back"
-                      fallbackSrc={activeObjekt.backImage}
-                      priority={true}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900" />
                   )}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Motion Badge Indicator */}
               {activeObjekt.frontMedia && activeSide === "front" && (
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/20 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 border border-white/20 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Motion MP4</span>
                 </div>
@@ -271,7 +281,10 @@ export default function ObjektModal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveSide("back")}
+                    onClick={() => {
+                      setHasFlipped(true);
+                      setActiveSide("back");
+                    }}
                     className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
                       activeSide === "back"
                         ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
@@ -507,6 +520,7 @@ export default function ObjektModal({
           </div>
         </motion.div>
       </div>
+      )}
     </AnimatePresence>
   );
 }
