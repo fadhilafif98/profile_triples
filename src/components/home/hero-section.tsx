@@ -51,7 +51,7 @@ export default function HeroSection() {
           src="/home/triples_hero.jpg"
           alt="tripleS 24-member full group assemble portrait"
           fill
-          priority
+          preload
           sizes="100vw"
           quality={90}
           className="object-cover object-[center_28%] sm:object-[center_28%] lg:object-[center_25%] brightness-[1.02] contrast-[1.04]"

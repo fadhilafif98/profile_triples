@@ -318,6 +318,11 @@ interface MemberProfileClientProps {
 export default function MemberProfileClient({ slug }: MemberProfileClientProps) {
   const member = getMemberBySlug(slug)
   const [gifActivated, setGifActivated] = useState(false)
+  const [prevMemberId, setPrevMemberId] = useState(member?.id)
+  if (member?.id !== prevMemberId) {
+    setPrevMemberId(member?.id)
+    setGifActivated(false)
+  }
   const [activePhoto, setActivePhoto] = useState<string | null>(null)
   const [dimensionPage, setDimensionPage] = useState(0)
   const shouldReduceMotion = useSafeReducedMotion()
@@ -330,9 +335,8 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   const startXRef = useRef(0)
   const scrollLeftRef = useRef(0)
 
-  // Reset hover GIF activation & scroll top on member change
+  // Scroll top on member change
   useEffect(() => {
-    setGifActivated(false)
     window.scrollTo({ top: 0, left: 0, behavior: "instant" })
   }, [member?.id])
 
@@ -527,7 +531,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   src={getMemberImageUrl(member)}
                   alt={`${member.name} (${member.birthName || member.name}) official profile portrait`}
                   fill
-                  priority
+                  preload
                   sizes="(max-width: 1024px) 100vw, 42vw"
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 />
@@ -867,7 +871,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 src={getMemberImageUrl(member)}
                 alt={`${member.name} official concept portrait`}
                 fill
-                priority
+                preload
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
@@ -1161,7 +1165,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       alt={`${m.name} (S${m.id}) profile photo`}
                       fill
                       sizes="(max-width: 640px) 130px, 180px"
-                      priority={isCurrent}
+                      preload={isCurrent}
                       loading={isCurrent ? undefined : "lazy"}
                       className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                     />

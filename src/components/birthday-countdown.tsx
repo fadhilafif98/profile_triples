@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -117,7 +117,11 @@ function computeBirthdayMeta(
 }
 
 export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [now, setNow] = useState<Date>(() => new Date());
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [viewCelebration, setViewCelebration] = useState(true);
@@ -139,8 +143,8 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   });
 
   useEffect(() => {
-    setMounted(true);
-    setNow(new Date());
+    const rafId = requestAnimationFrame(() => setNow(new Date()));
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   const currentMonthName = useMemo(
@@ -236,10 +240,10 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   }, [activeMember]);
 
   useEffect(() => {
-    updateCountdown();
+    const rafId = requestAnimationFrame(updateCountdown);
 
     if (!activeMember || activeMember.isToday || activeMember.nextBirthday.getTime() <= Date.now()) {
-      return;
+      return () => cancelAnimationFrame(rafId);
     }
 
     let isVisible = true;

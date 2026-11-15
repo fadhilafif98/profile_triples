@@ -254,7 +254,7 @@ export default function AlbumsClient() {
                     alt={`${featuredAlbum.title} album cover`}
                     fill
                     sizes="(max-width: 640px) 250px, (max-width: 1024px) 350px, 400px"
-                    priority
+                    preload
                     className="object-cover"
                   />
                 </div>
@@ -490,7 +490,7 @@ export default function AlbumsClient() {
                             src={album.cover}
                             alt=""
                             fill
-                            priority={album.id === featuredAlbum.id}
+                            preload={album.id === featuredAlbum.id}
                             sizes="100px"
                             className="object-cover"
                           />
@@ -510,7 +510,7 @@ export default function AlbumsClient() {
                           src={album.cover}
                           alt={`${album.title} album cover`}
                           fill
-                          priority={album.id === featuredAlbum.id}
+                          preload={album.id === featuredAlbum.id}
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
@@ -638,7 +638,7 @@ export default function AlbumsClient() {
                                 src={album.cover}
                                 alt=""
                                 fill
-                                priority={album.id === featuredAlbum.id}
+                                preload={album.id === featuredAlbum.id}
                                 sizes="120px"
                                 className="object-cover"
                               />
@@ -658,7 +658,7 @@ export default function AlbumsClient() {
                               src={album.cover}
                               alt={`${album.title} album cover`}
                               fill
-                              priority={album.id === featuredAlbum.id}
+                              preload={album.id === featuredAlbum.id}
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
                               className="object-cover"
                             />

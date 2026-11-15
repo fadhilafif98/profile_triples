@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react"
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react"
 import { useReducedMotion } from "motion/react"
+
+const emptySubscribe = () => () => {}
 
 /**
  * Hydration-safe wrapper around Motion's useReducedMotion().
@@ -9,10 +11,11 @@ import { useReducedMotion } from "motion/react"
  */
 export function useSafeReducedMotion(): boolean {
   const reduced = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
   return mounted ? Boolean(reduced) : false
 }
 
@@ -45,9 +48,11 @@ export function useDialogA11y(
 ) {
   const lockScroll = options?.lockScroll ?? true
   const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
   const onKeyDownRef = useRef(options?.onKeyDown)
-  onKeyDownRef.current = options?.onKeyDown
+  useEffect(() => {
+    onCloseRef.current = onClose
+    onKeyDownRef.current = options?.onKeyDown
+  })
   const previousActiveRef = useRef<HTMLElement | null>(null)
   const wasOpenRef = useRef(false)
 
@@ -155,7 +160,9 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
   const listboxId = useId()
 
   useEffect(() => {
-    if (isOpen && dropdownRef.current) {
+    if (!isOpen) return
+    const rafId = requestAnimationFrame(() => {
+      if (!dropdownRef.current) return
       if (align !== "auto") {
         setMenuAlign(align)
       } else {
@@ -166,7 +173,8 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
           setMenuAlign("left")
         }
       }
-    }
+    })
+    return () => cancelAnimationFrame(rafId)
   }, [isOpen, align])
 
   useEffect(() => {

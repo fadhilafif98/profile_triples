@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useCallback, useSyncExternalStore } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 
@@ -50,7 +50,11 @@ export default function PageTransition() {
   const isNavigatingRef = useRef(false)
   const prevPathnameRef = useRef(pathname)
   const colorIndexRef = useRef(0)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const loadGsap = useCallback(async (): Promise<GsapModule> => {
@@ -61,7 +65,6 @@ export default function PageTransition() {
   }, [])
 
   useEffect(() => {
-    setMounted(true)
     return () => {
       if (safetyTimerRef.current) {
         clearTimeout(safetyTimerRef.current)
