@@ -27,6 +27,11 @@ export interface Objekt {
 
 export type ObjektSide = "front" | "back";
 
+export interface GroupedObjekt {
+  primary: Objekt;
+  variants: Objekt[];
+}
+
 export interface ObjektFilters {
   season: string;
   member: string;

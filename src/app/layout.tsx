@@ -37,6 +37,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://profile-triples.vercel.app"),
   title: "tripleS | Fanmade Website",
   description: "The fanmade website of triples, a 24-member girl group “the idol of all possibilities“. ",
 }

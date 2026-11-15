@@ -272,7 +272,7 @@ export default function AboutClient() {
                 alt="tripleS 24 Members OT24 World Tour ANDLESS in Seoul Stage Concert"
                 fill
                 sizes="(max-width: 1280px) 100vw, 1216px"
-                priority
+                preload
                 className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.01]"
               />
             </div>

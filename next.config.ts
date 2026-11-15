@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   experimental: {
-    optimizePackageImports: ["react-icons", "lucide-react", "motion"],
+    optimizePackageImports: ["react-icons", "lucide-react", "motion", "gsap"],
+    inlineCss: true,
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   images: {
     formats: ['image/avif', 'image/webp'],
+    qualities: [75, 90],
     minimumCacheTTL: 2592000, // 30 days (1 month edge cache)
     remotePatterns: [
       {

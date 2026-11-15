@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
@@ -15,26 +15,37 @@ import {
 import { Objekt, ObjektSide } from "@/types/objekt";
 import ObjektImage from "./objekt-image";
 import CosmoLogo from "./cosmo-logo";
-import { getClassBadgeStyle } from "@/lib/objekts";
+import { getClassBadgeStyle, getObjektCollectionSuffix } from "@/lib/objekts";
 import { getAllMembers, getMemberColor } from "@/lib/members";
 import { useDialogA11y } from "@/lib/a11y";
 
 interface ObjektModalProps {
   objekt: Objekt | null;
+  variants?: Objekt[];
+  onSelectVariant?: (variant: Objekt) => void;
   onClose: () => void;
 }
 
-export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
+export default function ObjektModal({
+  objekt,
+  variants,
+  onSelectVariant,
+  onClose,
+}: ObjektModalProps) {
   const [activeSide, setActiveSide] = useState<ObjektSide>("front");
   const [copied, setCopied] = useState(false);
+  const [overrideVariant, setOverrideVariant] = useState<Objekt | null>(null);
+  const [prevObjektId, setPrevObjektId] = useState<string | undefined>(objekt?.id);
   const modalRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
   // Reset states when selected objekt changes
-  useEffect(() => {
+  if (objekt?.id !== prevObjektId) {
+    setPrevObjektId(objekt?.id);
     setActiveSide("front");
     setCopied(false);
-  }, [objekt?.id]);
+    setOverrideVariant(null);
+  }
 
   const handleClose = useCallback(() => {
     onClose();
@@ -44,27 +55,38 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
 
   if (!objekt) return null;
 
-  const badgeStyle = getClassBadgeStyle(objekt.class);
+  const activeObjekt = overrideVariant ?? objekt;
+  const hasMultipleVariants = Boolean(variants && variants.length > 1);
+  const badgeStyle = getClassBadgeStyle(activeObjekt.class);
 
   // Match official member data (S-number, color, slug)
   const allMembers = getAllMembers();
   const memberData = allMembers.find(
     (m) =>
-      m.name.toLowerCase() === objekt.member.toLowerCase() ||
-      (m.birthName && m.birthName.toLowerCase().includes(objekt.member.toLowerCase()))
+      m.name.toLowerCase() === activeObjekt.member.toLowerCase() ||
+      (m.birthName && m.birthName.toLowerCase().includes(activeObjekt.member.toLowerCase()))
   );
   const memberColor = memberData
     ? getMemberColor(memberData.id)
-    : objekt.accentColor || "#7C3AED";
+    : activeObjekt.accentColor || "#7C3AED";
 
   const toggleFlip = () => {
     setActiveSide((prev) => (prev === "front" ? "back" : "front"));
   };
 
+  const handleSwitchVariant = (variant: Objekt) => {
+    setCopied(false);
+    if (onSelectVariant) {
+      onSelectVariant(variant);
+    } else {
+      setOverrideVariant(variant);
+    }
+  };
+
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(
-        `#${objekt.collectionNo} (${objekt.member} · ${objekt.season})`
+        `#${activeObjekt.collectionNo} (${activeObjekt.member} · ${activeObjekt.season})`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -151,10 +173,10 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                   className="absolute inset-0 w-full h-full"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  {objekt.frontMedia ? (
+                  {activeObjekt.frontMedia ? (
                     <video
-                      src={objekt.frontMedia}
-                      poster={objekt.frontImage || objekt.thumbnailImage}
+                      src={activeObjekt.frontMedia}
+                      poster={activeObjekt.frontImage || activeObjekt.thumbnailImage}
                       autoPlay
                       loop
                       muted
@@ -163,18 +185,18 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     />
                   ) : (
                     <ObjektImage
-                      season={objekt.season}
-                      member={objekt.member}
-                      slug={objekt.slug}
+                      season={activeObjekt.season}
+                      member={activeObjekt.member}
+                      slug={activeObjekt.slug}
                       side="front"
-                      fallbackSrc={objekt.frontImage || objekt.thumbnailImage}
+                      fallbackSrc={activeObjekt.frontImage || activeObjekt.thumbnailImage}
                       priority={true}
                       className="w-full h-full object-cover"
                     />
                   )}
 
                   {/* Official COSMO Collection Code Overlay (Vertical Right Tab) */}
-                  {objekt.collectionNo && (
+                  {activeObjekt.collectionNo && (
                     <div
                       className="absolute right-0 top-0 bottom-0 w-[11.2%] flex items-center justify-center pointer-events-none select-none z-10"
                       aria-hidden="true"
@@ -182,10 +204,10 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                       <span
                         className="font-bold text-xs sm:text-sm md:text-[15px] tracking-[0.06em] whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
                         style={{
-                          color: objekt.textColor || "#000000",
+                          color: activeObjekt.textColor || "#000000",
                         }}
                       >
-                        {objekt.collectionNo}
+                        {activeObjekt.collectionNo}
                       </span>
                     </div>
                   )}
@@ -199,10 +221,10 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     transform: "rotateY(180deg)",
                   }}
                 >
-                  {objekt.backMedia ? (
+                  {activeObjekt.backMedia ? (
                     <video
-                      src={objekt.backMedia}
-                      poster={objekt.backImage}
+                      src={activeObjekt.backMedia}
+                      poster={activeObjekt.backImage}
                       autoPlay
                       loop
                       muted
@@ -211,11 +233,11 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     />
                   ) : (
                     <ObjektImage
-                      season={objekt.season}
-                      member={objekt.member}
-                      slug={objekt.slug}
+                      season={activeObjekt.season}
+                      member={activeObjekt.member}
+                      slug={activeObjekt.slug}
                       side="back"
-                      fallbackSrc={objekt.backImage}
+                      fallbackSrc={activeObjekt.backImage}
                       priority={true}
                       className="w-full h-full object-cover"
                     />
@@ -224,7 +246,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
               </motion.div>
 
               {/* Motion Badge Indicator */}
-              {objekt.frontMedia && activeSide === "front" && (
+              {activeObjekt.frontMedia && activeSide === "front" && (
                 <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 dark:bg-black/85 backdrop-blur-md border border-white/20 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Motion MP4</span>
@@ -232,31 +254,67 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
               )}
             </div>
 
-            {/* Showcase Stage Controls: Front/Back Pill + 3D Flip Hint */}
-            <div className="w-full flex flex-col items-center gap-2 pt-4 z-10">
-              <div className="flex items-center p-1 rounded-full bg-zinc-200/70 dark:bg-white/10 border border-zinc-300/60 dark:border-white/10 shadow-inner">
-                <button
-                  type="button"
-                  onClick={() => setActiveSide("front")}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
-                    activeSide === "front"
-                      ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-                  }`}
-                >
-                  Front
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveSide("back")}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
-                    activeSide === "back"
-                      ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-                  }`}
-                >
-                  Back
-                </button>
+            {/* Showcase Stage Controls: Front/Back Pill + Format Variant Switcher + 3D Flip Hint */}
+            <div className="w-full flex flex-col items-center gap-2.5 pt-4 z-10">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <div className="flex items-center p-1 rounded-full bg-zinc-200/70 dark:bg-white/10 border border-zinc-300/60 dark:border-white/10 shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSide("front")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
+                      activeSide === "front"
+                        ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+                    }`}
+                  >
+                    Front
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSide("back")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
+                      activeSide === "back"
+                        ? "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-white shadow-sm"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+                    }`}
+                  >
+                    Back
+                  </button>
+                </div>
+
+                {hasMultipleVariants && variants && (
+                  <div
+                    role="group"
+                    aria-label="Switch edition format"
+                    className="flex items-center p-1 rounded-full bg-zinc-200/70 dark:bg-white/10 border border-zinc-300/60 dark:border-white/10 shadow-inner"
+                  >
+                    {variants.map((variant) => {
+                      const suffix = getObjektCollectionSuffix(variant);
+                      const formatLabel =
+                        variant.onOffline === "offline"
+                          ? "Offline"
+                          : variant.onOffline === "online"
+                          ? "Online"
+                          : suffix;
+                      const isActive = variant.id === activeObjekt.id;
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          onClick={() => handleSwitchVariant(variant)}
+                          aria-pressed={isActive}
+                          className={`px-3 py-1.5 rounded-full text-xs font-mono font-bold transition-[background-color,color,box-shadow] ${
+                            isActive
+                              ? "bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black shadow-sm"
+                              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+                          }`}
+                        >
+                          {suffix ? `${suffix} · ${formatLabel}` : formatLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <button
@@ -278,20 +336,20 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                 <div className="flex items-center gap-2 flex-wrap mb-2.5">
                   {/* Season Badge */}
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-300/70 dark:border-white/15">
-                    {objekt.season}
+                    {activeObjekt.season}
                   </span>
 
                   {/* Class Badge */}
                   <span
                     className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border ${badgeStyle.bg} ${badgeStyle.text} ${badgeStyle.border}`}
                   >
-                    {objekt.class}
+                    {activeObjekt.class}
                   </span>
 
                   {/* Online/Offline Badge */}
-                  {objekt.onOffline && (
+                  {activeObjekt.onOffline && (
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/5">
-                      {objekt.onOffline}
+                      {activeObjekt.onOffline}
                     </span>
                   )}
 
@@ -304,7 +362,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                       id="objekt-modal-title"
                       className="text-2xl sm:text-3xl lg:text-4xl font-display font-black text-zinc-950 dark:text-white tracking-tight"
                     >
-                      {objekt.member}
+                      {activeObjekt.member}
                       {memberData?.hangul && (
                         <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400 ml-2 font-display">
                           {memberData.hangul}
@@ -325,7 +383,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                   </div>
 
                   <span className="text-lg sm:text-xl font-mono font-black text-zinc-900 dark:text-[#D4FF00] tracking-tight shrink-0">
-                    #{objekt.collectionNo}
+                    #{activeObjekt.collectionNo}
                   </span>
                 </div>
               </div>
@@ -333,7 +391,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
               {/* Curator Note / Description Box */}
               <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-100/60 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10">
                 <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-sans">
-                  {objekt.description ||
+                  {activeObjekt.description ||
                     "Official tripleS collectible photocard on COSMO : the Gate. Collect Objekts to earn COMO and vote in Grand Gravity."}
                 </p>
               </div>
@@ -345,7 +403,7 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     Collection No:
                   </span>
                   <span className="font-bold text-zinc-900 dark:text-white">
-                    #{objekt.collectionNo}
+                    #{activeObjekt.collectionNo}
                   </span>
                 </div>
 
@@ -354,24 +412,24 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     Edition / Season:
                   </span>
                   <span className="text-zinc-900 dark:text-zinc-200 font-semibold">
-                    {objekt.season}
+                    {activeObjekt.season}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-200/60 dark:border-white/5">
                   <span className="text-zinc-500 dark:text-zinc-400">Class:</span>
                   <span className="text-zinc-900 dark:text-zinc-200 font-semibold">
-                    {objekt.class}
+                    {activeObjekt.class}
                   </span>
                 </div>
 
-                {objekt.shortCode && (
+                {activeObjekt.shortCode && (
                   <div className="flex items-center justify-between py-1.5 border-b border-zinc-200/60 dark:border-white/5">
                     <span className="text-zinc-500 dark:text-zinc-400">
                       Short Code:
                     </span>
                     <span className="text-zinc-800 dark:text-zinc-300">
-                      {objekt.shortCode}
+                      {activeObjekt.shortCode}
                     </span>
                   </div>
                 )}
@@ -381,14 +439,14 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                     COMO:
                   </span>
                   <span className="text-zinc-900 dark:text-[#D4FF00] font-bold">
-                    {objekt.comoAmount ? `+${objekt.comoAmount} COMO` : "+1 COMO"}
+                    {activeObjekt.comoAmount ? `+${activeObjekt.comoAmount} COMO` : "+1 COMO"}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between py-1.5">
                   <span className="text-zinc-500 dark:text-zinc-400">Slug:</span>
                   <span className="text-zinc-700 dark:text-zinc-300 truncate max-w-[180px] sm:max-w-[220px]">
-                    {objekt.slug}
+                    {activeObjekt.slug}
                   </span>
                 </div>
               </div>
@@ -435,8 +493,8 @@ export default function ObjektModal({ objekt, onClose }: ObjektModalProps) {
                 {/* 3. Apollo Cafe Explorer Link */}
                 <a
                   href={`https://apollo.cafe/objekts?member=${encodeURIComponent(
-                    objekt.member
-                  )}&season=${encodeURIComponent(objekt.season)}`}
+                    activeObjekt.member
+                  )}&season=${encodeURIComponent(activeObjekt.season)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl bg-zinc-950 hover:bg-black text-white dark:bg-white/10 dark:hover:bg-white/20 dark:text-white text-xs font-mono font-bold transition-[background-color,transform] border border-transparent dark:border-white/10 active:scale-95 truncate text-center group"

@@ -196,7 +196,7 @@ export default function SubUnitsClient() {
                             alt={`${unit.name} concept photo`}
                             fill
                             sizes="(max-width: 1024px) 100vw, 50vw"
-                            priority={index === 0}
+                            preload={index === 0}
                             className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-103"
                           />
                         </Link>

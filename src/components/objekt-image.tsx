@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { getObjektImageUrl } from "@/lib/objekts";
 import { ObjektSide } from "@/types/objekt";
@@ -58,11 +58,14 @@ export default function ObjektImage({
   const [triedHf, setTriedHf] = useState<boolean>(!hasDirectSrc);
   const [allFailed, setAllFailed] = useState<boolean>(!initialSrc);
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(initialSrc));
+  const srcKey = `${season}|${member}|${slug}|${side}|${fallbackSrc || ""}`;
+  const [prevSrcKey, setPrevSrcKey] = useState<string>(srcKey);
 
   const imageAlt = alt || `${season} ${member} ${slug} (${side})`;
 
   // Reset states when card attributes change
-  useEffect(() => {
+  if (srcKey !== prevSrcKey) {
+    setPrevSrcKey(srcKey);
     const hasValidDirect = Boolean(fallbackSrc && fallbackSrc.trim().length > 0);
     const nextHfUrl = getObjektImageUrl(season, member, slug, side);
     const nextSrc = hasValidDirect
@@ -75,7 +78,7 @@ export default function ObjektImage({
     setTriedHf(!hasValidDirect);
     setAllFailed(!nextSrc);
     setIsLoading(Boolean(nextSrc));
-  }, [season, member, slug, side, fallbackSrc]);
+  }
 
   const handleImageError = () => {
     // If we were using direct src and haven't tried HF CDN yet, try HF CDN
@@ -128,7 +131,7 @@ export default function ObjektImage({
           src={currentSrc}
           alt={imageAlt}
           fill
-          priority={priority}
+          preload={priority}
           sizes={sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"}
           referrerPolicy="no-referrer"
           className={`object-cover transition-opacity duration-300 ${
@@ -146,7 +149,7 @@ export default function ObjektImage({
           alt={imageAlt}
           width={width || 360}
           height={height || 560}
-          priority={priority}
+          preload={priority}
           referrerPolicy="no-referrer"
           className={`transition-opacity duration-300 ${
             isLoading ? "opacity-0" : "opacity-100"

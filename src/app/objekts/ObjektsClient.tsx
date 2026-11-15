@@ -9,13 +9,15 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  Layers,
 } from "lucide-react";
-import { Objekt } from "@/types/objekt";
+import { GroupedObjekt, Objekt } from "@/types/objekt";
 import { membersList, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members";
 import {
   ALL_OBJEKTS_JSON_URL,
   ObjektSortOption,
   compareObjekts,
+  groupObjektVariants,
   getObjektSeasons,
   getObjektClasses,
   DEFAULT_SEASONS,
@@ -43,14 +45,18 @@ const ITEMS_PER_PAGE = 30; // Divisible by 3 (mobile 10 rows) and 5 (desktop 6 r
 
 interface ObjektsClientProps {
   initialObjekts?: Objekt[];
+  initialGroups?: GroupedObjekt[];
   initialTotalCount?: number;
+  initialUniqueCount?: number;
   initialSeasons?: string[];
   initialClasses?: string[];
 }
 
 export default function ObjektsClient({
   initialObjekts = [],
+  initialGroups = [],
   initialTotalCount = 0,
+  initialUniqueCount = 0,
   initialSeasons = DEFAULT_SEASONS,
   initialClasses = DEFAULT_CLASSES,
 }: ObjektsClientProps) {
@@ -101,10 +107,18 @@ export default function ObjektsClient({
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams?.get("sort") as SortOption) || "newest"
   );
+  const [groupVariants, setGroupVariants] = useState(
+    searchParams?.get("group") !== "false"
+  );
 
   // Pagination & Modal State
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedObjekt, setSelectedObjekt] = useState<Objekt | null>(null);
+  const [selectedModalEntry, setSelectedModalEntry] = useState<{
+    objekt: Objekt;
+    variants?: Objekt[];
+  } | null>(null);
+
+  const effectiveGrouping = groupVariants && selectedOnOffline === "All";
 
   const isDefaultView =
     selectedSeason === "All" &&
@@ -113,9 +127,13 @@ export default function ObjektsClient({
     selectedOnOffline === "All" &&
     deferredSearchQuery.trim() === "" &&
     sortBy === "newest" &&
+    groupVariants === true &&
     currentPage === 1;
 
-  const usingInitialPreview = fullObjekts === null && isDefaultView && initialObjekts.length > 0;
+  const usingInitialPreview =
+    fullObjekts === null &&
+    isDefaultView &&
+    (initialGroups.length > 0 || initialObjekts.length > 0);
   const loading = !usingInitialPreview && fullObjekts === null && loadingFull;
 
   // Fetch complete Objekts JSON index in background for filtering, searching, and pagination
@@ -180,19 +198,15 @@ export default function ObjektsClient({
   }, [initialObjekts.length]);
 
   // Reset page to 1 when filters change
-  useEffect(() => {
+  const filterKey = `${selectedSeason}|${selectedMember}|${selectedClass}|${selectedOnOffline}|${deferredSearchQuery}|${sortBy}|${groupVariants}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setCurrentPage(1);
-  }, [
-    selectedSeason,
-    selectedMember,
-    selectedClass,
-    selectedOnOffline,
-    deferredSearchQuery,
-    sortBy,
-  ]);
+  }
 
   // Client-side filtering & sorting
-  const filteredObjekts = useMemo(() => {
+  const filteredRawObjekts = useMemo(() => {
     if (!fullObjekts) {
       return usingInitialPreview ? initialObjekts : [];
     }
@@ -249,19 +263,43 @@ export default function ObjektsClient({
     sortBy,
   ]);
 
+  const groupedEntries = useMemo<GroupedObjekt[]>(() => {
+    if (!fullObjekts && usingInitialPreview) {
+      if (initialGroups.length > 0) return initialGroups;
+      return initialObjekts.map((o) => ({ primary: o, variants: [o] }));
+    }
+    if (effectiveGrouping) {
+      return groupObjektVariants(filteredRawObjekts);
+    }
+    return filteredRawObjekts.map((o) => ({ primary: o, variants: [o] }));
+  }, [
+    fullObjekts,
+    usingInitialPreview,
+    initialGroups,
+    initialObjekts,
+    effectiveGrouping,
+    filteredRawObjekts,
+  ]);
+
   // Pagination calculation
-  const displayCount =
+  const rawTotalCount =
     fullObjekts === null && usingInitialPreview && initialTotalCount > 0
       ? initialTotalCount
-      : filteredObjekts.length;
+      : filteredRawObjekts.length;
+  const displayCount =
+    fullObjekts === null && usingInitialPreview && effectiveGrouping && initialUniqueCount > 0
+      ? initialUniqueCount
+      : groupedEntries.length;
+  const mergedDuplicateCount = Math.max(0, rawTotalCount - displayCount);
+
   const totalPages = Math.ceil(displayCount / ITEMS_PER_PAGE) || 1;
-  const paginatedObjekts = useMemo(() => {
+  const paginatedEntries = useMemo(() => {
     if (usingInitialPreview && !fullObjekts) {
-      return initialObjekts;
+      return groupedEntries;
     }
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredObjekts.slice(start, start + ITEMS_PER_PAGE);
-  }, [usingInitialPreview, fullObjekts, initialObjekts, filteredObjekts, currentPage]);
+    return groupedEntries.slice(start, start + ITEMS_PER_PAGE);
+  }, [usingInitialPreview, fullObjekts, groupedEntries, currentPage]);
 
   const resetFilters = () => {
     setSelectedSeason("All");
@@ -270,6 +308,7 @@ export default function ObjektsClient({
     setSelectedOnOffline("All");
     setSearchQuery("");
     setSortBy("newest");
+    setGroupVariants(true);
     setCurrentPage(1);
   };
 
@@ -279,7 +318,8 @@ export default function ObjektsClient({
     selectedClass !== "All" ||
     selectedOnOffline !== "All" ||
     searchQuery.trim() !== "" ||
-    sortBy !== "newest";
+    sortBy !== "newest" ||
+    !groupVariants;
 
   const activeFilterCount = [
     selectedSeason !== "All",
@@ -288,6 +328,7 @@ export default function ObjektsClient({
     selectedOnOffline !== "All",
     searchQuery.trim() !== "",
     sortBy !== "newest",
+    !groupVariants,
   ].filter(Boolean).length;
 
   return (
@@ -314,8 +355,13 @@ export default function ObjektsClient({
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 text-xs font-mono text-zinc-700 dark:text-zinc-300 w-fit shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0" aria-hidden="true" />
               <span className="font-bold text-zinc-950 dark:text-white">
-                {loading ? "..." : `${displayCount.toLocaleString()} Objekts`}
+                {loading ? "..." : `${displayCount.toLocaleString("en-US")} Objekts`}
               </span>
+              {!loading && mergedDuplicateCount > 0 && (
+                <span className="text-zinc-500 dark:text-zinc-400 hidden sm:inline">
+                  ({rawTotalCount.toLocaleString("en-US")} editions)
+                </span>
+              )}
               <span className="text-zinc-400 dark:text-zinc-500">&bull;</span>
               <span>{availableSeasons.length - 1} Seasons</span>
             </div>
@@ -329,6 +375,8 @@ export default function ObjektsClient({
             <button
               type="button"
               onClick={() => setSelectedMember("All")}
+              aria-label="Show all 24 members"
+              title="All Members (OT24)"
               className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-none"
             >
               <div
@@ -338,8 +386,14 @@ export default function ObjektsClient({
                     : "opacity-80 hover:opacity-100"
                 }`}
               >
-                <div className="w-full h-full rounded-full bg-white dark:bg-[#14141B] border border-zinc-200/80 dark:border-white/10 flex items-center justify-center font-mono font-bold text-[11px] sm:text-xs text-zinc-950 dark:text-white shadow-sm">
-                  OT24
+                <div className="relative w-full h-full rounded-full overflow-hidden bg-black border border-zinc-200/80 dark:border-white/15 shadow-sm">
+                  <Image
+                    src="/icons/triples-logo-latest.png"
+                    alt="tripleS OT24"
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
                 </div>
               </div>
               <span
@@ -465,13 +519,47 @@ export default function ObjektsClient({
             </div>
           </div>
 
-          {/* Active Filter Chips & Clear Action */}
-          {hasActiveFilters && (
-            <div className="pt-2.5 border-t border-zinc-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mr-1">
-                  Active Filters:
+          {/* Deduplicate A/Z Toggle & Active Filter Chips */}
+          <div className="pt-2.5 border-t border-zinc-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={effectiveGrouping}
+                disabled={selectedOnOffline !== "All"}
+                onClick={() => setGroupVariants((prev) => !prev)}
+                className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border transition-colors ${
+                  selectedOnOffline !== "All"
+                    ? "opacity-50 cursor-not-allowed bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500"
+                    : effectiveGrouping
+                    ? "bg-zinc-950 text-white border-zinc-950 dark:bg-[#D4FF00]/15 dark:text-[#D4FF00] dark:border-[#D4FF00]/40"
+                    : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30"
+                }`}
+                title="Merge matching Online (Z) and Offline (A) photocards into a single card"
+              >
+                <Layers className="h-3.5 w-3.5 shrink-0" />
+                <span className="font-semibold">Merge A / Z Pairs</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
+                    effectiveGrouping
+                      ? "bg-white/20 dark:bg-[#D4FF00] dark:text-black"
+                      : "bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300"
+                  }`}
+                >
+                  {selectedOnOffline !== "All" ? "N/A" : effectiveGrouping ? "ON" : "OFF"}
                 </span>
+              </button>
+
+              {mergedDuplicateCount > 0 && (
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  {mergedDuplicateCount.toLocaleString("en-US")} duplicate{" "}
+                  {mergedDuplicateCount === 1 ? "pair" : "pairs"} combined
+                </span>
+              )}
+            </div>
+
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-1.5 ml-auto">
                 {selectedMember !== "All" && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Member: {selectedMember}
@@ -508,17 +596,23 @@ export default function ObjektsClient({
                     <button onClick={() => setSortBy("newest")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
                   </span>
                 )}
-              </div>
+                {!groupVariants && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                    Show A/Z Separately
+                    <button onClick={() => setGroupVariants(true)} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                  </span>
+                )}
 
-              <button
-                onClick={resetFilters}
-                className="inline-flex items-center gap-1 text-zinc-500 hover:text-black dark:hover:text-white underline underline-offset-2 ml-auto"
-              >
-                <RotateCcw className="h-3 w-3" />
-                <span>Reset all ({activeFilterCount})</span>
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-1 text-zinc-500 hover:text-black dark:hover:text-white underline underline-offset-2 ml-1"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span>Reset ({activeFilterCount})</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── 4. Main Objekts Grid (3-cols Mobile, 5-cols Desktop) ── */}
@@ -572,7 +666,7 @@ export default function ObjektsClient({
               Retry
             </button>
           </div>
-        ) : filteredObjekts.length === 0 ? (
+        ) : groupedEntries.length === 0 ? (
           /* Empty State */
           <div className="p-16 text-center rounded-3xl bg-white dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10 shadow-sm">
             <SearchX className="h-8 w-8 text-zinc-400 mx-auto mb-3 opacity-60" />
@@ -594,11 +688,14 @@ export default function ObjektsClient({
           /* Loaded Photocard Grid (Preserved Cards Intact) */
           <div>
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3.5 md:gap-4">
-              {paginatedObjekts.map((objekt, idx) => (
+              {paginatedEntries.map((entry, idx) => (
                 <ObjektCard
-                  key={objekt.id || `${objekt.slug}-${idx}`}
-                  objekt={objekt}
-                  onSelect={(o) => setSelectedObjekt(o)}
+                  key={entry.primary.id || `${entry.primary.slug}-${idx}`}
+                  objekt={entry.primary}
+                  variants={entry.variants}
+                  onSelect={(selectedObj, variants) =>
+                    setSelectedModalEntry({ objekt: selectedObj, variants })
+                  }
                   priority={idx < 6}
                 />
               ))}
@@ -609,7 +706,7 @@ export default function ObjektsClient({
               <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-zinc-200/80 dark:border-white/10">
                 <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
                   Page <span className="font-bold text-zinc-950 dark:text-white">{currentPage}</span> of{" "}
-                  <span className="font-bold text-zinc-950 dark:text-white">{totalPages}</span> ({displayCount.toLocaleString()} total items)
+                  <span className="font-bold text-zinc-950 dark:text-white">{totalPages}</span> ({displayCount.toLocaleString("en-US")} total items)
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -650,10 +747,14 @@ export default function ObjektsClient({
       </div>
 
       {/* ── 6. High-Res Flip Modal Preview ── */}
-      {selectedObjekt && (
+      {selectedModalEntry && (
         <ObjektModal
-          objekt={selectedObjekt}
-          onClose={() => setSelectedObjekt(null)}
+          objekt={selectedModalEntry.objekt}
+          variants={selectedModalEntry.variants}
+          onSelectVariant={(variant) =>
+            setSelectedModalEntry((prev) => (prev ? { ...prev, objekt: variant } : null))
+          }
+          onClose={() => setSelectedModalEntry(null)}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import { Objekt, ObjektSide } from "@/types/objekt";
+import { GroupedObjekt, Objekt, ObjektSide } from "@/types/objekt";
 
 export type ObjektSortOption =
   | "newest"
@@ -53,6 +53,70 @@ export function compareObjekts(a: Objekt, b: Objekt, sortBy: ObjektSortOption): 
   return 0;
 }
 
+/**
+ * Extracts the collection suffix letter (e.g. "Z" from "101Z", "A" from "101A").
+ */
+export function getObjektCollectionSuffix(objekt: Pick<Objekt, "collectionNo" | "onOffline">): string {
+  const match = (objekt.collectionNo || "").trim().match(/^\d+([A-Za-z]+)$/);
+  if (match) return match[1].toUpperCase();
+  if (objekt.onOffline === "online") return "Z";
+  if (objekt.onOffline === "offline") return "A";
+  return "";
+}
+
+/**
+ * Builds a canonical grouping key shared by online ("Z") and offline ("A") editions
+ * of the same photocard (same season, member, class, and base collection number).
+ */
+export function getObjektVariantGroupKey(objekt: Objekt): string {
+  const code = (objekt.collectionNo || "").trim();
+  const match = code.match(/^(\d+)[A-Za-z]+$/);
+  const baseNo = match ? match[1] : code || objekt.slug || objekt.id;
+  return `${objekt.season}|${objekt.member}|${objekt.class}|${baseNo}`.toLowerCase();
+}
+
+function getVariantPriority(objekt: Objekt): number {
+  const suffix = getObjektCollectionSuffix(objekt);
+  if (suffix === "Z" || objekt.onOffline === "online") return 0;
+  if (suffix === "A" || objekt.onOffline === "offline") return 1;
+  return 2;
+}
+
+/**
+ * Collapses duplicate online/offline editions (e.g. 101A + 101Z) into a single
+ * GroupedObjekt entry while preserving the input sort order.
+ */
+export function groupObjektVariants(objekts: Objekt[]): GroupedObjekt[] {
+  const orderedKeys: string[] = [];
+  const buckets = new Map<string, Objekt[]>();
+
+  for (const item of objekts) {
+    const key = getObjektVariantGroupKey(item);
+    let list = buckets.get(key);
+    if (!list) {
+      list = [];
+      buckets.set(key, list);
+      orderedKeys.push(key);
+    }
+    list.push(item);
+  }
+
+  return orderedKeys.map((key) => {
+    const variants = buckets.get(key)!;
+    if (variants.length > 1) {
+      variants.sort((a, b) => {
+        const pDiff = getVariantPriority(a) - getVariantPriority(b);
+        if (pDiff !== 0) return pDiff;
+        return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+      });
+    }
+    return {
+      primary: variants[0],
+      variants,
+    };
+  });
+}
+
 export const HF_CDN_BASE =
   "https://huggingface.co/datasets/fadhilafif98/triples-objekts/resolve/main";
 
@@ -93,7 +157,9 @@ export function getObjektBackUrl(objekt: {
 
 export interface ObjektsInitialSnapshot {
   objekts: Objekt[];
+  groups: GroupedObjekt[];
   totalCount: number;
+  uniqueCount: number;
   seasons: string[];
   classes: string[];
 }
@@ -111,7 +177,9 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
   if (cachedSnapshot && now < cachedSnapshot.expiresAt) {
     return {
       objekts: cachedSnapshot.objekts,
+      groups: cachedSnapshot.groups,
       totalCount: cachedSnapshot.totalCount,
+      uniqueCount: cachedSnapshot.uniqueCount,
       seasons: cachedSnapshot.seasons,
       classes: cachedSnapshot.classes,
     };
@@ -127,9 +195,13 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
         }
         const data: Objekt[] = await res.json();
         const sortedNewest = [...data].sort((a, b) => compareObjekts(a, b, "newest"));
+        const groupedNewest = groupObjektVariants(sortedNewest);
+        const previewGroups = groupedNewest.slice(0, 30);
         const snapshot: ObjektsInitialSnapshot = {
-          objekts: sortedNewest.slice(0, 30),
+          objekts: previewGroups.map((g) => g.primary),
+          groups: previewGroups,
           totalCount: data.length,
+          uniqueCount: groupedNewest.length,
           seasons: getObjektSeasons(data),
           classes: getObjektClasses(data),
         };
@@ -141,7 +213,9 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
       })
       .catch(() => ({
         objekts: [],
+        groups: [],
         totalCount: 0,
+        uniqueCount: 0,
         seasons: DEFAULT_SEASONS,
         classes: DEFAULT_CLASSES,
       }))
@@ -157,7 +231,9 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
         () =>
           resolve({
             objekts: [],
+            groups: [],
             totalCount: 0,
+            uniqueCount: 0,
             seasons: DEFAULT_SEASONS,
             classes: DEFAULT_CLASSES,
           }),

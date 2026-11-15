@@ -40,7 +40,9 @@ export default async function ObjektsPage() {
     <Suspense fallback={<div className="min-h-screen bg-[#fafafa] dark:bg-[#08080A]" />}>
       <ObjektsClient
         initialObjekts={initialData.objekts}
+        initialGroups={initialData.groups}
         initialTotalCount={initialData.totalCount}
+        initialUniqueCount={initialData.uniqueCount}
         initialSeasons={initialData.seasons}
         initialClasses={initialData.classes}
       />

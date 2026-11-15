@@ -48,7 +48,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
         src={getMemberImageUrl(member)}
         alt={`${member.name} (${member.birthName || member.name}) portrait`}
         fill
-        priority={member.id <= 6}
+        preload={member.id <= 6}
         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
         className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
       />
@@ -216,7 +216,7 @@ export default function MemberGrid() {
                 fill
                 sizes="(max-width: 640px) 360px, 400px"
                 className="object-cover object-top"
-                priority
+                preload
               />
 
               {/* Top Header Plate */}

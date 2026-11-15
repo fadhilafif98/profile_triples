@@ -277,7 +277,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 src={unit.image || "/placeholder.svg"}
                 alt={`${unit.name} concept photo`}
                 fill
-                priority
+                preload
                 sizes="(max-width: 1024px) 100vw, 58vw"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
               />
