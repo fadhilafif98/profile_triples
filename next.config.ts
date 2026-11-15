@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     optimizePackageImports: ["react-icons", "lucide-react", "motion", "gsap"],
-    inlineCss: true,
     staleTimes: {
       dynamic: 30,
       static: 180,

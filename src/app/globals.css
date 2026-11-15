@@ -70,191 +70,215 @@
   }
 }
 
-/* Spotlight & Bento Card (Theme Aware) */
-.spotlight-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+@layer components {
+  /* Spotlight & Bento Card (Theme Aware) */
+  .spotlight-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dark .spotlight-card {
+    background: #0D0D12;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .spotlight-card:hover {
+    border-color: rgba(9, 9, 11, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 30px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .spotlight-card:hover {
+    border-color: rgba(212, 255, 0, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 30px -4px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Animated Underline Draw for Nav & Links */
+  .nav-draw-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    background-image: linear-gradient(#09090B, #09090B);
+    background-position: 100% calc(50% + 0.65em);
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dark .nav-draw-link {
+    background-image: linear-gradient(#D4FF00, #D4FF00);
+  }
+
+  .nav-draw-link:hover,
+  .nav-draw-link:focus-visible,
+  .nav-draw-link.active {
+    background-position: 0% calc(50% + 0.65em);
+    background-size: 100% 2px;
+  }
+
+  /* Tactile Magnetic Button Hover Wiggle */
+  .btn-magnetic {
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-magnetic:hover .btn-arrow {
+    transform: translate(3px, -3px);
+  }
+  .btn-arrow {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ── Standardized Action Buttons & Interactive Tokens ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    background-color: #09090B;
+    color: #FFFFFF;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-mono), monospace;
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .btn-primary:hover {
+    background-color: #27272A;
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+  .btn-primary:focus-visible {
+    outline: 2px solid #09090B;
+    outline-offset: 2px;
+  }
+  .dark .btn-primary {
+    background-color: #D4FF00;
+    color: #000000;
+  }
+  .dark .btn-primary:hover {
+    background-color: #E2FF33;
+  }
+  .dark .btn-primary:focus-visible {
+    outline: 2px solid #D4FF00;
+    outline-offset: 2px;
+  }
+
+  /* Secondary / Utility Pill Button */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    background-color: #FFFFFF;
+    color: #27272A;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 0.5rem 1rem;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .btn-secondary:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+    color: #000000;
+    background-color: #F8F8FA;
+  }
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+  .btn-secondary:focus-visible {
+    outline: 2px solid #09090B;
+    outline-offset: 2px;
+  }
+  .dark .btn-secondary {
+    background-color: #0D0D12;
+    color: #E4E4E7;
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .dark .btn-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    background-color: #14141B;
+  }
+  .dark .btn-secondary:focus-visible {
+    outline: 2px solid #D4FF00;
+    outline-offset: 2px;
+  }
+
+  /* Category & Filter Tabs */
+  .tab-pill-active {
+    background-color: #09090B;
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .dark .tab-pill-active {
+    background-color: #D4FF00;
+    color: #000000;
+  }
+  .tab-pill-inactive {
+    color: #71717A;
+  }
+  .tab-pill-inactive:hover {
+    color: #09090B;
+    background-color: #F4F4F6;
+  }
+  .dark .tab-pill-inactive {
+    color: #A1A1AA;
+  }
+  .dark .tab-pill-inactive:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Dual-Theme Kinetic Indicator Dot */
+  .kinetic-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: #09090B;
+    flex-shrink: 0;
+  }
+  .dark .kinetic-dot {
+    background-color: #D4FF00;
+  }
 }
 
-.dark .spotlight-card {
-  background: #0D0D12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
+@layer utilities {
+  /* Calligraphic Luxury Flourish (Pinyon Script) */
+  .font-accent {
+    font-family: var(--font-accent), cursive;
+  }
 
-.spotlight-card:hover {
-  border-color: rgba(9, 9, 11, 0.25);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 30px -4px rgba(0, 0, 0, 0.08);
-}
+  /* Hollow Outline Text Utility */
+  .text-outline-thin {
+    -webkit-text-stroke: 1px currentColor;
+    color: transparent;
+  }
 
-.dark .spotlight-card:hover {
-  border-color: rgba(212, 255, 0, 0.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 12px 30px -4px rgba(0, 0, 0, 0.5);
-}
+  /* Gradient backgrounds */
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
 
-/* Animated Underline Draw for Nav & Links */
-.nav-draw-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  background-image: linear-gradient(#09090B, #09090B);
-  background-position: 100% calc(50% + 0.65em);
-  background-repeat: no-repeat;
-  background-size: 0% 2px;
-  transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dark .nav-draw-link {
-  background-image: linear-gradient(#D4FF00, #D4FF00);
-}
-
-.nav-draw-link:hover,
-.nav-draw-link:focus-visible,
-.nav-draw-link.active {
-  background-position: 0% calc(50% + 0.65em);
-  background-size: 100% 2px;
-}
-
-/* Tactile Magnetic Button Hover Wiggle */
-.btn-magnetic {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-magnetic:hover .btn-arrow {
-  transform: translate(3px, -3px);
-}
-.btn-arrow {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ── Standardized Action Buttons & Interactive Tokens ── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  background-color: #09090B;
-  color: #FFFFFF;
-  padding: 0.75rem 1.5rem;
-  font-family: var(--font-mono), monospace;
-  font-weight: 700;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.btn-primary:hover {
-  background-color: #27272A;
-}
-.btn-primary:active {
-  transform: scale(0.98);
-}
-.btn-primary:focus-visible {
-  outline: 2px solid #09090B;
-  outline-offset: 2px;
-}
-.dark .btn-primary {
-  background-color: #D4FF00;
-  color: #000000;
-}
-.dark .btn-primary:hover {
-  background-color: #E2FF33;
-}
-.dark .btn-primary:focus-visible {
-  outline: 2px solid #D4FF00;
-  outline-offset: 2px;
-}
-
-/* Secondary / Utility Pill Button */
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  border-radius: 9999px;
-  background-color: #FFFFFF;
-  color: #27272A;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 0.5rem 1rem;
-  font-family: var(--font-mono), monospace;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.btn-secondary:hover {
-  border-color: rgba(0, 0, 0, 0.25);
-  color: #000000;
-  background-color: #F8F8FA;
-}
-.btn-secondary:active {
-  transform: scale(0.98);
-}
-.btn-secondary:focus-visible {
-  outline: 2px solid #09090B;
-  outline-offset: 2px;
-}
-.dark .btn-secondary {
-  background-color: #0D0D12;
-  color: #E4E4E7;
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-.dark .btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
-  background-color: #14141B;
-}
-.dark .btn-secondary:focus-visible {
-  outline: 2px solid #D4FF00;
-  outline-offset: 2px;
-}
-
-/* Category & Filter Tabs */
-.tab-pill-active {
-  background-color: #09090B;
-  color: #FFFFFF;
-  font-weight: 700;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.dark .tab-pill-active {
-  background-color: #D4FF00;
-  color: #000000;
-}
-.tab-pill-inactive {
-  color: #71717A;
-}
-.tab-pill-inactive:hover {
-  color: #09090B;
-  background-color: #F4F4F6;
-}
-.dark .tab-pill-inactive {
-  color: #A1A1AA;
-}
-.dark .tab-pill-inactive:hover {
-  color: #FFFFFF;
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* Dual-Theme Kinetic Indicator Dot */
-.kinetic-dot {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 9999px;
-  background-color: #09090B;
-  flex-shrink: 0;
-}
-.dark .kinetic-dot {
-  background-color: #D4FF00;
-}
-
-/* Calligraphic Luxury Flourish (Pinyon Script) */
-.font-accent {
-  font-family: var(--font-accent), cursive;
+  /* Hide scrollbars while retaining scroll/swipeability */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Infinite Editorial Ticker / Marquee */
@@ -277,12 +301,6 @@
   animation-play-state: paused;
 }
 
-/* Hollow Outline Text Utility */
-.text-outline-thin {
-  -webkit-text-stroke: 1px currentColor;
-  color: transparent;
-}
-
 /* Smooth Scrolling */
 html.lenis {
   height: auto;
@@ -298,20 +316,6 @@ html.lenis {
 
 .lenis.lenis-stopped {
   overflow: hidden;
-}
-
-/* Gradient backgrounds */
-.bg-gradient-radial {
-  background-image: radial-gradient(var(--tw-gradient-stops));
-}
-
-/* Hide scrollbars while retaining scroll/swipeability */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 /* Hero entrance: pure CSS so it starts before hydration (no flash of visible-then-hidden content)

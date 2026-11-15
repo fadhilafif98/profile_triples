@@ -115,7 +115,7 @@ export default function PageTransition() {
       {
         strokeDashoffset: -totalLength,
         strokeWidth: 30,
-        duration: 0.6,
+        duration: 0.48,
         ease: "power2.inOut",
       },
       0
@@ -127,10 +127,10 @@ export default function PageTransition() {
         backdrop,
         {
           opacity: 0,
-          duration: 0.35,
+          duration: 0.28,
           ease: "power1.out",
         },
-        0.15
+        0.12
       )
     }
   }, [loadGsap])
@@ -201,7 +201,7 @@ export default function PageTransition() {
         {
           strokeDashoffset: 0,
           strokeWidth: 340,
-          duration: 0.55,
+          duration: 0.42,
           ease: "power2.inOut",
         },
         0
@@ -213,10 +213,10 @@ export default function PageTransition() {
           backdrop,
           {
             opacity: 1,
-            duration: 0.32,
+            duration: 0.25,
             ease: "power1.inOut",
           },
-          0.16
+          0.12
         )
       }
     },
@@ -288,10 +288,10 @@ export default function PageTransition() {
       style={{ visibility: "hidden" }}
       className="fixed inset-0 z-[100] pointer-events-none overflow-hidden select-none"
     >
-      {/* 1. Backdrop Glass Scrim */}
+      {/* 1. Backdrop Scrim (no backdrop-blur on 100vw layer to keep SVG sweep at 60fps) */}
       <div
         ref={backdropRef}
-        className="absolute inset-0 bg-[#FAFAFA]/95 dark:bg-[#08080A]/95 backdrop-blur-xl opacity-0"
+        className="absolute inset-0 bg-[#FAFAFA]/95 dark:bg-[#08080A]/95 opacity-0"
       />
 
       {/* 2. Fluid Single-Color SVG Ribbon Canvas (140% oversized shape) */}
@@ -302,14 +302,7 @@ export default function PageTransition() {
           preserveAspectRatio="none"
           className="w-full h-full pointer-events-none overflow-hidden"
         >
-          <defs>
-            <filter id="ribbon-glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="12" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          {/* Underlay Subtle Bloom Ribbon */}
+          {/* Underlay Soft Ribbon Layer (no SVG GaussianBlur filter for GPU 60fps) */}
           <path
             ref={pathGlowRef}
             d={CALLIGRAPHY_RIBBON_PATH}
@@ -317,11 +310,10 @@ export default function PageTransition() {
             stroke="#D4FF00"
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter="url(#ribbon-glow)"
             strokeDasharray="4636 4636"
             strokeDashoffset="4636"
             strokeWidth="30"
-            className="opacity-40"
+            className="opacity-25"
           />
 
           {/* Foreground Pure Vector Ribbon (Solid Color Cycling on Every Route Change) */}

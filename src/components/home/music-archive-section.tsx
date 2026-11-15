@@ -145,7 +145,7 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
           <div className="relative w-full max-w-[230px] sm:max-w-[270px] lg:max-w-[300px] mr-12 sm:mr-16 group">
             {/* Ambient artwork blur */}
             <div
-              className="pointer-events-none absolute -inset-6 rounded-full opacity-35 dark:opacity-30 blur-2xl overflow-hidden"
+              className="pointer-events-none absolute -inset-4 rounded-full opacity-25 dark:opacity-25 blur-xl overflow-hidden"
               aria-hidden="true"
             >
               <Image

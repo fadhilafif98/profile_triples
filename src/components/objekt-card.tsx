@@ -1,11 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { memo, useState } from "react";
 import { RotateCw } from "lucide-react";
 import { Objekt, ObjektSide } from "@/types/objekt";
 import { getObjektCollectionSuffix } from "@/lib/objekts";
 import ObjektImage from "./objekt-image";
+
+const preloadedVariantUrls = new Set<string>();
+
+function preloadVariantImage(variant: Objekt) {
+  if (typeof window === "undefined") return;
+  const url = variant.frontImage || variant.thumbnailImage;
+  if (!url || preloadedVariantUrls.has(url)) return;
+  if (preloadedVariantUrls.size > 500) {
+    preloadedVariantUrls.clear();
+  }
+  preloadedVariantUrls.add(url);
+  const img = new window.Image();
+  img.referrerPolicy = "no-referrer";
+  img.src = url;
+}
 
 interface ObjektCardProps {
   objekt: Objekt;
@@ -17,7 +31,7 @@ interface ObjektCardProps {
 /**
  * Clean edge-to-edge photocard Objekt design matching the official COSMO scan aesthetic.
  */
-export default function ObjektCard({
+function ObjektCard({
   objekt,
   variants,
   onSelect,
@@ -27,7 +41,6 @@ export default function ObjektCard({
   const [hasFlipped, setHasFlipped] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
-  const shouldReduceMotion = useReducedMotion();
 
   const hasMultipleVariants = Boolean(variants && variants.length > 1);
   const activeObjekt =
@@ -48,12 +61,10 @@ export default function ObjektCard({
       onClick={() => onSelect && onSelect(activeObjekt, variants)}
       className="group relative aspect-[1/1.55] w-full rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-[#0D0D12] shadow-sm hover:shadow-2xl transition-[box-shadow,transform,border-color] duration-300 hover:scale-[1.03] hover:-translate-y-1 cursor-pointer border border-zinc-200/80 dark:border-white/10 select-none"
     >
-      {/* ── 3D Flip Card Container ── */}
-      <motion.div
-        animate={{ rotateY: side === "front" ? 0 : 180 }}
-        transition={{ duration: shouldReduceMotion ? 0.01 : 0.45, ease: "easeInOut" }}
-        className="w-full h-full relative"
-        style={{ transformStyle: "preserve-3d" }}
+      {/* ── 3D Flip Card Container (GPU CSS transform) ── */}
+      <div
+        className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none [transform-style:preserve-3d]"
+        style={{ transform: side === "front" ? "rotateY(0deg)" : "rotateY(180deg)" }}
       >
         {/* Front Side */}
         <div
@@ -110,7 +121,7 @@ export default function ObjektCard({
             <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900" />
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* ── Online / Offline Variant Switcher (Merged A/Z Pairs) ── */}
       {hasMultipleVariants && variants && (
@@ -118,7 +129,7 @@ export default function ObjektCard({
           onClick={(e) => e.stopPropagation()}
           role="group"
           aria-label="Switch Objekt format variant"
-          className="absolute bottom-1.5 left-1.5 sm:bottom-2.5 sm:left-2.5 flex items-center gap-0.5 p-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/20 shadow-lg z-20"
+          className="absolute bottom-1.5 left-1.5 sm:bottom-2.5 sm:left-2.5 flex items-center gap-0.5 p-0.5 rounded-full bg-black/75 border border-white/20 shadow-lg z-20"
         >
           {variants.map((variant) => {
             const suffix =
@@ -129,6 +140,12 @@ export default function ObjektCard({
               <button
                 key={variant.id}
                 type="button"
+                onPointerEnter={() => {
+                  if (!isActive) preloadVariantImage(variant);
+                }}
+                onFocus={() => {
+                  if (!isActive) preloadVariantImage(variant);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedVariantId(variant.id);
@@ -153,10 +170,12 @@ export default function ObjektCard({
         type="button"
         onClick={handleFlip}
         aria-label="Flip Objekt"
-        className="absolute bottom-1.5 right-1.5 sm:bottom-2.5 sm:right-2.5 p-1.5 sm:p-2 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md border border-white/20 shadow-lg opacity-0 group-hover:opacity-100 transition-[opacity,transform,background-color] hover:scale-110 active:scale-95 z-20"
+        className="absolute bottom-1.5 right-1.5 sm:bottom-2.5 sm:right-2.5 p-1.5 sm:p-2 rounded-full bg-black/75 hover:bg-black/90 text-white border border-white/20 shadow-lg opacity-0 group-hover:opacity-100 transition-[opacity,transform,background-color] hover:scale-110 active:scale-95 z-20"
       >
         <RotateCw className={`h-3 sm:h-3.5 w-3 sm:w-3.5 transition-transform ${isFlipping ? "rotate-180" : ""}`} />
       </button>
     </div>
   );
 }
+
+export default memo(ObjektCard);

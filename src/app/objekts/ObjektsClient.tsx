@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useDeferredValue } from "react";
+import { useState, useEffect, useMemo, useRef, useDeferredValue, useCallback, startTransition } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
@@ -151,8 +151,10 @@ export default function ObjektsClient({
             if (cachedRes) {
               const cachedData: Objekt[] = await cachedRes.json();
               if (isMounted && cachedData.length > 0) {
-                setFullObjekts(cachedData);
-                setLoadingFull(false);
+                startTransition(() => {
+                  setFullObjekts(cachedData);
+                  setLoadingFull(false);
+                });
                 return;
               }
             }
@@ -178,8 +180,10 @@ export default function ObjektsClient({
         const data: Objekt[] = await res.json();
 
         if (isMounted) {
-          setFullObjekts(data);
-          setLoadingFull(false);
+          startTransition(() => {
+            setFullObjekts(data);
+            setLoadingFull(false);
+          });
         }
       } catch (err: unknown) {
         if (isMounted) {
@@ -205,10 +209,34 @@ export default function ObjektsClient({
     setCurrentPage(1);
   }
 
+  // Pre-compute default "newest" sorted & grouped datasets once when fullObjekts arrives
+  // so modal toggles, pagination, and clearing filters avoid re-sorting 11,700+ items
+  const defaultNewestSorted = useMemo(() => {
+    if (!fullObjekts) return null;
+    return [...fullObjekts].sort((a, b) => compareObjekts(a, b, "newest"));
+  }, [fullObjekts]);
+
+  const defaultNewestGroups = useMemo(() => {
+    if (!defaultNewestSorted) return null;
+    return groupObjektVariants(defaultNewestSorted);
+  }, [defaultNewestSorted]);
+
+  const isDefaultFilterAndSort =
+    selectedSeason === "All" &&
+    selectedMember === "All" &&
+    selectedClass === "All" &&
+    selectedOnOffline === "All" &&
+    deferredSearchQuery.trim() === "" &&
+    sortBy === "newest";
+
   // Client-side filtering & sorting
   const filteredRawObjekts = useMemo(() => {
     if (!fullObjekts) {
       return usingInitialPreview ? initialObjekts : [];
+    }
+
+    if (isDefaultFilterAndSort && defaultNewestSorted) {
+      return defaultNewestSorted;
     }
 
     const query = deferredSearchQuery.toLowerCase().trim();
@@ -255,6 +283,8 @@ export default function ObjektsClient({
     fullObjekts,
     usingInitialPreview,
     initialObjekts,
+    isDefaultFilterAndSort,
+    defaultNewestSorted,
     selectedSeason,
     selectedMember,
     selectedClass,
@@ -269,6 +299,9 @@ export default function ObjektsClient({
       return initialObjekts.map((o) => ({ primary: o, variants: [o] }));
     }
     if (effectiveGrouping) {
+      if (isDefaultFilterAndSort && defaultNewestGroups) {
+        return defaultNewestGroups;
+      }
       return groupObjektVariants(filteredRawObjekts);
     }
     return filteredRawObjekts.map((o) => ({ primary: o, variants: [o] }));
@@ -278,8 +311,22 @@ export default function ObjektsClient({
     initialGroups,
     initialObjekts,
     effectiveGrouping,
+    isDefaultFilterAndSort,
+    defaultNewestGroups,
     filteredRawObjekts,
   ]);
+
+  const handleSelectObjekt = useCallback((selectedObj: Objekt, variants?: Objekt[]) => {
+    setSelectedModalEntry({ objekt: selectedObj, variants });
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedModalEntry(null);
+  }, []);
+
+  const handleSelectModalVariant = useCallback((variant: Objekt) => {
+    setSelectedModalEntry((prev) => (prev ? { ...prev, objekt: variant } : null));
+  }, []);
 
   // Pagination calculation
   const rawTotalCount =
@@ -693,9 +740,7 @@ export default function ObjektsClient({
                   key={entry.primary.id || `${entry.primary.slug}-${idx}`}
                   objekt={entry.primary}
                   variants={entry.variants}
-                  onSelect={(selectedObj, variants) =>
-                    setSelectedModalEntry({ objekt: selectedObj, variants })
-                  }
+                  onSelect={handleSelectObjekt}
                   priority={idx < 6}
                 />
               ))}
@@ -747,16 +792,12 @@ export default function ObjektsClient({
       </div>
 
       {/* ── 6. High-Res Flip Modal Preview ── */}
-      {selectedModalEntry && (
-        <ObjektModal
-          objekt={selectedModalEntry.objekt}
-          variants={selectedModalEntry.variants}
-          onSelectVariant={(variant) =>
-            setSelectedModalEntry((prev) => (prev ? { ...prev, objekt: variant } : null))
-          }
-          onClose={() => setSelectedModalEntry(null)}
-        />
-      )}
+      <ObjektModal
+        objekt={selectedModalEntry?.objekt ?? null}
+        variants={selectedModalEntry?.variants}
+        onSelectVariant={handleSelectModalVariant}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -123,14 +123,9 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     () => false
   );
   const [now, setNow] = useState<Date>(() => new Date());
+  const [tickMs, setTickMs] = useState<number>(() => Date.now());
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [viewCelebration, setViewCelebration] = useState(true);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const queueRef = useRef<HTMLDivElement | null>(null);
@@ -143,7 +138,11 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
   });
 
   useEffect(() => {
-    const rafId = requestAnimationFrame(() => setNow(new Date()));
+    const rafId = requestAnimationFrame(() => {
+      const current = new Date();
+      setNow(current);
+      setTickMs(current.getTime());
+    });
     return () => cancelAnimationFrame(rafId);
   }, []);
 
@@ -221,46 +220,47 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
     return idx >= 0 ? idx : 0;
   }, [activeMember, pipelineQueue]);
 
-  const updateCountdown = useCallback(() => {
-    if (!activeMember) return;
-    const current = new Date();
-    const diff = activeMember.nextBirthday.getTime() - current.getTime();
-
-    if (diff <= 0 || activeMember.isToday) {
-      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      return;
+  const timeLeft = useMemo(() => {
+    if (!activeMember || activeMember.isToday) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
-
-    setTimeLeft({
+    const diff = activeMember.nextBirthday.getTime() - tickMs;
+    if (diff <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    return {
       days: Math.floor(diff / (1000 * 60 * 60 * 24)),
       hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
       minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
       seconds: Math.floor((diff % (1000 * 60)) / 1000),
-    });
-  }, [activeMember]);
+    };
+  }, [activeMember, tickMs]);
 
   useEffect(() => {
-    const rafId = requestAnimationFrame(updateCountdown);
-
-    if (!activeMember || activeMember.isToday || activeMember.nextBirthday.getTime() <= Date.now()) {
-      return () => cancelAnimationFrame(rafId);
+    if (!activeMember || activeMember.isToday || activeMember.nextBirthday.getTime() <= now.getTime()) {
+      return;
     }
 
     let isVisible = true;
     let intervalId: number | null = null;
+    let resumeRafId: number | null = null;
 
-    const syncInterval = () => {
+    const tick = () => setTickMs(Date.now());
+
+    const syncInterval = (immediate = false) => {
       const shouldRun = isVisible && !document.hidden;
       if (shouldRun && intervalId === null) {
-        updateCountdown();
-        intervalId = window.setInterval(updateCountdown, 1000);
+        if (immediate) {
+          resumeRafId = requestAnimationFrame(tick);
+        }
+        intervalId = window.setInterval(tick, 1000);
       } else if (!shouldRun && intervalId !== null) {
         window.clearInterval(intervalId);
         intervalId = null;
       }
     };
 
-    const handleVisibilityChange = () => syncInterval();
+    const handleVisibilityChange = () => syncInterval(true);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     let observer: IntersectionObserver | null = null;
@@ -268,23 +268,26 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
       observer = new IntersectionObserver(
         (entries) => {
           isVisible = entries.some((entry) => entry.isIntersecting);
-          syncInterval();
+          syncInterval(true);
         },
         { threshold: 0.05 }
       );
       observer.observe(sectionRef.current);
     }
 
-    syncInterval();
+    syncInterval(false);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       observer?.disconnect();
+      if (resumeRafId !== null) {
+        cancelAnimationFrame(resumeRafId);
+      }
       if (intervalId !== null) {
         window.clearInterval(intervalId);
       }
     };
-  }, [updateCountdown, activeMember]);
+  }, [activeMember, now]);
 
   useEffect(() => {
     const container = queueRef.current;

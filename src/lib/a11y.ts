@@ -73,7 +73,13 @@ export function useDialogA11y(
     previousActiveRef.current = document.activeElement as HTMLElement | null
 
     const prevOverflow = lockScroll ? document.body.style.overflow : ""
+    const prevPaddingRight = lockScroll ? document.body.style.paddingRight : ""
     if (lockScroll) {
+      const scrollbarGap = window.innerWidth - document.documentElement.clientWidth
+      if (scrollbarGap > 0) {
+        const computedPadding = parseFloat(getComputedStyle(document.body).paddingRight) || 0
+        document.body.style.paddingRight = `${computedPadding + scrollbarGap}px`
+      }
       document.body.style.overflow = "hidden"
     }
 
@@ -81,12 +87,7 @@ export function useDialogA11y(
       const container = containerRef.current
       if (!container) return
       if (!container.contains(document.activeElement)) {
-        const focusables = getVisibleFocusableElements(container)
-        if (focusables.length > 0) {
-          focusables[0].focus({ preventScroll: true })
-        } else {
-          container.focus({ preventScroll: true })
-        }
+        container.focus({ preventScroll: true })
       }
     })
 
@@ -130,6 +131,7 @@ export function useDialogA11y(
       window.removeEventListener("keydown", handleKeyDown)
       if (lockScroll) {
         document.body.style.overflow = prevOverflow
+        document.body.style.paddingRight = prevPaddingRight
       }
     }
   }, [isOpen, containerRef, lockScroll])

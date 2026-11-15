@@ -22,6 +22,16 @@ interface ObjektImageProps {
   onLoad?: () => void;
 }
 
+const loadedImageUrls = new Set<string>();
+
+function markImageLoaded(url: string) {
+  if (!url) return;
+  if (loadedImageUrls.size > 1000) {
+    loadedImageUrls.clear();
+  }
+  loadedImageUrls.add(url);
+}
+
 /**
  * High-performance Objekt Image component.
  * Directs to valid official image sources (resources.cosmo.fans / imagedelivery.net / Hugging Face CDN)
@@ -57,13 +67,15 @@ export default function ObjektImage({
   const [currentSrc, setCurrentSrc] = useState<string>(initialSrc);
   const [triedHf, setTriedHf] = useState<boolean>(!hasDirectSrc);
   const [allFailed, setAllFailed] = useState<boolean>(!initialSrc);
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(initialSrc));
+  const [isLoading, setIsLoading] = useState<boolean>(
+    Boolean(initialSrc) && !loadedImageUrls.has(initialSrc)
+  );
   const srcKey = `${season}|${member}|${slug}|${side}|${fallbackSrc || ""}`;
   const [prevSrcKey, setPrevSrcKey] = useState<string>(srcKey);
 
   const imageAlt = alt || `${season} ${member} ${slug} (${side})`;
 
-  // Reset states when card attributes change
+  // Reset states when card attributes change without flickering cached variants
   if (srcKey !== prevSrcKey) {
     setPrevSrcKey(srcKey);
     const hasValidDirect = Boolean(fallbackSrc && fallbackSrc.trim().length > 0);
@@ -77,7 +89,7 @@ export default function ObjektImage({
     setCurrentSrc(nextSrc);
     setTriedHf(!hasValidDirect);
     setAllFailed(!nextSrc);
-    setIsLoading(Boolean(nextSrc));
+    setIsLoading(Boolean(nextSrc) && !loadedImageUrls.has(nextSrc));
   }
 
   const handleImageError = () => {
@@ -134,10 +146,11 @@ export default function ObjektImage({
           preload={priority}
           sizes={sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"}
           referrerPolicy="no-referrer"
-          className={`object-cover transition-opacity duration-300 ${
+          className={`object-cover transition-opacity duration-200 ${
             isLoading ? "opacity-0" : "opacity-100"
           }`}
           onLoad={() => {
+            markImageLoaded(currentSrc);
             setIsLoading(false);
             if (onLoad) onLoad();
           }}
@@ -151,10 +164,11 @@ export default function ObjektImage({
           height={height || 560}
           preload={priority}
           referrerPolicy="no-referrer"
-          className={`transition-opacity duration-300 ${
+          className={`transition-opacity duration-200 ${
             isLoading ? "opacity-0" : "opacity-100"
           }`}
           onLoad={() => {
+            markImageLoaded(currentSrc);
             setIsLoading(false);
             if (onLoad) onLoad();
           }}

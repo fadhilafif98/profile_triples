@@ -38,9 +38,9 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
   }, [subUnits])
 
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isHovered, setIsHovered] = useState(false)
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false)
-  const [isInView, setIsInView] = useState(false)
+  const isHoveredRef = useRef(false)
+  const isInViewRef = useRef(false)
 
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % showcaseUnits.length)
@@ -54,14 +54,14 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
     setCurrentIndex(index)
   }, [])
 
-  // Only autoplay while section is in viewport
+  // Track viewport visibility via ref to avoid React re-renders mid-scroll
   useEffect(() => {
     const target = sectionRef.current
     if (!target) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsInView(entry.isIntersecting)
+        isInViewRef.current = entry.isIntersecting
       },
       { threshold: 0.25 }
     )
@@ -70,15 +70,14 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
     return () => observer.disconnect()
   }, [])
 
-  // Pause when browser tab is inactive
+  // Sync visibility ref when browser tab changes
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setIsInView(false)
+        isInViewRef.current = false
       } else if (sectionRef.current) {
         const rect = sectionRef.current.getBoundingClientRect()
-        const inView = rect.top < window.innerHeight && rect.bottom > 0
-        setIsInView(inView)
+        isInViewRef.current = rect.top < window.innerHeight && rect.bottom > 0
       }
     }
 
@@ -88,26 +87,27 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
 
   // Autoplay loop
   useEffect(() => {
-    if (reduceMotion || isHovered || isAutoplayPaused || !isInView) return
+    if (reduceMotion || isAutoplayPaused) return
 
     const timer = setInterval(() => {
+      if (!isInViewRef.current || isHoveredRef.current || document.hidden) return
       handleNext()
     }, 4800)
 
     return () => clearInterval(timer)
-  }, [reduceMotion, isHovered, isAutoplayPaused, isInView, handleNext])
+  }, [reduceMotion, isAutoplayPaused, handleNext])
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isInView) return
+      if (!isInViewRef.current) return
       if (e.key === "ArrowRight") handleNext()
       if (e.key === "ArrowLeft") handlePrev()
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isInView, handleNext, handlePrev])
+  }, [handleNext, handlePrev])
 
   const currentUnit = showcaseUnits[currentIndex]
   if (!currentUnit) return null
@@ -116,7 +116,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
     <section
       ref={sectionRef}
       aria-labelledby="featured-dimensions-heading"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-white/10 bg-[#fafafa] dark:bg-[#08080A] relative overflow-hidden"
+      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-white/10 bg-[#fafafa] dark:bg-[#08080A] relative overflow-hidden [contain:layout_paint_style]"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -255,10 +255,14 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
           {/* Right Column: Interactive 3D Perspective Card Stack */}
           <div
             className="lg:col-span-7 flex items-center justify-center relative touch-pan-y"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => {
+              isHoveredRef.current = true
+            }}
+            onMouseLeave={() => {
+              isHoveredRef.current = false
+            }}
             onTouchStart={(e) => {
-              setIsHovered(true)
+              isHoveredRef.current = true
               const touch = e.touches[0]
               if (!touch) return
               touchStartXRef.current = touch.clientX
@@ -295,13 +299,13 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
               }
               touchStartXRef.current = null
               touchStartYRef.current = null
-              setIsHovered(false)
+              isHoveredRef.current = false
             }}
             onTouchCancel={() => {
               touchStartXRef.current = null
               touchStartYRef.current = null
               touchSwipedRef.current = false
-              setIsHovered(false)
+              isHoveredRef.current = false
             }}
             onClickCapture={(e) => {
               if (touchSwipedRef.current) {
@@ -319,6 +323,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                 const offset = (index - currentIndex + showcaseUnits.length) % showcaseUnits.length
                 const isTop = offset === 0
                 const isExited = offset === showcaseUnits.length - 1
+                const isVisibleLayer = offset <= 3 || isExited
 
                 let transformStyle = ""
                 let zIndex = 0
@@ -362,6 +367,13 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                   pointerEvents = "none"
                 }
 
+                // Limit heavy box-shadow to top two visible cards to avoid 7x GPU shadow overdraw
+                const elevationClass = isTop
+                  ? "shadow-xl shadow-black/25 dark:shadow-black/70"
+                  : offset === 1
+                  ? "shadow-md shadow-black/15 dark:shadow-black/40"
+                  : "shadow-none"
+
                 return (
                   <div
                     key={unit.id}
@@ -371,11 +383,13 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                       opacity,
                       pointerEvents,
                     }}
-                    className={`absolute inset-0 rounded-[2rem] overflow-hidden border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-[#0D0D12] shadow-2xl transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom select-none transform-gpu ${
+                    className={`absolute inset-0 rounded-[2rem] overflow-hidden border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-[#0D0D12] ${elevationClass} transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom select-none ${
+                      isVisibleLayer ? "transform-gpu" : "invisible"
+                    } ${
                       isTop ? "cursor-pointer" : "cursor-pointer hover:-translate-y-1"
                     }`}
                   >
-                    {isTop ? (
+                    {!isVisibleLayer ? null : isTop ? (
                       <Link
                         href={`/sub-units/${unit.slug}`}
                         className="block w-full h-full relative group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] active:scale-[0.98] transition-transform duration-200 ease-out"
@@ -385,6 +399,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                           src={unit.image}
                           alt={`tripleS ${unit.name} concept photo`}
                           fill
+                          loading="eager"
                           sizes="(max-width: 768px) 90vw, 450px"
                           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                         />
@@ -402,7 +417,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                               </p>
                             </div>
 
-                            <div className="w-10 h-10 rounded-full bg-white/20 group-hover:bg-[#D4FF00] backdrop-blur-md flex items-center justify-center text-white group-hover:text-black transition-[background-color,color] duration-200 shrink-0 shadow-lg">
+                            <div className="w-10 h-10 rounded-full bg-black/55 group-hover:bg-[#D4FF00] border border-white/20 flex items-center justify-center text-white group-hover:text-black transition-[background-color,color] duration-200 shrink-0 shadow-lg">
                               <ArrowUpRight
                                 className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                                 aria-hidden="true"
@@ -422,6 +437,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                           src={unit.image}
                           alt={`tripleS ${unit.name}`}
                           fill
+                          loading={offset <= 2 ? "eager" : "lazy"}
                           sizes="(max-width: 768px) 90vw, 450px"
                           className="object-cover"
                         />
