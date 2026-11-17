@@ -62,7 +62,7 @@ export default function RootLayout({
             <PageTransition />
             <div className="flex flex-col min-h-screen overflow-x-clip">
               <Navigation />
-              <main id="main-content" tabIndex={-1} className="flex-grow outline-none">{children}</main>
+              <main id="main-content" tabIndex={-1} className="grow outline-none">{children}</main>
               <Footer />
               <BackToTop />
             </div>

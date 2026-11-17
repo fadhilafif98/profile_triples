@@ -23,7 +23,7 @@ export default function WavWordmark({
       role="img"
       aria-label={alt}
       title={alt}
-      className={`inline-block aspect-[705/177] bg-current align-baseline select-none transition-colors ${className}`}
+      className={`inline-block aspect-705/177 bg-current align-baseline select-none transition-colors ${className}`}
       style={{
         maskImage: "url(/icons/wav-logo-transparent.png)",
         WebkitMaskImage: "url(/icons/wav-logo-transparent.png)",

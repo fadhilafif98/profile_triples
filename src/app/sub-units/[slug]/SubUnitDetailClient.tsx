@@ -272,7 +272,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
             
             {/* Left: Pure Concept Photography (No Overlaid Badges or Widgets) */}
-            <div className="lg:col-span-7 relative aspect-[4/3] rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-white/10 group">
+            <div className="lg:col-span-7 relative aspect-4/3 rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-white/10 group">
               <Image
                 src={unit.image || "/placeholder.svg"}
                 alt={`${unit.name} concept photo`}
@@ -420,7 +420,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               >
                 <Link
                   href={`/members/${member.slug}`}
-                  className="group block relative aspect-[3/4.25] rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 shadow-md hover:shadow-2xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1.5 border border-zinc-200/50 dark:border-white/5"
+                  className="group block relative aspect-3/4.25 rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 shadow-md hover:shadow-2xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1.5 border border-zinc-200/50 dark:border-white/5"
                 >
                   {/* Portrait Photograph */}
                   <Image
@@ -430,7 +430,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-104"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
                   {/* S-Number Badge */}
                   <div className="absolute top-3 left-3 z-10 pointer-events-none">
@@ -552,7 +552,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               <Link
                 key={other.id}
                 href={`/sub-units/${other.slug}`}
-                className="group block relative aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-900 shadow-md hover:shadow-xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 border border-zinc-200/50 dark:border-white/5"
+                className="group block relative aspect-4/5 rounded-2xl overflow-hidden bg-zinc-900 shadow-md hover:shadow-xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 border border-zinc-200/50 dark:border-white/5"
               >
                 <Image
                   src={other.image || "/placeholder.svg"}
@@ -561,7 +561,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                   sizes="(max-width: 640px) 50vw, 25vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
 
                 <div className="absolute top-3 left-3 z-10 text-white font-mono text-xs font-bold">
                   #{String(other.id).padStart(2, "0")}

@@ -204,7 +204,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
             onKeyDown={handleKeyDown}
             role="region"
             aria-label="tripleS S01 through S24 portrait filmstrip"
-            className="hidden sm:flex h-[460px] lg:h-[510px] w-full gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden select-none cursor-grab active:cursor-grabbing"
+            className="hidden sm:flex h-115 lg:h-127.5 w-full gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden select-none cursor-grab active:cursor-grabbing"
           >
             {orderedMembers.map((member, idx) => {
               const isExpanded = idx === safeActiveIndex;
@@ -216,7 +216,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                 return (
                   <article
                     key={member.id}
-                    className="group relative shrink-0 w-[52px] lg:w-[56px] hover:w-[62px] h-full overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-900 transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+                    className="group relative shrink-0 w-13 lg:w-14 hover:w-15.5 h-full overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-900 transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
                   >
                     <Image
                       src={getMemberImageUrl(member)}
@@ -236,7 +236,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                         setActiveIndex(idx);
                       }}
                       aria-label={`Select ${sCode} ${member.name}`}
-                      className="absolute inset-0 z-10 flex flex-col items-center justify-between py-4 px-1 bg-gradient-to-t from-black/80 via-black/15 to-black/30 group-hover:via-black/5 transition-colors duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D4FF00]"
+                      className="absolute inset-0 z-10 flex flex-col items-center justify-between py-4 px-1 bg-linear-to-t from-black/80 via-black/15 to-black/30 group-hover:via-black/5 transition-colors duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D4FF00]"
                     >
                       <span className="font-mono text-[10px] font-bold tracking-wider text-white/90">
                         {sCode}
@@ -255,7 +255,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
               return (
                 <article
                   key={member.id}
-                  className="group relative shrink-0 w-[290px] lg:w-[325px] h-full overflow-hidden rounded-2xl bg-zinc-900 shadow-xl transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
+                  className="group relative shrink-0 w-72.5 lg:w-81.25 h-full overflow-hidden rounded-2xl bg-zinc-900 shadow-xl transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
                 >
                   <Link
                     href={`/members/${member.slug}`}
@@ -280,14 +280,14 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                     {/* Subtle Bottom 26% Scrim — Face & Upper Portrait Stay Clear */}
                     <div
                       aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[26%] z-10 bg-gradient-to-t from-black/90 via-black/45 to-transparent"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[26%] z-10 bg-linear-to-t from-black/90 via-black/45 to-transparent"
                     />
 
                     {/* Official MODHAUS COSMO Vertical Sideband */}
                     <div
                       aria-hidden="true"
                       style={{ backgroundColor: memberHex }}
-                      className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[26px] flex flex-col items-center justify-between py-4 px-0.5 select-none ${
+                      className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-6.5 flex flex-col items-center justify-between py-4 px-0.5 select-none ${
                         lightBand ? "text-zinc-950" : "text-white"
                       }`}
                     >
@@ -296,7 +296,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                       </span>
                       <span
                         style={{ writingMode: "vertical-rl" }}
-                        className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[160px]"
+                        className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-40"
                       >
                         {member.name}
                       </span>
@@ -341,7 +341,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                   key={member.id}
                   href={`/members/${member.slug}`}
                   aria-label={`View ${sCode} ${member.name} profile`}
-                  className="group relative block w-[76vw] max-w-[280px] aspect-[3/4] snap-center shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+                  className="group relative block w-[76vw] max-w-70 aspect-3/4 snap-center shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
                 >
                   <Image
                     src={getMemberImageUrl(member)}
@@ -352,12 +352,12 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                   />
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] z-10 bg-gradient-to-t from-black/95 via-black/55 to-transparent"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] z-10 bg-linear-to-t from-black/95 via-black/55 to-transparent"
                   />
                   <div
                     aria-hidden="true"
                     style={{ backgroundColor: memberHex }}
-                    className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[24px] flex flex-col items-center justify-between py-3.5 px-0.5 select-none ${
+                    className={`pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-6 flex flex-col items-center justify-between py-3.5 px-0.5 select-none ${
                       lightBand ? "text-zinc-950" : "text-white"
                     }`}
                   >
@@ -366,7 +366,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                     </span>
                     <span
                       style={{ writingMode: "vertical-rl" }}
-                      className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[140px]"
+                      className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-35"
                     >
                       {member.name}
                     </span>

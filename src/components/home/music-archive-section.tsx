@@ -142,7 +142,7 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto py-2">
         {/* Left: Unboxed Sliding Vinyl Sleeve */}
         <div className="lg:col-span-5 flex items-center justify-center py-2">
-          <div className="relative w-full max-w-[230px] sm:max-w-[270px] lg:max-w-[300px] mr-12 sm:mr-16 group">
+          <div className="relative w-full max-w-57.5 sm:max-w-67.5 lg:max-w-75 mr-12 sm:mr-16 group">
             {/* Ambient artwork blur */}
             <div
               className="pointer-events-none absolute -inset-4 rounded-full opacity-25 dark:opacity-25 blur-xl overflow-hidden"
@@ -169,8 +169,8 @@ export function MusicArchiveSection({ albums }: MusicArchiveSectionProps) {
                     "radial-gradient(circle, #18181B 0%, #09090B 68%, #141418 100%)",
                 }}
               >
-                <div className="absolute inset-[12%] rounded-full border border-white/[0.06]" />
-                <div className="absolute inset-[22%] rounded-full border border-white/[0.04]" />
+                <div className="absolute inset-[12%] rounded-full border border-white/6" />
+                <div className="absolute inset-[22%] rounded-full border border-white/4" />
                 <div className="relative w-[34%] h-[34%] rounded-full overflow-hidden ring-2 ring-black/70">
                   <Image
                     src={activeAlbum.cover}

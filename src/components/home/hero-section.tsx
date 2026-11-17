@@ -39,7 +39,7 @@ export default function HeroSection() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       aria-labelledby="hero-main-heading"
-      className="relative h-[100dvh] min-h-[100dvh] w-full flex flex-col justify-end overflow-hidden select-none bg-zinc-950"
+      className="relative h-dvh min-h-dvh w-full flex flex-col justify-end overflow-hidden select-none bg-zinc-950"
     >
       {/* Full-Viewport 24-Member Group Portrait */}
       <div
@@ -58,13 +58,13 @@ export default function HeroSection() {
         />
 
         {/* Top Vignette: Preserves fixed navbar legibility */}
-        <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-linear-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />
 
         {/* Subtle Ambient Scrim */}
         <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
         {/* Optical Contrast Well: Keeps lower-third typography legible without hiding member styling */}
-        <div className="absolute inset-x-0 bottom-0 h-[48vh] sm:h-[42vh] bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-[48vh] sm:h-[42vh] bg-linear-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
       </div>
 
       {/* Screen Reader Group Roster Context */}

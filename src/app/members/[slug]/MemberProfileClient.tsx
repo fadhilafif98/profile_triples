@@ -504,7 +504,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     setGifActivated(true)
                   }
                 }}
-                className="spotlight-card group relative block text-left aspect-[3/4] w-full max-w-[480px] mx-auto rounded-2xl overflow-hidden shadow-md border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0D0D12] cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+                className="spotlight-card group relative block text-left aspect-3/4 w-full max-w-120 mx-auto rounded-2xl overflow-hidden shadow-md border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-[#0D0D12] cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
                 aria-label={`Enlarge official portrait photo of ${member.name}`}
               >
                 {/* Signature Member Color Strip */}
@@ -548,7 +548,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 )}
 
                 {/* Bottom Contrast Scrim */}
-                <span className="block absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none z-10" />
+                <span className="block absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/85 via-black/30 to-transparent pointer-events-none z-10" />
 
                 {/* Bottom Card Caption */}
                 <span className="flex absolute bottom-3.5 inset-x-4 items-center justify-between text-xs font-mono text-zinc-300 z-20 pointer-events-none">
@@ -760,7 +760,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       <div key={idx} className="relative group">
                         {/* Timeline pip */}
                         <span
-                          className="absolute -left-[31px] top-1.5 w-2 h-2 rounded-full border-2 border-white dark:border-[#08080A] shadow-sm transition-transform group-hover:scale-125"
+                          className="absolute -left-7.75 top-1.5 w-2 h-2 rounded-full border-2 border-white dark:border-[#08080A] shadow-sm transition-transform group-hover:scale-125"
                           style={{ backgroundColor: memberColor }}
                           aria-hidden="true"
                         />
@@ -799,7 +799,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               {member.funFacts && member.funFacts[0] && (
                 <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10 shadow-sm relative overflow-hidden">
                   <div
-                    className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-zinc-200/40 dark:from-white/5 to-transparent rounded-bl-full pointer-events-none"
+                    className="absolute top-0 right-0 w-24 h-24 bg-linear-to-bl from-zinc-200/40 dark:from-white/5 to-transparent rounded-bl-full pointer-events-none"
                     aria-hidden="true"
                   />
                   <div className="flex items-center gap-2 mb-2">
@@ -857,7 +857,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {/* 1. Official Concept Portrait */}
             <div
               onClick={() => setActivePhoto(getMemberImageUrl(member))}
-              className="spotlight-card relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
+              className="spotlight-card relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -890,7 +890,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {member.gif ? (
               <div
                 onClick={() => setActivePhoto(`https://i.giphy.com/media/v1.${member.gif}`)}
-                className="spotlight-card relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
+                className="spotlight-card relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -922,7 +922,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {/* 3. Authentic First Class Digital Objekt Collectible Card */}
             <Link
               href={`/objekts?member=${encodeURIComponent(member.name)}`}
-              className="spotlight-card group relative aspect-[3/4] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] p-6 flex flex-col justify-between shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-[border-color,box-shadow]"
+              className="spotlight-card group relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] p-6 flex flex-col justify-between shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-[border-color,box-shadow]"
             >
               <div
                 className="absolute left-0 top-0 bottom-0 w-1.5 z-20"
@@ -1024,7 +1024,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                     key={unit.slug}
                     className="spotlight-card group rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#0D0D12] transition-[border-color,box-shadow] flex flex-col justify-between shadow-sm"
                   >
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                    <div className="relative aspect-video w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                       <Image
                         src={unit.image}
                         alt={unit.name}
@@ -1033,7 +1033,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
                       
                       <div className="absolute top-3 left-3 flex items-center gap-1.5">
                         <span className="text-[10px] font-mono uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white border border-white/20">
@@ -1153,7 +1153,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       : "border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30"
                   }`}
                 >
-                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                  <div className="relative aspect-3/4 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
                     {/* Side strip in official member color */}
                     <div
                       className="absolute left-0 top-0 bottom-0 w-1 z-20"
@@ -1169,7 +1169,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       loading={isCurrent ? undefined : "lazy"}
                       className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
 
                     {/* Top S-number tag */}
                     <div className="absolute top-2 left-2.5 z-10 flex items-center gap-1 pointer-events-none">

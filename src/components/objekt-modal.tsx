@@ -147,7 +147,7 @@ export default function ObjektModal({
           </button>
 
           {/* ── Left Column: Atelier Showcase Pedestal (3D Flip Photocard) ── */}
-          <div className="w-full md:w-[46%] lg:w-[44%] p-5 sm:p-7 md:p-8 bg-zinc-50/90 dark:bg-[#08080A] flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-zinc-200/80 dark:border-white/10 shrink-0 relative bg-gradient-to-b from-zinc-100/60 to-zinc-50/90 dark:from-white/[0.02] dark:to-transparent">
+          <div className="w-full md:w-[46%] lg:w-[44%] p-5 sm:p-7 md:p-8 bg-zinc-50/90 dark:bg-[#08080A] flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-zinc-200/80 dark:border-white/10 shrink-0 relative bg-linear-to-b from-zinc-100/60 to-zinc-50/90 dark:from-white/2 dark:to-transparent">
             {/* Ambient Radial Lighting Behind Card (zero blur filter repaint cost) */}
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none opacity-20 dark:opacity-15"
@@ -160,7 +160,7 @@ export default function ObjektModal({
             {/* 3D Flip Card Frame */}
             <div
               onClick={toggleFlip}
-              className="group relative w-full max-w-[260px] sm:max-w-[290px] md:max-w-[310px] aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 cursor-pointer select-none transition-transform hover:scale-[1.015] z-10 [perspective:1200px]"
+              className="group relative w-full max-w-65 sm:max-w-72.5 md:max-w-77.5 aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 cursor-pointer select-none transition-transform hover:scale-[1.015] z-10 perspective-distant"
               title="Click photo to flip front/back"
             >
               {/* Member Color Top Foil Line */}
@@ -171,7 +171,7 @@ export default function ObjektModal({
               />
 
               <div
-                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none [transform-style:preserve-3d]"
+                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d"
                 style={{
                   transform: activeSide === "front" ? "rotateY(0deg)" : "rotateY(180deg)",
                 }}
@@ -402,7 +402,7 @@ export default function ObjektModal({
               </div>
 
               {/* Curator Note / Description Box */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-100/60 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-100/60 dark:bg-white/3 border border-zinc-200/80 dark:border-white/10">
                 <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-sans">
                   {activeObjekt.description ||
                     "Official tripleS collectible photocard on COSMO : the Gate. Collect Objekts to earn COMO and vote in Grand Gravity."}
@@ -410,7 +410,7 @@ export default function ObjektModal({
               </div>
 
               {/* Spec Matrix Bento (Certificate Grid) */}
-              <div className="p-4 rounded-2xl bg-zinc-100/50 dark:bg-white/[0.03] border border-zinc-200/80 dark:border-white/10 space-y-2 text-xs font-mono">
+              <div className="p-4 rounded-2xl bg-zinc-100/50 dark:bg-white/3 border border-zinc-200/80 dark:border-white/10 space-y-2 text-xs font-mono">
                 <div className="flex items-center justify-between py-1.5 border-b border-zinc-200/60 dark:border-white/5">
                   <span className="text-zinc-500 dark:text-zinc-400">
                     Collection No:
@@ -458,7 +458,7 @@ export default function ObjektModal({
 
                 <div className="flex items-center justify-between py-1.5">
                   <span className="text-zinc-500 dark:text-zinc-400">Slug:</span>
-                  <span className="text-zinc-700 dark:text-zinc-300 truncate max-w-[180px] sm:max-w-[220px]">
+                  <span className="text-zinc-700 dark:text-zinc-300 truncate max-w-45 sm:max-w-55">
                     {activeObjekt.slug}
                   </span>
                 </div>

@@ -198,7 +198,7 @@ export default function AlbumsClient() {
             <p className="gsap-subtext text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed pt-1">
               The complete sonic journey of tripleS and its Dimensions, voted into existence by{" "}
               <span className="inline-flex items-baseline align-baseline text-zinc-950 dark:text-[#D4FF00]">
-                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-[1px]" />
+                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-px" />
               </span>{" "}
               through Grand Gravity events across each era.
             </p>
@@ -215,7 +215,7 @@ export default function AlbumsClient() {
             {/* Left: The Physical Vinyl Record (Unboxed, Floating with Ambient Glow) */}
             <div className="lg:col-span-6 flex justify-center lg:justify-start">
               <div
-                className="group relative w-full max-w-[280px] sm:max-w-[380px] md:max-w-[440px] aspect-square select-none cursor-pointer"
+                className="group relative w-full max-w-70 sm:max-w-95 md:max-w-110 aspect-square select-none cursor-pointer"
                 onClick={() => {
                   const el = document.getElementById(featuredAlbum.id)
                   if (el) el.scrollIntoView({ behavior: "smooth" })
@@ -361,7 +361,7 @@ export default function AlbumsClient() {
           {/* Right Controls: Search, Sort, View Toggle */}
           <div className="flex items-center gap-3 w-full md:w-auto">
             {/* Live Search */}
-            <div className="relative flex-grow md:w-64">
+            <div className="relative grow md:w-64">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
               <input
                 type="text"
@@ -468,7 +468,7 @@ export default function AlbumsClient() {
                       duration: shouldReduceMotion ? 0.01 : 0.4,
                       delay: shouldReduceMotion ? 0 : index * 0.02,
                     }}
-                    className="group scroll-mt-28 max-w-[320px] xs:max-w-[360px] sm:max-w-none mx-auto sm:mx-0 w-full"
+                    className="group scroll-mt-28 max-w-[320px] xs:max-w-90 sm:max-w-none mx-auto sm:mx-0 w-full"
                   >
                     {/* The Vinyl Sleeve (No Card Box, Floating Pure Physical Record) */}
                     <div
@@ -562,7 +562,7 @@ export default function AlbumsClient() {
                       </div>
 
                       {/* Description (Consistent height for aligned action buttons) */}
-                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed min-h-[2.5rem] sm:min-h-[2.75rem]">
+                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed min-h-10 sm:min-h-11">
                         {album.description}
                       </p>
 
@@ -622,7 +622,7 @@ export default function AlbumsClient() {
                       <div className={`lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
                         <div
                           onClick={() => inspectOnDeck(album)}
-                          className="group/vinyl relative aspect-square w-full max-w-[280px] sm:max-w-[340px] md:max-w-[380px] mx-auto select-none cursor-pointer"
+                          className="group/vinyl relative aspect-square w-full max-w-70 sm:max-w-85 md:max-w-95 mx-auto select-none cursor-pointer"
                         >
                           {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
                           <div

@@ -128,7 +128,7 @@ export default function Navigation() {
                       {isActive && (
                         <motion.div
                           layoutId="navbar-active-wav"
-                          className={`absolute -bottom-2 inset-x-[-4px] h-2.5 pointer-events-none ${
+                          className={`absolute -bottom-2 -inset-x-1 h-2.5 pointer-events-none ${
                             isAtHero
                               ? "text-[#D4FF00] drop-shadow-[0_0_8px_rgba(212,255,0,0.7)]"
                               : "text-zinc-950 dark:text-[#D4FF00] dark:drop-shadow-[0_0_8px_rgba(212,255,0,0.5)]"
@@ -151,7 +151,7 @@ export default function Navigation() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: shouldReduceMotion ? 0.01 : 0.16 }}
-                            className={`absolute -bottom-2 inset-x-[-4px] h-2.5 pointer-events-none ${
+                            className={`absolute -bottom-2 -inset-x-1 h-2.5 pointer-events-none ${
                               isAtHero
                                 ? "text-white/80 drop-shadow-[0_0_6px_rgba(255,255,255,0.6)]"
                                 : "text-zinc-500 dark:text-[#D4FF00]/80"

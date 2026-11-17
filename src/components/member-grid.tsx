@@ -33,7 +33,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
         if (e.pointerType === "mouse") activateHoverGif()
       }}
       onFocus={activateHoverGif}
-      className="spotlight-card group relative aspect-[3/4] w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+      className="spotlight-card group relative aspect-3/4 w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
       aria-label={`View quick profile for S${member.id} ${member.name}`}
     >
       {/* 4px side-band in official MODHAUS member color */}
@@ -67,7 +67,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
 
       {/* Editorial bottom gradient scrim */}
       <div
-        className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none z-10"
+        className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none z-10"
         aria-hidden="true"
       />
 
@@ -199,7 +199,7 @@ export default function MemberGrid() {
                   ? { duration: 0.01 }
                   : { type: "spring", damping: 28, stiffness: 350 }
               }
-              className="relative w-full max-w-[330px] xs:max-w-[360px] sm:max-w-[390px] aspect-[1/1.5] max-h-[85vh] rounded-2xl overflow-hidden bg-zinc-950 border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.9)]"
+              className="relative w-full max-w-82.5 xs:max-w-90 sm:max-w-97.5 aspect-1/1.5 max-h-[85vh] rounded-2xl overflow-hidden bg-zinc-950 border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.9)]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Member Color Top Foil Line */}
@@ -220,7 +220,7 @@ export default function MemberGrid() {
               />
 
               {/* Top Header Plate */}
-              <div className="absolute top-0 inset-x-0 p-4 sm:p-5 z-20 flex items-center justify-between bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none">
+              <div className="absolute top-0 inset-x-0 p-4 sm:p-5 z-20 flex items-center justify-between bg-linear-to-b from-black/85 via-black/40 to-transparent pointer-events-none">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-mono tracking-widest text-white/90 font-bold uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
                     tripleS
@@ -245,7 +245,7 @@ export default function MemberGrid() {
               </div>
 
               {/* Bottom Metadata Plaque */}
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 z-20 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col justify-end">
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 z-20 bg-linear-to-t from-black via-black/85 to-transparent flex flex-col justify-end">
                 <div className="flex items-baseline justify-between gap-2 mb-1">
                   <h2
                     id="objekt-card-title"

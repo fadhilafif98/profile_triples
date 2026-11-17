@@ -38,7 +38,7 @@ export default function Breadcrumb({ items, action, className = "" }: Breadcrumb
               {isLast || !item.href ? (
                 <span
                   aria-current={isLast ? "page" : undefined}
-                  className="font-semibold text-zinc-900 dark:text-white truncate max-w-[140px] xs:max-w-[180px] sm:max-w-none"
+                  className="font-semibold text-zinc-900 dark:text-white truncate max-w-35 xs:max-w-45 sm:max-w-none"
                 >
                   {item.label}
                 </span>
