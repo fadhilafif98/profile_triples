@@ -139,7 +139,7 @@ export default function VideoShowreelSection() {
       </h2>
 
       {/* Sticky Viewport: Expanding Video Showreel */}
-      <div className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center justify-center z-0">
+      <div className="sticky top-0 h-dvh w-full overflow-hidden flex items-center justify-center z-0">
         <div
           ref={videoCardRef}
           className="absolute inset-0 w-full h-full overflow-hidden bg-[#08080A] will-change-[clip-path]"
@@ -163,8 +163,8 @@ export default function VideoShowreelSection() {
             className="absolute inset-0 bg-black/60 pointer-events-none z-10"
           />
 
-          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
         </div>
 
         {/* Compact Utility Controls */}
@@ -212,7 +212,7 @@ export default function VideoShowreelSection() {
       </div>
 
       {/* Scrolling Editorial Statement Over Pinned Video */}
-      <div className="relative z-20 min-h-[220vh] flex flex-col items-center justify-start px-4 sm:px-6 pointer-events-none -mt-[100dvh] pt-[105vh] sm:pt-[110vh] pb-[50vh]">
+      <div className="relative z-20 min-h-[220vh] flex flex-col items-center justify-start px-4 sm:px-6 pointer-events-none mt-[-100dvh] pt-[105vh] sm:pt-[110vh] pb-[50vh]">
         <div className="w-full max-w-4xl mx-auto text-center text-white select-none">
           <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-[2.35rem] xl:text-[2.55rem] font-display font-extrabold uppercase tracking-tight leading-[1.12] sm:leading-[1.08] lg:leading-[1.06] text-[#F8F8FA] [text-shadow:0_4px_24px_rgba(0,0,0,0.95)]">
             tripleS is the K-pop girl group of{" "}

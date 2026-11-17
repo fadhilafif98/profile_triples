@@ -16,7 +16,7 @@ import { membersList, getMemberColor, getReadableMemberColor, getMemberImageUrl 
 import {
   ALL_OBJEKTS_JSON_URL,
   ObjektSortOption,
-  compareObjekts,
+  sortObjekts,
   groupObjektVariants,
   getObjektSeasons,
   getObjektClasses,
@@ -213,7 +213,7 @@ export default function ObjektsClient({
   // so modal toggles, pagination, and clearing filters avoid re-sorting 11,700+ items
   const defaultNewestSorted = useMemo(() => {
     if (!fullObjekts) return null;
-    return [...fullObjekts].sort((a, b) => compareObjekts(a, b, "newest"));
+    return sortObjekts(fullObjekts, "newest");
   }, [fullObjekts]);
 
   const defaultNewestGroups = useMemo(() => {
@@ -241,44 +241,44 @@ export default function ObjektsClient({
 
     const query = deferredSearchQuery.toLowerCase().trim();
 
-    return fullObjekts
-      .filter((item) => {
-        if (selectedSeason !== "All" && item.season !== selectedSeason) {
+    const filtered = fullObjekts.filter((item) => {
+      if (selectedSeason !== "All" && item.season !== selectedSeason) {
+        return false;
+      }
+
+      if (
+        selectedMember !== "All" &&
+        item.member.toLowerCase() !== selectedMember.toLowerCase()
+      ) {
+        return false;
+      }
+
+      if (selectedClass !== "All" && item.class !== selectedClass) {
+        return false;
+      }
+
+      if (selectedOnOffline !== "All") {
+        const isOnline = selectedOnOffline === "online";
+        if (isOnline && item.onOffline !== "online") return false;
+        if (!isOnline && item.onOffline !== "offline") return false;
+      }
+
+      if (query) {
+        const matchNo = item.collectionNo?.toLowerCase().includes(query);
+        const matchSlug = item.slug?.toLowerCase().includes(query);
+        const matchMember = item.member?.toLowerCase().includes(query);
+        const matchDesc = item.description?.toLowerCase().includes(query);
+        const matchCode = item.shortCode?.toLowerCase().includes(query);
+
+        if (!matchNo && !matchSlug && !matchMember && !matchDesc && !matchCode) {
           return false;
         }
+      }
 
-        if (
-          selectedMember !== "All" &&
-          item.member.toLowerCase() !== selectedMember.toLowerCase()
-        ) {
-          return false;
-        }
+      return true;
+    });
 
-        if (selectedClass !== "All" && item.class !== selectedClass) {
-          return false;
-        }
-
-        if (selectedOnOffline !== "All") {
-          const isOnline = selectedOnOffline === "online";
-          if (isOnline && item.onOffline !== "online") return false;
-          if (!isOnline && item.onOffline !== "offline") return false;
-        }
-
-        if (query) {
-          const matchNo = item.collectionNo?.toLowerCase().includes(query);
-          const matchSlug = item.slug?.toLowerCase().includes(query);
-          const matchMember = item.member?.toLowerCase().includes(query);
-          const matchDesc = item.description?.toLowerCase().includes(query);
-          const matchCode = item.shortCode?.toLowerCase().includes(query);
-
-          if (!matchNo && !matchSlug && !matchMember && !matchDesc && !matchCode) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .sort((a, b) => compareObjekts(a, b, sortBy));
+    return sortObjekts(filtered, sortBy);
   }, [
     fullObjekts,
     usingInitialPreview,
@@ -427,7 +427,7 @@ export default function ObjektsClient({
               className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-none"
             >
               <div
-                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-[transform,opacity,box-shadow] duration-200 ${
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0.5 transition-[transform,opacity,box-shadow] duration-200 ${
                   selectedMember === "All"
                     ? "ring-2 ring-zinc-950 dark:ring-[#D4FF00] scale-105"
                     : "opacity-80 hover:opacity-100"
@@ -467,7 +467,7 @@ export default function ObjektsClient({
                   title={`${m.name} (S${m.id})`}
                 >
                   <div
-                    className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full p-[2px] transition-[transform,opacity] duration-200 ${
+                    className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0.5 transition-[transform,opacity] duration-200 ${
                       isSelected ? "scale-105" : "opacity-80 hover:opacity-100"
                     }`}
                     style={{
@@ -492,7 +492,7 @@ export default function ObjektsClient({
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] sm:text-[11px] font-mono tracking-tight truncate max-w-[56px] text-center transition-colors ${
+                    className={`text-[10px] sm:text-[11px] font-mono tracking-tight truncate max-w-14 text-center transition-colors ${
                       isSelected
                         ? "text-zinc-950 dark:text-white font-bold"
                         : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
@@ -514,7 +514,7 @@ export default function ObjektsClient({
               selectedSeason={selectedSeason}
               seasons={availableSeasons}
               onSelectSeason={(s) => setSelectedSeason(s)}
-              className="w-full sm:w-auto flex-1 min-w-[140px]"
+              className="w-full sm:w-auto flex-1 min-w-35"
             />
 
             {/* Class Filter */}
@@ -523,7 +523,7 @@ export default function ObjektsClient({
               value={selectedClass}
               options={classOptions}
               onChange={(c) => setSelectedClass(c)}
-              className="w-[calc(50%-0.375rem)] sm:w-auto flex-1 min-w-[110px]"
+              className="w-[calc(50%-0.375rem)] sm:w-auto flex-1 min-w-27.5"
             />
 
             {/* Format Filter */}
@@ -532,7 +532,7 @@ export default function ObjektsClient({
               value={selectedOnOffline}
               options={typeOptions}
               onChange={(t) => setSelectedOnOffline(t)}
-              className="w-[calc(50%-0.375rem)] sm:w-auto flex-1 min-w-[110px]"
+              className="w-[calc(50%-0.375rem)] sm:w-auto flex-1 min-w-27.5"
             />
 
             {/* Sort Dropdown */}
@@ -541,11 +541,11 @@ export default function ObjektsClient({
               value={sortBy}
               options={SORT_OPTIONS}
               onChange={(s) => setSortBy(s)}
-              className="w-full sm:w-auto flex-1 min-w-[140px]"
+              className="w-full sm:w-auto flex-1 min-w-35"
             />
 
             {/* Search Input */}
-            <div className="relative w-full sm:flex-1 min-w-[180px]">
+            <div className="relative w-full sm:flex-1 min-w-45">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
               <input
                 type="text"
@@ -673,10 +673,10 @@ export default function ObjektsClient({
                   className="group relative aspect-[1/1.55] rounded-xl sm:rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/5 overflow-hidden flex flex-col items-center justify-center p-3 sm:p-4 select-none shadow-sm"
                 >
                   {/* Subtle top hairline rim bevel highlight */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-black/5 dark:via-white/10 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-black/5 dark:via-white/10 to-transparent pointer-events-none" />
 
                   {/* Soft radial glow */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/40 dark:from-white/[0.02] to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-b from-white/40 dark:from-white/2 to-transparent pointer-events-none" />
 
                   {/* Official tripleS ribbon logo with gentle breathing pulse */}
                   <div className="relative text-zinc-300 dark:text-zinc-800 animate-pulse">

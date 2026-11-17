@@ -64,7 +64,7 @@ export default function CustomDropdown<T extends string = string>({
           <span className="font-bold text-zinc-900 dark:text-white shrink-0">
             {label}
           </span>
-          <span className="h-3.5 w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
+          <span className="h-3.5 w-px bg-zinc-300 dark:bg-zinc-700 shrink-0" />
           <span className="text-zinc-500 dark:text-zinc-400 truncate">
             {selectedOption?.label || value}
           </span>
@@ -90,7 +90,7 @@ export default function CustomDropdown<T extends string = string>({
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: "easeOut" }}
-            className={`absolute top-full mt-2 min-w-[200px] max-w-[calc(100vw-2rem)] max-h-[320px] overflow-y-auto z-40 bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl no-scrollbar ${
+            className={`absolute top-full mt-2 min-w-50 max-w-[calc(100vw-2rem)] max-h-80 overflow-y-auto z-40 bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl no-scrollbar ${
               menuAlign === "right" ? "right-0 left-auto" : "left-0 right-auto"
             }`}
           >

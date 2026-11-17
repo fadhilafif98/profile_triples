@@ -90,7 +90,7 @@ export default function SubUnitsClient() {
             <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed pt-1">
               Official tripleS modular units voted into existence by{" "}
               <span className="inline-flex items-baseline align-baseline text-zinc-950 dark:text-[#D4FF00]">
-                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-[1px]" />
+                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-px" />
               </span>{" "}
               through Grand Gravity events across each era.
             </p>
@@ -188,7 +188,7 @@ export default function SubUnitsClient() {
                       <div className={`lg:col-span-6 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
                         <Link
                           href={`/sub-units/${unit.slug}`}
-                          className="group block relative aspect-[16/10] sm:aspect-[4/3] rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl bg-zinc-900 border border-zinc-200/50 dark:border-white/5"
+                          className="group block relative aspect-16/10 sm:aspect-4/3 rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl bg-zinc-900 border border-zinc-200/50 dark:border-white/5"
                           aria-label={`View ${unit.name} dimension`}
                         >
                           <Image

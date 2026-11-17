@@ -13,6 +13,100 @@ const OBJEKT_COLLATOR = new Intl.Collator(undefined, {
   sensitivity: "base",
 });
 
+// Merge multi-day minting delays within the same event drop while splitting separate release waves
+const DROP_CLUSTER_GAP_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface DropCluster {
+  items: Objekt[];
+  minCreatedAt: number;
+  maxCreatedAt: number;
+  season: string;
+  objektClass: string;
+  description: string;
+}
+
+function compareWithinDropCluster(a: Objekt, b: Objekt): number {
+  const memberDiff = (a.memberSortOrder || 0) - (b.memberSortOrder || 0);
+  if (memberDiff !== 0) return memberDiff;
+  return OBJEKT_COLLATOR.compare(a.collectionNo || "", b.collectionNo || "");
+}
+
+function sortObjektsByDropCluster(
+  objekts: Objekt[],
+  direction: "newest" | "oldest"
+): Objekt[] {
+  if (objekts.length <= 1) return [...objekts];
+
+  const buckets = new Map<string, Objekt[]>();
+  for (const item of objekts) {
+    const season = (item.season || "").trim();
+    const objektClass = (item.class || "").trim();
+    const description = (item.description || "").trim();
+    const key = `${season}|${objektClass}|${description}`.toLowerCase();
+    let list = buckets.get(key);
+    if (!list) {
+      list = [];
+      buckets.set(key, list);
+    }
+    list.push(item);
+  }
+
+  const clusters: DropCluster[] = [];
+
+  for (const items of buckets.values()) {
+    items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+    let current: DropCluster | null = null;
+    for (const item of items) {
+      const ts = item.createdAt || 0;
+      if (!current || ts - current.maxCreatedAt > DROP_CLUSTER_GAP_MS) {
+        if (current) {
+          current.items.sort(compareWithinDropCluster);
+          clusters.push(current);
+        }
+        current = {
+          items: [item],
+          minCreatedAt: ts,
+          maxCreatedAt: ts,
+          season: (item.season || "").trim(),
+          objektClass: (item.class || "").trim(),
+          description: (item.description || "").trim(),
+        };
+      } else {
+        current.items.push(item);
+        if (ts > current.maxCreatedAt) current.maxCreatedAt = ts;
+      }
+    }
+    if (current) {
+      current.items.sort(compareWithinDropCluster);
+      clusters.push(current);
+    }
+  }
+
+  clusters.sort((a, b) => {
+    const timeDiff =
+      direction === "newest"
+        ? b.maxCreatedAt - a.maxCreatedAt
+        : a.minCreatedAt - b.minCreatedAt;
+    if (timeDiff !== 0) return timeDiff;
+
+    const seasonCmp = OBJEKT_COLLATOR.compare(a.season, b.season);
+    if (seasonCmp !== 0) return seasonCmp;
+    const classCmp = OBJEKT_COLLATOR.compare(a.objektClass, b.objektClass);
+    if (classCmp !== 0) return classCmp;
+    return OBJEKT_COLLATOR.compare(a.description, b.description);
+  });
+
+  return clusters.flatMap((cluster) => cluster.items);
+}
+
+export function sortObjekts(objekts: Objekt[], sortBy: ObjektSortOption): Objekt[] {
+  if (sortBy === "newest" || sortBy === "oldest") {
+    return sortObjektsByDropCluster(objekts, sortBy);
+  }
+  return [...objekts].sort((a, b) => compareObjekts(a, b, sortBy));
+}
+
 export function compareObjekts(a: Objekt, b: Objekt, sortBy: ObjektSortOption): number {
   if (sortBy === "newest") {
     const batchA = Math.floor((a.createdAt || 0) / 43200000);
@@ -194,7 +288,7 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
           throw new Error(`Failed to fetch Objekts snapshot: ${res.status}`);
         }
         const data: Objekt[] = await res.json();
-        const sortedNewest = [...data].sort((a, b) => compareObjekts(a, b, "newest"));
+        const sortedNewest = sortObjekts(data, "newest");
         const groupedNewest = groupObjektVariants(sortedNewest);
         const previewGroups = groupedNewest.slice(0, 30);
         const snapshot: ObjektsInitialSnapshot = {

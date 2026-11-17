@@ -259,14 +259,14 @@ export default function AboutClient() {
             <p className="gsap-reveal-title max-w-[68ch] text-base sm:text-lg lg:text-xl text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed pt-1">
               The Idol of All Possibilities &mdash; &lsquo;We are one and also twenty-four.&rsquo; Revealed from S1 SeoYeon to S24 JiYeon under MODHAUS, tripleS brings together 24 girls with special abilities (&lsquo;s&rsquo;) who unite as one group and form seasonal Dimensions shaped with{" "}
               <span className="inline-flex items-baseline align-baseline text-zinc-950 dark:text-[#D4FF00]">
-                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-[1px]" />
+                <WavWordmark className="h-[0.85em] inline-block align-baseline -mb-px" />
               </span>.
             </p>
           </div>
 
           {/* Full-Bleed Concert Stage Showcase (Unchanged Original Photograph) */}
           <figure className="space-y-3 mb-12 sm:mb-16">
-            <div className="relative w-full aspect-[3/2] rounded-2xl sm:rounded-3xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-950 group">
+            <div className="relative w-full aspect-3/2 rounded-2xl sm:rounded-3xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-950 group">
               <Image
                 src="/about/triples_about_2.jpg"
                 alt="tripleS 24 Members OT24 World Tour ANDLESS in Seoul Stage Concert"
@@ -620,7 +620,7 @@ export default function AboutClient() {
               className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12"
             >
               <div
-                className="absolute top-0 right-0 font-display font-black text-7xl sm:text-9xl text-zinc-950/[0.03] dark:text-white/[0.03] select-none pointer-events-none hidden md:block leading-none"
+                className="absolute top-0 right-0 font-display font-black text-7xl sm:text-9xl text-zinc-950/3 dark:text-white/3 select-none pointer-events-none hidden md:block leading-none"
                 aria-hidden="true"
               >
                 {TIMELINE_ERAS[activeEraIndex].year}
@@ -754,7 +754,7 @@ export default function AboutClient() {
                   href={portal.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group grid grid-cols-1 md:grid-cols-12 items-center gap-4 py-5 px-2 transition-colors hover:bg-zinc-950/[0.02] dark:hover:bg-white/[0.03]"
+                  className="group grid grid-cols-1 md:grid-cols-12 items-center gap-4 py-5 px-2 transition-colors hover:bg-zinc-950/2 dark:hover:bg-white/3"
                 >
                   {/* Col 1: Icon + Title + Handle (4 cols) */}
                   <div className="md:col-span-4 flex items-center gap-3.5 min-w-0">
@@ -767,7 +767,7 @@ export default function AboutClient() {
                           height={22}
                           loading="eager"
                           unoptimized
-                          className="w-[22px] h-[22px] object-contain"
+                          className="w-5.5 h-5.5 object-contain"
                         />
                       ) : IconComponent ? (
                         <IconComponent className={`w-5 h-5 ${portal.colorClass || "text-zinc-950"}`} />

@@ -116,7 +116,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
     <section
       ref={sectionRef}
       aria-labelledby="featured-dimensions-heading"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-white/10 bg-[#fafafa] dark:bg-[#08080A] relative overflow-hidden [contain:layout_paint_style]"
+      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-white/10 bg-[#fafafa] dark:bg-[#08080A] relative overflow-hidden contain-[layout_paint_style]"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -316,7 +316,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
             }}
           >
             <div
-              className="relative w-full max-w-sm sm:max-w-md aspect-[4/5] [perspective:1200px]"
+              className="relative w-full max-w-sm sm:max-w-md aspect-4/5 perspective-distant"
               aria-live="polite"
             >
               {showcaseUnits.map((unit, index) => {
@@ -383,7 +383,7 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                       opacity,
                       pointerEvents,
                     }}
-                    className={`absolute inset-0 rounded-[2rem] overflow-hidden border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-[#0D0D12] ${elevationClass} transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom select-none ${
+                    className={`absolute inset-0 rounded-4xl overflow-hidden border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-[#0D0D12] ${elevationClass} transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-bottom select-none ${
                       isVisibleLayer ? "transform-gpu" : "invisible"
                     } ${
                       isTop ? "cursor-pointer" : "cursor-pointer hover:-translate-y-1"
@@ -404,12 +404,12 @@ export default function DimensionsCardStack({ subUnits }: DimensionsCardStackPro
                           className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                         />
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/45 to-transparent pointer-events-none" />
 
                         <div className="absolute bottom-0 inset-x-0 p-5 sm:p-7 text-white">
                           <div className="flex items-end justify-between gap-3">
                             <div className="space-y-1.5 min-w-0 flex-1">
-                              <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white tracking-tight leading-[1.15] break-words group-hover:text-[#D4FF00] transition-colors">
+                              <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white tracking-tight leading-[1.15] wrap-break-word group-hover:text-[#D4FF00] transition-colors">
                                 {unit.name}
                               </h3>
                               <p className="text-xs sm:text-sm text-zinc-300 line-clamp-2 leading-relaxed max-w-sm">

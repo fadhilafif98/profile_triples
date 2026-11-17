@@ -57,7 +57,7 @@ export default function SeasonDropdown({
           <span className="font-bold text-zinc-900 dark:text-white shrink-0">
             Season
           </span>
-          <span className="h-3.5 w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
+          <span className="h-3.5 w-px bg-zinc-300 dark:bg-zinc-700 shrink-0" />
           <span className="text-zinc-800 dark:text-zinc-200 font-semibold truncate">
             {selectedSeason === "All" ? "All Seasons" : selectedSeason}
           </span>
@@ -88,7 +88,7 @@ export default function SeasonDropdown({
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: "easeOut" }}
-            className={`absolute top-full mt-2 min-w-[200px] max-w-[calc(100vw-2rem)] max-h-[340px] overflow-y-auto z-40 bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2.5 backdrop-blur-xl no-scrollbar ${
+            className={`absolute top-full mt-2 min-w-50 max-w-[calc(100vw-2rem)] max-h-85 overflow-y-auto z-40 bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2.5 backdrop-blur-xl no-scrollbar ${
               menuAlign === "right" ? "right-0 left-auto" : "left-0 right-auto"
             }`}
           >
@@ -130,7 +130,7 @@ export default function SeasonDropdown({
                     {/* Circular Radio Icon */}
                     {isSelected ? (
                       <div className="w-5 h-5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black flex items-center justify-center shrink-0 shadow-xs">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 stroke-3" />
                       </div>
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-zinc-300 dark:border-zinc-700 bg-transparent shrink-0 group-hover:border-zinc-400 dark:group-hover:border-zinc-500 transition-colors" />

@@ -286,7 +286,7 @@ export default function PageTransition() {
       ref={overlayRef}
       aria-hidden="true"
       style={{ visibility: "hidden" }}
-      className="fixed inset-0 z-[100] pointer-events-none overflow-hidden select-none"
+      className="fixed inset-0 z-100 pointer-events-none overflow-hidden select-none"
     >
       {/* 1. Backdrop Scrim (no backdrop-blur on 100vw layer to keep SVG sweep at 60fps) */}
       <div

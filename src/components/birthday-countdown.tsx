@@ -431,7 +431,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-14 items-center">
           {/* Left Column (5 Cols): Crisp Physical First Class Objekt Portrait */}
           <div className="lg:col-span-5 flex justify-center">
-            <div className="w-full max-w-[260px] sm:max-w-[300px] lg:max-w-[320px] aspect-[2/3] group">
+            <div className="w-full max-w-65 sm:max-w-75 lg:max-w-[320px] aspect-2/3 group">
               <Link
                 href={`/members/${activeMember.slug}`}
                 aria-label={`View ${sCode} ${activeMember.name} profile`}
@@ -449,14 +449,14 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                 <div
                   aria-hidden="true"
                   style={{ backgroundColor: officialColor, color: sidebandInk }}
-                  className="pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-[28px] flex flex-col items-center justify-between py-4 px-0.5 select-none"
+                  className="pointer-events-none absolute top-0 right-0 bottom-0 z-20 w-7 flex flex-col items-center justify-between py-4 px-0.5 select-none"
                 >
                   <span className="font-mono text-[9px] font-bold tracking-tight">
                     {sCode}
                   </span>
                   <span
                     style={{ writingMode: "vertical-rl" }}
-                    className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-[180px]"
+                    className="rotate-180 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] truncate max-h-45"
                   >
                     {activeMember.name}
                   </span>
@@ -513,7 +513,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
             </div>
 
             {/* Architectural 3-State Countdown / Celebration Block */}
-            <div className="min-h-[88px] flex flex-col justify-center py-2 w-full">
+            <div className="min-h-22 flex flex-col justify-center py-2 w-full">
               {isTodayCelebrating ? (
                 <div className="space-y-1.5">
                   <p className="inline-flex items-center justify-center lg:justify-start gap-2 font-display text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white tracking-tight">
@@ -600,7 +600,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
 
             {/* Integrated Curated Pipeline Queue (Colocated with Right Column) */}
             <div className="w-full pt-6 border-t border-zinc-200 dark:border-white/10 space-y-3 text-left">
-              <div className="flex items-center justify-between gap-2 min-h-[28px]">
+              <div className="flex items-center justify-between gap-2 min-h-7">
                 <p
                   suppressHydrationWarning
                   className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.12em] sm:tracking-[0.16em] text-zinc-500 dark:text-zinc-400 truncate"

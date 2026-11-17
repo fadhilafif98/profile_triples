@@ -63,7 +63,7 @@ function ObjektCard({
     >
       {/* ── 3D Flip Card Container (GPU CSS transform) ── */}
       <div
-        className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none [transform-style:preserve-3d]"
+        className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d"
         style={{ transform: side === "front" ? "rotateY(0deg)" : "rotateY(180deg)" }}
       >
         {/* Front Side */}
@@ -88,7 +88,7 @@ function ObjektCard({
               aria-hidden="true"
             >
               <span
-                className="font-bold text-[8.5px] xs:text-[9.5px] sm:text-[10.5px] md:text-[11.5px] tracking-[0.05em] whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
+                className="font-bold text-[8.5px] xs:text-[9.5px] sm:text-[10.5px] md:text-[11.5px] tracking-wider whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
                 style={{
                   color: activeObjekt.textColor || "#000000",
                 }}
