@@ -3,11 +3,11 @@
 import React, { useState, useCallback, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence, useReducedMotion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 import { X, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { Member } from "@/types/member"
 import { getAllMembers, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members"
-import { useDialogA11y } from "@/lib/a11y"
+import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
 
 const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect: (member: Member) => void }) => {
   const memberColor = getMemberColor(member.id)
@@ -97,8 +97,8 @@ MemberCard.displayName = "MemberCard"
 export default function MemberGrid() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const allMembers = getAllMembers()
-  const modalRef = useRef<HTMLDivElement>(null)
-  const shouldReduceMotion = useReducedMotion()
+  const modalRef = useRef<HTMLDialogElement>(null)
+  const shouldReduceMotion = useSafeReducedMotion()
 
   const handleClose = useCallback(() => {
     setSelectedMember(null)
@@ -140,24 +140,17 @@ export default function MemberGrid() {
       {/* Member Modal — Authentic Vertical First Class Objekt Photocard Inspect */}
       <AnimatePresence>
         {selectedMember && (
-          <motion.div
+          <dialog
             ref={modalRef}
-            tabIndex={-1}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md focus:outline-none"
-            onClick={handleClose}
-            role="dialog"
-            aria-modal="true"
+            closedby="any"
             aria-labelledby="objekt-card-title"
+            className="open:m-auto open:p-0 open:max-w-none open:max-h-none open:bg-transparent open:border-0 open:flex open:items-center open:justify-center open:overflow-visible open:overscroll-contain backdrop:bg-black/85 backdrop:backdrop-blur-md backdrop:overflow-hidden backdrop:overscroll-contain focus:outline-none"
           >
             {/* Close button */}
             <button
               type="button"
               onClick={handleClose}
-              className="absolute top-4 right-4 z-40 p-2.5 rounded-full bg-black/70 hover:bg-black text-white border border-white/20 transition-colors shadow-lg"
+              className="fixed top-4 right-4 z-40 p-2.5 rounded-full bg-black/70 hover:bg-black text-white border border-white/20 transition-colors shadow-lg"
               aria-label="Close card inspect"
             >
               <X className="h-4 w-4" />
@@ -166,11 +159,8 @@ export default function MemberGrid() {
             {/* Previous Member Button (Desktop) */}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setSelectedMember(prevMember)
-              }}
-              className="hidden sm:flex absolute left-4 lg:left-12 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
+              onClick={() => setSelectedMember(prevMember)}
+              className="hidden sm:flex fixed left-4 lg:left-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
               aria-label={`Previous member: S${prevMember.id} ${prevMember.name}`}
             >
               <ChevronLeft className="h-5 w-5" />
@@ -179,11 +169,8 @@ export default function MemberGrid() {
             {/* Next Member Button (Desktop) */}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setSelectedMember(nextMember)
-              }}
-              className="hidden sm:flex absolute right-4 lg:right-12 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
+              onClick={() => setSelectedMember(nextMember)}
+              className="hidden sm:flex fixed right-4 lg:right-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
               aria-label={`Next member: S${nextMember.id} ${nextMember.name}`}
             >
               <ChevronRight className="h-5 w-5" />
@@ -199,8 +186,7 @@ export default function MemberGrid() {
                   ? { duration: 0.01 }
                   : { type: "spring", damping: 28, stiffness: 350 }
               }
-              className="relative w-full max-w-82.5 xs:max-w-90 sm:max-w-97.5 aspect-1/1.5 max-h-[85vh] rounded-2xl overflow-hidden bg-zinc-950 border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.9)]"
-              onClick={(e) => e.stopPropagation()}
+              className="relative w-[calc(100vw-2rem)] max-w-82.5 xs:max-w-90 sm:max-w-97.5 aspect-1/1.5 max-h-[85vh] rounded-2xl overflow-hidden bg-zinc-950 border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.9)]"
             >
               {/* Member Color Top Foil Line */}
               <div
@@ -294,7 +280,7 @@ export default function MemberGrid() {
                 </Link>
               </div>
             </motion.div>
-          </motion.div>
+          </dialog>
         )}
       </AnimatePresence>
     </>

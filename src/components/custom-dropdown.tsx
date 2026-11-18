@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import type { CSSProperties } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { useListboxA11y } from "@/lib/a11y";
 
@@ -27,15 +27,16 @@ export default function CustomDropdown<T extends string = string>({
   align = "auto",
   className = "",
 }: CustomDropdownProps<T>) {
-  const shouldReduceMotion = useReducedMotion();
   const {
     isOpen,
-    setIsOpen,
     menuAlign,
+    anchorName,
+    fallbackStyle,
     dropdownRef,
     triggerRef,
     menuRef,
     listboxId,
+    handleTriggerClick,
     handleTriggerKeyDown,
     handleMenuKeyDown,
     closeAndFocusTrigger,
@@ -49,11 +50,13 @@ export default function CustomDropdown<T extends string = string>({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        popoverTarget={listboxId}
+        onClick={handleTriggerClick}
         onKeyDown={handleTriggerKeyDown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={listboxId}
+        style={{ anchorName } as CSSProperties}
         className={`w-full flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2.5 rounded-2xl border transition-[background-color,border-color,color,box-shadow] text-xs font-mono select-none ${
           isOpen
             ? "bg-white dark:bg-[#151518] border-zinc-950 dark:border-[#D4FF00] shadow-sm text-zinc-900 dark:text-white"
@@ -77,64 +80,59 @@ export default function CustomDropdown<T extends string = string>({
         )}
       </button>
 
-      {/* ── Dropdown Popover Menu (Auto Left/Right Align) ── */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={menuRef}
-            id={listboxId}
-            role="listbox"
-            aria-label={label}
-            onKeyDown={handleMenuKeyDown}
-            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
-            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: "easeOut" }}
-            className={`absolute top-full mt-2 min-w-50 max-w-[calc(100vw-2rem)] max-h-80 overflow-y-auto z-40 bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl no-scrollbar ${
-              menuAlign === "right" ? "right-0 left-auto" : "left-0 right-auto"
-            }`}
-          >
-            <div className="space-y-0.5">
-              {options.map((option) => {
-                const isSelected = option.value === value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    onClick={() => {
-                      onChange(option.value);
-                      closeAndFocusTrigger();
-                    }}
-                    className={`w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-left transition-colors ${
-                      isSelected
-                        ? "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-white font-medium"
-                        : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                      <span className="text-xs sm:text-sm font-sans font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
-                        {option.label}
-                      </span>
-                      {option.subLabel && (
-                        <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 truncate">
-                          {option.subLabel}
-                        </span>
-                      )}
-                    </div>
+      {/* ── Top-Layer Popover Menu (CSS Anchor Positioning + JS Fallback + Scroll Shadows) ── */}
+      <div
+        ref={menuRef}
+        id={listboxId}
+        role="listbox"
+        aria-label={label}
+        popover="auto"
+        data-align={menuAlign}
+        data-open={isOpen ? "true" : "false"}
+        data-lenis-prevent
+        onKeyDown={handleMenuKeyDown}
+        style={{ positionAnchor: anchorName, ...fallbackStyle } as CSSProperties}
+        className="dropdown-popover dropdown-scroll-hints min-w-50 max-w-[calc(100vw-2rem)] max-h-80 overflow-y-auto overscroll-contain bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-1.5 backdrop-blur-xl text-left"
+      >
+        <div className="space-y-0.5">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  closeAndFocusTrigger();
+                }}
+                className={`w-full flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-left transition-colors ${
+                  isSelected
+                    ? "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-white font-medium"
+                    : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40 text-zinc-700 dark:text-zinc-300"
+                }`}
+              >
+                <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                  <span className="text-xs sm:text-sm font-sans font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
+                    {option.label}
+                  </span>
+                  {option.subLabel && (
+                    <span className="text-[0.6875rem] font-mono text-zinc-500 dark:text-zinc-400 truncate">
+                      {option.subLabel}
+                    </span>
+                  )}
+                </div>
 
-                    {/* Active Accent Dot (Carbon/Voltage Dual Theme) */}
-                    {isSelected && (
-                      <span className="h-2 w-2 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0 shadow-xs" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {/* Active Accent Dot (Carbon/Voltage Dual Theme) */}
+                {isSelected && (
+                  <span className="h-2 w-2 rounded-full bg-zinc-950 dark:bg-[#D4FF00] shrink-0 shadow-xs" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

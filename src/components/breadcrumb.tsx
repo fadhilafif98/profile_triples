@@ -38,14 +38,14 @@ export default function Breadcrumb({ items, action, className = "" }: Breadcrumb
               {isLast || !item.href ? (
                 <span
                   aria-current={isLast ? "page" : undefined}
-                  className="font-semibold text-zinc-900 dark:text-white truncate max-w-35 xs:max-w-45 sm:max-w-none"
+                  className="font-semibold text-zinc-900 dark:text-white"
                 >
                   {item.label}
                 </span>
               ) : (
                 <Link
                   href={item.href}
-                  className="text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors shrink-0"
+                  className="text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:underline focus-visible:underline underline-offset-4 transition-colors shrink-0"
                 >
                   {item.label}
                 </Link>

@@ -1,6 +1,6 @@
 import type React from "react"
 import "./globals.css"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Syne, Manrope, Pinyon_Script, JetBrains_Mono } from "next/font/google"
 import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -35,6 +35,10 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
 })
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://profile-triples.vercel.app"),

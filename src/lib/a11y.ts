@@ -19,168 +19,207 @@ export function useSafeReducedMotion(): boolean {
   return mounted ? Boolean(reduced) : false
 }
 
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-function getVisibleFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (el) =>
-      !el.hasAttribute("disabled") &&
-      el.getAttribute("aria-hidden") !== "true" &&
-      (el.offsetParent !== null || getComputedStyle(el).position === "fixed")
-  )
-}
-
 interface UseDialogA11yOptions {
-  lockScroll?: boolean
   onKeyDown?: (e: KeyboardEvent) => void
+  lightDismiss?: boolean
 }
 
 /**
- * Manages modal/drawer dialog focus entry, Tab cycling, Escape closing,
- * optional body scroll locking, and focus restoration on close.
+ * Coordinates native modal <dialog> lifecycle (showModal/close), close event sync,
+ * Safari light-dismiss fallback for closedby="any", and optional keyboard handlers.
  */
 export function useDialogA11y(
   isOpen: boolean,
-  containerRef: RefObject<HTMLElement | null>,
+  dialogRef: RefObject<HTMLDialogElement | null>,
   onClose: () => void,
   options?: UseDialogA11yOptions
 ) {
-  const lockScroll = options?.lockScroll ?? true
+  const lightDismiss = options?.lightDismiss ?? true
   const onCloseRef = useRef(onClose)
   const onKeyDownRef = useRef(options?.onKeyDown)
   useEffect(() => {
     onCloseRef.current = onClose
     onKeyDownRef.current = options?.onKeyDown
   })
-  const previousActiveRef = useRef<HTMLElement | null>(null)
-  const wasOpenRef = useRef(false)
 
   useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+
     if (!isOpen) {
-      if (wasOpenRef.current) {
-        wasOpenRef.current = false
-        const prev = previousActiveRef.current
-        previousActiveRef.current = null
-        if (prev && prev.isConnected && typeof prev.focus === "function") {
-          prev.focus({ preventScroll: true })
-        }
+      if (dialog.open) {
+        dialog.returnValue = ""
+        dialog.close()
       }
       return
     }
 
-    wasOpenRef.current = true
-    previousActiveRef.current = document.activeElement as HTMLElement | null
-
-    const prevOverflow = lockScroll ? document.body.style.overflow : ""
-    const prevPaddingRight = lockScroll ? document.body.style.paddingRight : ""
-    if (lockScroll) {
-      const scrollbarGap = window.innerWidth - document.documentElement.clientWidth
-      if (scrollbarGap > 0) {
-        const computedPadding = parseFloat(getComputedStyle(document.body).paddingRight) || 0
-        document.body.style.paddingRight = `${computedPadding + scrollbarGap}px`
-      }
-      document.body.style.overflow = "hidden"
+    if (!dialog.open) {
+      dialog.showModal()
     }
 
-    const rafId = requestAnimationFrame(() => {
-      const container = containerRef.current
-      if (!container) return
-      if (!container.contains(document.activeElement)) {
-        container.focus({ preventScroll: true })
-      }
-    })
+    const handleClose = () => {
+      dialog.returnValue = ""
+      onCloseRef.current()
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault()
-        onCloseRef.current()
-        return
-      }
-
-      if (e.key === "Tab" && containerRef.current) {
-        const focusables = getVisibleFocusableElements(containerRef.current)
-        if (focusables.length === 0) {
-          e.preventDefault()
-          return
-        }
-        const first = focusables[0]
-        const last = focusables[focusables.length - 1]
-        const active = document.activeElement as HTMLElement | null
-
-        if (e.shiftKey) {
-          if (!active || active === first || !containerRef.current.contains(active)) {
-            e.preventDefault()
-            last.focus()
-          }
-        } else {
-          if (!active || active === last || !containerRef.current.contains(active)) {
-            e.preventDefault()
-            first.focus()
-          }
-        }
-        return
-      }
-
       onKeyDownRef.current?.(e)
     }
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => {
-      cancelAnimationFrame(rafId)
-      window.removeEventListener("keydown", handleKeyDown)
-      if (lockScroll) {
-        document.body.style.overflow = prevOverflow
-        document.body.style.paddingRight = prevPaddingRight
-      }
-    }
-  }, [isOpen, containerRef, lockScroll])
+    dialog.addEventListener("close", handleClose)
+    dialog.addEventListener("keydown", handleKeyDown)
 
-  // Restore trigger focus if component unmounts while open
-  useEffect(() => {
-    return () => {
-      if (wasOpenRef.current) {
-        const prev = previousActiveRef.current
-        if (prev && prev.isConnected && typeof prev.focus === "function") {
-          prev.focus({ preventScroll: true })
+    let removeLightDismiss: (() => void) | undefined
+    if (lightDismiss && !("closedBy" in HTMLDialogElement.prototype)) {
+      let pressedOutside = false
+      const isOutside = (e: PointerEvent) => {
+        if (e.target !== dialog) return false
+        const r = dialog.getBoundingClientRect()
+        return (
+          e.clientX < r.left ||
+          e.clientX > r.right ||
+          e.clientY < r.top ||
+          e.clientY > r.bottom
+        )
+      }
+      const handlePointerDown = (e: PointerEvent) => {
+        pressedOutside = isOutside(e)
+      }
+      const handlePointerUp = (e: PointerEvent) => {
+        if (pressedOutside && isOutside(e)) {
+          dialog.close()
         }
+        pressedOutside = false
+      }
+      dialog.addEventListener("pointerdown", handlePointerDown)
+      dialog.addEventListener("pointerup", handlePointerUp)
+      removeLightDismiss = () => {
+        dialog.removeEventListener("pointerdown", handlePointerDown)
+        dialog.removeEventListener("pointerup", handlePointerUp)
       }
     }
-  }, [])
+
+    return () => {
+      dialog.removeEventListener("close", handleClose)
+      dialog.removeEventListener("keydown", handleKeyDown)
+      removeLightDismiss?.()
+      if (dialog.open) {
+        dialog.returnValue = ""
+        dialog.close()
+      }
+    }
+  }, [isOpen, dialogRef, lightDismiss])
 }
 
 /**
- * Shared accessible state, boundary auto-alignment, outside-click dismissal,
- * and roving keyboard navigation for listbox dropdowns.
+ * Shared accessible state, top-layer Popover API integration, progressive CSS Anchor Positioning
+ * (with viewport-aware fixed fallback for browsers without position-area), and roving keyboard
+ * navigation for listbox dropdowns.
  */
 export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
   const [isOpen, setIsOpen] = useState(false)
   const [menuAlign, setMenuAlign] = useState<"left" | "right">("left")
+  const [fallbackStyle, setFallbackStyle] = useState<React.CSSProperties | undefined>(undefined)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const listboxId = useId()
+  const rawId = useId()
+  const listboxId = `listbox-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`
+  const anchorName = `--anchor-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`
+
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu) return
+
+    const handleToggle = (e: Event) => {
+      const toggleEvent = e as ToggleEvent
+      const nextOpen = toggleEvent.newState === "open"
+      setIsOpen(nextOpen)
+    }
+
+    menu.addEventListener("toggle", handleToggle)
+    return () => menu.removeEventListener("toggle", handleToggle)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
-    const rafId = requestAnimationFrame(() => {
-      if (!dropdownRef.current) return
+
+    const supportsAnchorPositioning =
+      typeof CSS !== "undefined" &&
+      typeof CSS.supports === "function" &&
+      CSS.supports("position-area", "block-end")
+
+    const updatePosition = () => {
+      const trigger = triggerRef.current ?? dropdownRef.current
+      const menu = menuRef.current
+      if (!trigger || !menu) return
+
+      const triggerRect = trigger.getBoundingClientRect()
+      const menuWidth = Math.max(210, menu.offsetWidth || 0)
+
+      let nextAlign: "left" | "right" = "left"
       if (align !== "auto") {
-        setMenuAlign(align)
-      } else {
-        const rect = dropdownRef.current.getBoundingClientRect()
-        if (rect.left + 210 > window.innerWidth || rect.left > window.innerWidth / 2) {
-          setMenuAlign("right")
-        } else {
-          setMenuAlign("left")
-        }
+        nextAlign = align
+      } else if (
+        triggerRect.left + menuWidth > window.innerWidth - 16 ||
+        triggerRect.left > window.innerWidth / 2
+      ) {
+        nextAlign = "right"
       }
-    })
-    return () => cancelAnimationFrame(rafId)
+      setMenuAlign(nextAlign)
+
+      if (supportsAnchorPositioning) {
+        setFallbackStyle(undefined)
+        return
+      }
+
+      const desiredHeight = Math.min(menu.scrollHeight || 340, 340)
+      const spaceBelow = window.innerHeight - triggerRect.bottom - 16
+      const spaceAbove = triggerRect.top - 16
+      const flipTop = spaceBelow < desiredHeight && spaceAbove > spaceBelow
+      const availableSpace = flipTop ? spaceAbove : spaceBelow
+      const maxHeight = Math.max(160, Math.floor(Math.min(340, availableSpace)))
+
+      const nextStyle: React.CSSProperties = {
+        position: "fixed",
+        inset: "auto",
+        margin: 0,
+        maxHeight: `${maxHeight}px`,
+        minWidth: `${Math.max(200, Math.round(triggerRect.width))}px`,
+      }
+
+      if (flipTop) {
+        nextStyle.bottom = `${Math.round(window.innerHeight - triggerRect.top + 8)}px`
+      } else {
+        nextStyle.top = `${Math.round(triggerRect.bottom + 8)}px`
+      }
+
+      if (nextAlign === "right") {
+        nextStyle.right = `${Math.max(16, Math.round(window.innerWidth - triggerRect.right))}px`
+      } else {
+        nextStyle.left = `${Math.max(16, Math.round(triggerRect.left))}px`
+      }
+
+      setFallbackStyle(nextStyle)
+    }
+
+    const rafId = requestAnimationFrame(updatePosition)
+    window.addEventListener("resize", updatePosition)
+    window.addEventListener("scroll", updatePosition, { passive: true })
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener("resize", updatePosition)
+      window.removeEventListener("scroll", updatePosition)
+    }
   }, [isOpen, align])
 
   useEffect(() => {
     if (!isOpen) return
+    const supportsPopover =
+      typeof HTMLElement !== "undefined" && "popover" in HTMLElement.prototype
+    if (supportsPopover) return
+
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
@@ -200,6 +239,36 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
     }
   }, [isOpen])
 
+  const openMenu = () => {
+    const menu = menuRef.current
+    if (menu && typeof menu.showPopover === "function") {
+      try {
+        if (!menu.matches(":popover-open")) {
+          menu.showPopover()
+        }
+      } catch {
+        setIsOpen(true)
+      }
+    } else {
+      setIsOpen(true)
+    }
+  }
+
+  const closeMenu = () => {
+    const menu = menuRef.current
+    if (menu && typeof menu.hidePopover === "function") {
+      try {
+        if (menu.matches(":popover-open")) {
+          menu.hidePopover()
+        }
+      } catch {
+        setIsOpen(false)
+      }
+    } else {
+      setIsOpen(false)
+    }
+  }
+
   const focusOptionAt = (target: "selected" | "first" | "last") => {
     requestAnimationFrame(() => {
       const menu = menuRef.current
@@ -217,10 +286,17 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
     })
   }
 
+  const handleTriggerClick = () => {
+    const menu = menuRef.current
+    if (!menu || typeof menu.showPopover !== "function") {
+      setIsOpen((prev) => !prev)
+    }
+  }
+
   const handleTriggerKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault()
-      setIsOpen(true)
+      openMenu()
       focusOptionAt(e.key === "ArrowUp" ? "last" : "selected")
     }
   }
@@ -247,12 +323,12 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
       e.preventDefault()
       options[options.length - 1].focus()
     } else if (e.key === "Tab") {
-      setIsOpen(false)
+      closeMenu()
     }
   }
 
   const closeAndFocusTrigger = () => {
-    setIsOpen(false)
+    closeMenu()
     triggerRef.current?.focus({ preventScroll: true })
   }
 
@@ -260,10 +336,13 @@ export function useListboxA11y(align: "left" | "right" | "auto" = "auto") {
     isOpen,
     setIsOpen,
     menuAlign,
+    anchorName,
+    fallbackStyle,
     dropdownRef,
     triggerRef,
     menuRef,
     listboxId,
+    handleTriggerClick,
     handleTriggerKeyDown,
     handleMenuKeyDown,
     closeAndFocusTrigger,

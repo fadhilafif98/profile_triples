@@ -47,7 +47,7 @@ function isLightHex(hex: string): boolean {
 
 export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
   const orderedMembers = useMemo(
-    () => [...members].sort((a, b) => a.id - b.id),
+    () => members.toSorted((a, b) => a.id - b.id),
     [members]
   );
 

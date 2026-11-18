@@ -127,7 +127,8 @@ export default function AlbumsClient() {
           setFeaturedAlbum(found)
           const el = document.getElementById(hash)
           if (el) {
-            el.scrollIntoView({ behavior: "smooth" })
+            const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" })
           }
         }
       }

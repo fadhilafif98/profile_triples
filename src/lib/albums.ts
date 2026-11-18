@@ -31,7 +31,7 @@ export const albumsList: Album[] = [
 ] as Album[]
 
 // Newest first by default for discography timeline
-export const albums: Album[] = [...albumsList].reverse()
+export const albums: Album[] = albumsList.toReversed()
 
 export function getAllAlbums(): Album[] {
   return albums
