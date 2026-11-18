@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   X,
   ExternalLink,
@@ -17,7 +17,7 @@ import ObjektImage from "./objekt-image";
 import CosmoLogo from "./cosmo-logo";
 import { getClassBadgeStyle, getObjektCollectionSuffix } from "@/lib/objekts";
 import { getAllMembers, getMemberColor } from "@/lib/members";
-import { useDialogA11y } from "@/lib/a11y";
+import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y";
 
 interface ObjektModalProps {
   objekt: Objekt | null;
@@ -37,8 +37,10 @@ export default function ObjektModal({
   const [copied, setCopied] = useState(false);
   const [overrideVariant, setOverrideVariant] = useState<Objekt | null>(null);
   const [prevObjektId, setPrevObjektId] = useState<string | undefined>(objekt?.id);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
+  const modalRef = useRef<HTMLDialogElement>(null);
+  const frontVideoRef = useRef<HTMLVideoElement>(null);
+  const backVideoRef = useRef<HTMLVideoElement>(null);
+  const shouldReduceMotion = useSafeReducedMotion();
 
   // Reset states when selected objekt changes
   if (objekt?.id !== prevObjektId) {
@@ -54,6 +56,13 @@ export default function ObjektModal({
   }, [onClose]);
 
   useDialogA11y(Boolean(objekt), modalRef, handleClose);
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      frontVideoRef.current?.pause();
+      backVideoRef.current?.pause();
+    }
+  }, [shouldReduceMotion, objekt?.id, activeSide]);
 
   const activeObjekt = objekt ? (overrideVariant ?? objekt) : null;
   const hasMultipleVariants = Boolean(variants && variants.length > 1);
@@ -105,25 +114,13 @@ export default function ObjektModal({
   return (
     <AnimatePresence>
       {activeObjekt && badgeStyle && (
-      <div
+      <dialog
         key="objekt-modal-root"
         ref={modalRef}
-        tabIndex={-1}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-y-auto focus:outline-none"
-        role="dialog"
-        aria-modal="true"
+        closedby="any"
         aria-labelledby="objekt-modal-title"
+        className="open:m-auto open:p-0 open:max-w-none open:max-h-none open:bg-transparent open:border-0 open:flex open:items-center open:justify-center open:overflow-visible open:overscroll-contain backdrop:bg-black/75 dark:backdrop:bg-black/85 backdrop:overflow-hidden backdrop:overscroll-contain focus:outline-none"
       >
-        {/* Backdrop (solid translucent scrim without full-screen backdrop-blur flash) */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: shouldReduceMotion ? 0.01 : 0.16, ease: "easeOut" }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/75 dark:bg-black/85"
-        />
-
         {/* Modal Window — Editorial Collector's Atelier Frame (no outer scale() wrapping preserve-3d) */}
         <motion.div
           initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
@@ -134,11 +131,11 @@ export default function ObjektModal({
               ? { duration: 0.01 }
               : { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
           }
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg md:max-w-4xl lg:max-w-5xl max-h-[92vh] bg-white dark:bg-[#0D0D12] border border-zinc-200/90 dark:border-white/10 rounded-3xl shadow-2xl shadow-zinc-950/15 dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col md:flex-row overflow-hidden z-10 text-zinc-950 dark:text-zinc-100 my-auto"
+          className="relative w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-2.5rem)] md:w-[calc(100vw-4rem)] max-w-lg md:max-w-4xl lg:max-w-5xl max-h-[92vh] bg-white dark:bg-[#0D0D12] border border-zinc-200/90 dark:border-white/10 rounded-3xl shadow-2xl shadow-zinc-950/15 dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col md:flex-row overflow-hidden text-zinc-950 dark:text-zinc-100"
         >
           {/* Close button */}
           <button
+            type="button"
             onClick={onClose}
             className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-200 transition-colors z-40 shadow-sm border border-zinc-200/60 dark:border-white/10"
             aria-label="Close modal"
@@ -158,20 +155,24 @@ export default function ObjektModal({
             />
 
             {/* 3D Flip Card Frame */}
-            <div
-              onClick={toggleFlip}
-              className="group relative w-full max-w-65 sm:max-w-72.5 md:max-w-77.5 aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 cursor-pointer select-none transition-transform hover:scale-[1.015] z-10 perspective-distant"
-              title="Click photo to flip front/back"
-            >
+            <div className="group relative w-full max-w-65 sm:max-w-72.5 md:max-w-77.5 aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 select-none transition-transform hover:scale-[1.015] z-10 perspective-distant">
+              <button
+                type="button"
+                onClick={toggleFlip}
+                aria-pressed={activeSide === "back"}
+                aria-label={`Flip ${activeObjekt.member} photocard to ${activeSide === "front" ? "back" : "front"} side`}
+                title="Click photo to flip front/back"
+                className="absolute inset-0 z-30 cursor-pointer rounded-[inherit] bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+              />
               {/* Member Color Top Foil Line */}
               <div
-                className="absolute top-0 inset-x-0 h-1 z-30 shadow-sm"
+                className="absolute top-0 inset-x-0 h-1 z-30 shadow-sm pointer-events-none"
                 style={{ backgroundColor: memberColor }}
                 aria-hidden="true"
               />
 
               <div
-                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d"
+                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d pointer-events-none"
                 style={{
                   transform: activeSide === "front" ? "rotateY(0deg)" : "rotateY(180deg)",
                 }}
@@ -183,10 +184,11 @@ export default function ObjektModal({
                 >
                   {activeObjekt.frontMedia ? (
                     <video
+                      ref={frontVideoRef}
                       src={activeObjekt.frontMedia}
                       poster={activeObjekt.frontImage || activeObjekt.thumbnailImage}
-                      autoPlay
-                      loop
+                      autoPlay={!shouldReduceMotion}
+                      loop={!shouldReduceMotion}
                       muted
                       playsInline
                       className="w-full h-full object-cover"
@@ -231,10 +233,11 @@ export default function ObjektModal({
                   {hasFlipped || activeSide === "back" ? (
                     activeObjekt.backMedia ? (
                       <video
+                        ref={backVideoRef}
                         src={activeObjekt.backMedia}
                         poster={activeObjekt.backImage}
-                        autoPlay
-                        loop
+                        autoPlay={!shouldReduceMotion}
+                        loop={!shouldReduceMotion}
                         muted
                         playsInline
                         className="w-full h-full object-cover"
@@ -257,7 +260,7 @@ export default function ObjektModal({
 
               {/* Motion Badge Indicator */}
               {activeObjekt.frontMedia && activeSide === "front" && (
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 border border-white/20 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20">
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 border border-white/20 text-[0.6875rem] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20 pointer-events-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Motion MP4</span>
                 </div>
@@ -333,7 +336,7 @@ export default function ObjektModal({
               <button
                 type="button"
                 onClick={toggleFlip}
-                className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors pt-0.5"
+                className="flex items-center gap-1.5 text-[0.6875rem] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors pt-0.5"
               >
                 <RotateCw className="w-3 h-3 transition-transform group-hover:rotate-180" />
                 <span>Tap photocard to flip 3D</span>
@@ -342,26 +345,29 @@ export default function ObjektModal({
           </div>
 
           {/* ── Right Column: Curator's Ledger & Spec Matrix ── */}
-          <div className="w-full md:w-[54%] lg:w-[56%] p-5 sm:p-7 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[92vh] md:max-h-none space-y-6">
+          <div
+            data-lenis-prevent
+            className="w-full md:w-[54%] lg:w-[56%] p-5 sm:p-7 md:p-8 flex flex-col justify-between overflow-y-auto overscroll-contain max-h-[92vh] md:max-h-none space-y-6"
+          >
             <div className="space-y-5">
               {/* Header Badges & Member Identity */}
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-2.5">
                   {/* Season Badge */}
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-300/70 dark:border-white/15">
+                  <span className="px-2.5 py-1 rounded-full text-[0.6875rem] font-mono font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-300/70 dark:border-white/15">
                     {activeObjekt.season}
                   </span>
 
                   {/* Class Badge */}
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider border ${badgeStyle.bg} ${badgeStyle.text} ${badgeStyle.border}`}
+                    className={`px-2.5 py-1 rounded-full text-[0.6875rem] font-mono font-bold uppercase tracking-wider border ${badgeStyle.bg} ${badgeStyle.text} ${badgeStyle.border}`}
                   >
                     {activeObjekt.class}
                   </span>
 
                   {/* Online/Offline Badge */}
                   {activeObjekt.onOffline && (
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/5">
+                    <span className="px-2.5 py-1 rounded-full text-[0.625rem] font-mono uppercase bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/5">
                       {activeObjekt.onOffline}
                     </span>
                   )}
@@ -519,7 +525,7 @@ export default function ObjektModal({
             </div>
           </div>
         </motion.div>
-      </div>
+      </dialog>
       )}
     </AnimatePresence>
   );

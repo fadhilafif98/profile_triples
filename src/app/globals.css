@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -27,6 +28,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: 240 11% 3.5%;
     --foreground: 240 5% 96%;
     --card: 240 16% 6%;
@@ -59,6 +61,12 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display), system-ui, sans-serif;
   }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
   /* WCAG 2.4.7 Focus Visible: Clear keyboard focus indicator across entire app */
   :focus-visible {
     outline: 2px solid #09090B;
@@ -76,7 +84,11 @@
     background: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 
   .dark .spotlight-card {
@@ -104,7 +116,10 @@
     background-position: 100% calc(50% + 0.65em);
     background-repeat: no-repeat;
     background-size: 0% 2px;
-    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 
   .dark .nav-draw-link {
@@ -120,13 +135,21 @@
 
   /* Tactile Magnetic Button Hover Wiggle */
   .btn-magnetic {
-    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
   .btn-magnetic:hover .btn-arrow {
-    transform: translate(3px, -3px);
+    @media (prefers-reduced-motion: no-preference) {
+      transform: translate(3px, -3px);
+    }
   }
   .btn-arrow {
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 
   /* ── Standardized Action Buttons & Interactive Tokens ── */
@@ -145,14 +168,20 @@
     line-height: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
   .btn-primary:hover {
     background-color: #27272A;
   }
   .btn-primary:active {
-    transform: scale(0.98);
+    @media (prefers-reduced-motion: no-preference) {
+      transform: scale(0.98);
+    }
   }
   .btn-primary:focus-visible {
     outline: 2px solid #09090B;
@@ -184,8 +213,12 @@
     font-family: var(--font-mono), monospace;
     font-size: 0.75rem;
     line-height: 1rem;
-    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
   .btn-secondary:hover {
     border-color: rgba(0, 0, 0, 0.25);
@@ -193,7 +226,9 @@
     background-color: #F8F8FA;
   }
   .btn-secondary:active {
-    transform: scale(0.98);
+    @media (prefers-reduced-motion: no-preference) {
+      transform: scale(0.98);
+    }
   }
   .btn-secondary:focus-visible {
     outline: 2px solid #09090B;
@@ -252,6 +287,149 @@
   .dark .kinetic-dot {
     background-color: #D4FF00;
   }
+
+  /* Viewport-Aware Top-Layer Dropdown Popover & Scrollability Hints */
+  @supports not selector(:popover-open) {
+    [popover].dropdown-popover:not([data-open="true"]) {
+      display: none;
+    }
+  }
+
+  [popover].dropdown-popover {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(113, 113, 122, 0.45) transparent;
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+    transition:
+      opacity 0.16s ease-out,
+      transform 0.16s ease-out,
+      display 0.16s allow-discrete,
+      overlay 0.16s allow-discrete;
+  }
+
+  .dark [popover].dropdown-popover {
+    scrollbar-color: rgba(161, 161, 170, 0.4) transparent;
+  }
+
+  [popover].dropdown-popover:popover-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  @starting-style {
+    [popover].dropdown-popover:popover-open {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [popover].dropdown-popover,
+    [popover].dropdown-popover:popover-open {
+      transform: none;
+      transition:
+        opacity 0.12s ease-out,
+        display 0.12s allow-discrete,
+        overlay 0.12s allow-discrete;
+    }
+
+    @starting-style {
+      [popover].dropdown-popover:popover-open {
+        transform: none;
+      }
+    }
+  }
+
+  @supports (position-area: block-end) {
+    [popover].dropdown-popover {
+      inset: auto;
+      margin: 0;
+      margin-block: 0.5rem;
+      max-block-size: min(21.25rem, 70dvh);
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    }
+
+    [popover].dropdown-popover[data-align="right"] {
+      position-area: block-end span-inline-start;
+    }
+  }
+
+  /* Sticky edge shadows indicating more scrollable options */
+  .dropdown-scroll-hints::before,
+  .dropdown-scroll-hints::after {
+    content: "";
+    display: block;
+    position: sticky;
+    block-size: 0.75rem;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .dropdown-scroll-hints::before {
+    inset-block-start: 0;
+    margin-block-end: -0.75rem;
+    background: radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 0.14), transparent);
+  }
+
+  .dropdown-scroll-hints::after {
+    inset-block-end: 0;
+    margin-block-start: -0.75rem;
+    background: radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 0.14), transparent);
+  }
+
+  .dark .dropdown-scroll-hints::before {
+    background: radial-gradient(farthest-side at 50% 0, rgb(0 0 0 / 0.65), transparent);
+  }
+
+  .dark .dropdown-scroll-hints::after {
+    background: radial-gradient(farthest-side at 50% 100%, rgb(0 0 0 / 0.65), transparent);
+  }
+
+  @supports (container-type: scroll-state) {
+    .dropdown-scroll-hints {
+      container-type: scroll-state;
+    }
+
+    @container scroll-state(scrollable: block-start) {
+      .dropdown-scroll-hints::before {
+        opacity: 1;
+      }
+    }
+
+    @container scroll-state(scrollable: block-end) {
+      .dropdown-scroll-hints::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  @supports not (container-type: scroll-state) {
+    @supports (animation-timeline: scroll()) {
+      .dropdown-scroll-hints::before,
+      .dropdown-scroll-hints::after {
+        animation: dropdown-scroll-shadow linear both;
+        animation-timeline: scroll();
+      }
+
+      .dropdown-scroll-hints::before {
+        animation-range: 0 1.5rem;
+      }
+
+      .dropdown-scroll-hints::after {
+        animation-direction: reverse;
+        animation-range: calc(100% - 1.5rem) 100%;
+      }
+    }
+  }
+}
+
+@keyframes dropdown-scroll-shadow {
+  to {
+    opacity: 1;
+  }
 }
 
 @layer utilities {
@@ -279,26 +457,6 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-}
-
-/* Infinite Editorial Ticker / Marquee */
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 32s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
 }
 
 /* Smooth Scrolling */
@@ -351,30 +509,21 @@ html.lenis {
 
 .hero-rise {
   animation: hero-rise 700ms cubic-bezier(0.23, 1, 0.32, 1) var(--hero-delay, 0ms) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: hero-fade 300ms ease var(--hero-delay, 0ms) both;
+  }
 }
 
 .hero-settle {
-  animation: hero-settle 1600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  @media (prefers-reduced-motion: no-preference) {
+    animation: hero-settle 1600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
 }
 
 /* WCAG 2.3.3 Animation from Interactions: Honor reduced motion preference while preserving subtle opacity/color state feedback */
 @media (prefers-reduced-motion: reduce) {
-  .hero-rise {
-    animation: hero-fade 300ms ease var(--hero-delay, 0ms) both;
-  }
-  .hero-settle {
-    animation: none;
-  }
   html {
-    scroll-behavior: auto !important;
-  }
-  .animate-marquee {
-    animation: none !important;
-  }
-  .btn-magnetic,
-  .btn-arrow,
-  .nav-draw-link::after {
-    transition-duration: 0.01ms !important;
-    transform: none !important;
+    scroll-behavior: auto;
   }
 }

@@ -29,6 +29,7 @@ import CustomDropdown, { DropdownOption } from "@/components/custom-dropdown";
 import SeasonDropdown from "@/components/season-dropdown";
 import Breadcrumb from "@/components/breadcrumb";
 import TriplesLogo from "@/components/triples-logo";
+import { useSafeReducedMotion } from "@/lib/a11y";
 
 type SortOption = ObjektSortOption;
 
@@ -61,6 +62,7 @@ export default function ObjektsClient({
   initialClasses = DEFAULT_CLASSES,
 }: ObjektsClientProps) {
   const searchParams = useSearchParams();
+  const shouldReduceMotion = useSafeReducedMotion();
   const [fullObjekts, setFullObjekts] = useState<Objekt[] | null>(null);
   const [loadingFull, setLoadingFull] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -416,7 +418,7 @@ export default function ObjektsClient({
         </div>
 
         {/* ── 2. Member Story Avatar Strip (Official MODHAUS Colors) ── */}
-        <div className="mb-6 py-2 px-0.5 overflow-x-auto no-scrollbar" ref={avatarTrackRef}>
+        <div className="mb-6 py-2 px-1 overflow-x-auto no-scrollbar" ref={avatarTrackRef}>
           <div className="flex items-center gap-3 sm:gap-3.5">
             {/* OT24 / ALL Bubble */}
             <button
@@ -424,7 +426,7 @@ export default function ObjektsClient({
               onClick={() => setSelectedMember("All")}
               aria-label="Show all 24 members"
               title="All Members (OT24)"
-              className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-none"
+              className="flex flex-col items-center gap-1.5 shrink-0 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
             >
               <div
                 className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0.5 transition-[transform,opacity,box-shadow] duration-200 ${
@@ -444,7 +446,7 @@ export default function ObjektsClient({
                 </div>
               </div>
               <span
-                className={`text-[10px] sm:text-[11px] font-mono tracking-tight transition-colors ${
+                className={`text-[0.625rem] sm:text-[0.6875rem] font-mono tracking-tight transition-colors ${
                   selectedMember === "All"
                     ? "text-zinc-950 dark:text-white font-bold"
                     : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
@@ -463,7 +465,7 @@ export default function ObjektsClient({
                   key={m.id}
                   type="button"
                   onClick={() => setSelectedMember(isSelected ? "All" : m.name)}
-                  className="flex flex-col items-center gap-1.5 shrink-0 group focus:outline-none"
+                  className="flex flex-col items-center gap-1.5 shrink-0 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
                   title={`${m.name} (S${m.id})`}
                 >
                   <div
@@ -485,14 +487,14 @@ export default function ObjektsClient({
                       />
                     </div>
                     <div
-                      className="absolute bottom-0 right-0 px-1 py-0.2 rounded-full text-[10px] font-mono font-bold bg-black/85 border border-white/20 shadow-sm"
+                      className="absolute bottom-0 right-0 px-1 py-0.2 rounded-full text-[0.625rem] font-mono font-bold bg-black/85 border border-white/20 shadow-sm"
                       style={{ color: getReadableMemberColor(mColor, true) }}
                     >
                       S{m.id < 10 ? `0${m.id}` : m.id}
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] sm:text-[11px] font-mono tracking-tight truncate max-w-14 text-center transition-colors ${
+                    className={`text-[0.625rem] sm:text-[0.6875rem] font-mono tracking-tight truncate max-w-14 text-center transition-colors ${
                       isSelected
                         ? "text-zinc-950 dark:text-white font-bold"
                         : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
@@ -552,12 +554,13 @@ export default function ObjektsClient({
                 placeholder="Search collection No. / member..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-8 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-white/10 text-xs sm:text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-400 dark:focus:border-white/30 transition-colors font-mono"
+                className="w-full pl-10 pr-9 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-white/10 text-xs sm:text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] transition-[box-shadow,color,background-color,border-color] font-mono"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-400 hover:text-black dark:hover:text-white p-1"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 min-w-6 min-h-6 inline-flex items-center justify-center rounded-md text-xs font-mono text-zinc-400 hover:text-black dark:hover:text-white"
                   aria-label="Clear search input"
                 >
                   ✕
@@ -587,7 +590,7 @@ export default function ObjektsClient({
                 <Layers className="h-3.5 w-3.5 shrink-0" />
                 <span className="font-semibold">Merge A / Z Pairs</span>
                 <span
-                  className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
+                  className={`px-1.5 py-0.2 rounded text-[0.625rem] font-bold uppercase ${
                     effectiveGrouping
                       ? "bg-white/20 dark:bg-[#D4FF00] dark:text-black"
                       : "bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300"
@@ -598,7 +601,7 @@ export default function ObjektsClient({
               </button>
 
               {mergedDuplicateCount > 0 && (
-                <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                <span className="text-[0.6875rem] text-zinc-500 dark:text-zinc-400">
                   {mergedDuplicateCount.toLocaleString("en-US")} duplicate{" "}
                   {mergedDuplicateCount === 1 ? "pair" : "pairs"} combined
                 </span>
@@ -608,49 +611,99 @@ export default function ObjektsClient({
             {hasActiveFilters && (
               <div className="flex flex-wrap items-center gap-1.5 ml-auto">
                 {selectedMember !== "All" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Member: {selectedMember}
-                    <button onClick={() => setSelectedMember("All")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${selectedMember} filter`}
+                      onClick={() => setSelectedMember("All")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {selectedSeason !== "All" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Season: {selectedSeason}
-                    <button onClick={() => setSelectedSeason("All")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${selectedSeason} season filter`}
+                      onClick={() => setSelectedSeason("All")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {selectedClass !== "All" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Class: {selectedClass}
-                    <button onClick={() => setSelectedClass("All")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${selectedClass} class filter`}
+                      onClick={() => setSelectedClass("All")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {selectedOnOffline !== "All" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Format: {selectedOnOffline}
-                    <button onClick={() => setSelectedOnOffline("All")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${selectedOnOffline} format filter`}
+                      onClick={() => setSelectedOnOffline("All")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {searchQuery.trim() && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Query: &ldquo;{searchQuery}&rdquo;
-                    <button onClick={() => setSearchQuery("")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label="Remove search query filter"
+                      onClick={() => setSearchQuery("")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {sortBy !== "newest" && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Sort: {SORT_OPTIONS.find((s) => s.value === sortBy)?.label}
-                    <button onClick={() => setSortBy("newest")} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label="Reset sort order to default"
+                      onClick={() => setSortBy("newest")}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
                 {!groupVariants && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
+                  <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
                     Show A/Z Separately
-                    <button onClick={() => setGroupVariants(true)} className="hover:text-black dark:hover:text-white ml-1">✕</button>
+                    <button
+                      type="button"
+                      aria-label="Re-enable Merge A / Z Pairs"
+                      onClick={() => setGroupVariants(true)}
+                      className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
                   </span>
                 )}
 
                 <button
+                  type="button"
                   onClick={resetFilters}
                   className="inline-flex items-center gap-1 text-zinc-500 hover:text-black dark:hover:text-white underline underline-offset-2 ml-1"
                 >
@@ -707,6 +760,7 @@ export default function ObjektsClient({
           <div className="p-12 text-center rounded-3xl bg-white dark:bg-[#0D0D12] border border-zinc-200/80 dark:border-white/10">
             <p className="font-mono text-sm text-rose-500 mb-4">{error}</p>
             <button
+              type="button"
               onClick={() => window.location.reload()}
               className="px-6 py-2.5 rounded-full bg-zinc-950 text-white hover:bg-black dark:bg-[#D4FF00] dark:text-black dark:hover:bg-[#E2FF33] text-xs font-mono font-bold"
             >
@@ -724,6 +778,7 @@ export default function ObjektsClient({
               No photocards match the selected criteria. Try adjusting season, member, or search terms.
             </p>
             <button
+              type="button"
               onClick={resetFilters}
               className="mt-5 btn-magnetic inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-zinc-950 text-white hover:bg-black dark:bg-[#D4FF00] dark:text-black dark:hover:bg-[#E2FF33] text-xs font-mono font-bold"
             >
@@ -736,13 +791,24 @@ export default function ObjektsClient({
           <div>
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3.5 md:gap-4">
               {paginatedEntries.map((entry, idx) => (
-                <ObjektCard
+                <div
                   key={entry.primary.id || `${entry.primary.slug}-${idx}`}
-                  objekt={entry.primary}
-                  variants={entry.variants}
-                  onSelect={handleSelectObjekt}
-                  priority={idx < 6}
-                />
+                  style={
+                    idx >= 5
+                      ? {
+                          contentVisibility: "auto",
+                          containIntrinsicSize: "auto 300px",
+                        }
+                      : undefined
+                  }
+                >
+                  <ObjektCard
+                    objekt={entry.primary}
+                    variants={entry.variants}
+                    onSelect={handleSelectObjekt}
+                    priority={idx < 5}
+                  />
+                </div>
               ))}
             </div>
 
@@ -756,9 +822,13 @@ export default function ObjektsClient({
 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => {
                       setCurrentPage((p) => Math.max(1, p - 1));
-                      window.scrollTo({ top: 200, behavior: "smooth" });
+                      window.scrollTo({
+                        top: 200,
+                        behavior: shouldReduceMotion ? "auto" : "smooth",
+                      });
                     }}
                     disabled={currentPage === 1}
                     className="flex items-center gap-1 px-4 py-2 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-xs font-mono text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-zinc-400 dark:hover:border-white/30 transition-colors shadow-sm"
@@ -774,9 +844,13 @@ export default function ObjektsClient({
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => {
                       setCurrentPage((p) => Math.min(totalPages, p + 1));
-                      window.scrollTo({ top: 200, behavior: "smooth" });
+                      window.scrollTo({
+                        top: 200,
+                        behavior: shouldReduceMotion ? "auto" : "smooth",
+                      });
                     }}
                     disabled={currentPage === totalPages}
                     className="flex items-center gap-1 px-4 py-2 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-xs font-mono text-zinc-700 dark:text-zinc-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-zinc-400 dark:hover:border-white/30 transition-colors shadow-sm"

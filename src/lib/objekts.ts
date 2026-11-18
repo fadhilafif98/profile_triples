@@ -104,7 +104,7 @@ export function sortObjekts(objekts: Objekt[], sortBy: ObjektSortOption): Objekt
   if (sortBy === "newest" || sortBy === "oldest") {
     return sortObjektsByDropCluster(objekts, sortBy);
   }
-  return [...objekts].sort((a, b) => compareObjekts(a, b, sortBy));
+  return objekts.toSorted((a, b) => compareObjekts(a, b, sortBy));
 }
 
 export function compareObjekts(a: Objekt, b: Objekt, sortBy: ObjektSortOption): number {
@@ -282,6 +282,7 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
   if (!snapshotInFlight) {
     snapshotInFlight = fetch(ALL_OBJEKTS_JSON_URL, {
       cache: "no-store",
+      signal: AbortSignal.timeout(900),
     })
       .then(async (res) => {
         if (!res.ok) {
@@ -318,23 +319,7 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
       });
   }
 
-  return Promise.race([
-    snapshotInFlight,
-    new Promise<ObjektsInitialSnapshot>((resolve) =>
-      setTimeout(
-        () =>
-          resolve({
-            objekts: [],
-            groups: [],
-            totalCount: 0,
-            uniqueCount: 0,
-            seasons: DEFAULT_SEASONS,
-            classes: DEFAULT_CLASSES,
-          }),
-        900
-      )
-    ),
-  ]);
+  return snapshotInFlight;
 }
 
 /**

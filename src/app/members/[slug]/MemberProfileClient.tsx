@@ -329,7 +329,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
   // More tripleS Slider Drag State & Auto-Center
   const memberSliderRef = useRef<HTMLDivElement>(null)
-  const lightboxRef = useRef<HTMLDivElement>(null)
+  const lightboxRef = useRef<HTMLDialogElement>(null)
   const isDraggingRef = useRef(false)
   const hasMovedRef = useRef(false)
   const startXRef = useRef(0)
@@ -1202,38 +1202,35 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       {/* ── Photo Lightbox Modal ── */}
       <AnimatePresence>
         {activePhoto && (
-          <motion.div
+          <dialog
             ref={lightboxRef}
-            role="dialog"
-            aria-modal="true"
+            closedby="any"
             aria-label={`${member.name} photo viewer`}
-            tabIndex={-1}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#08080A]/95 backdrop-blur-md focus:outline-none"
-            onClick={closeLightbox}
+            className="open:m-auto open:p-0 open:max-w-none open:max-h-none open:bg-transparent open:border-0 open:flex open:items-center open:justify-center open:overflow-visible open:overscroll-contain backdrop:bg-[#08080A]/95 backdrop:backdrop-blur-md backdrop:overflow-hidden backdrop:overscroll-contain focus:outline-none"
           >
             <button
+              type="button"
               onClick={closeLightbox}
-              className="absolute top-6 right-6 p-3 rounded-full bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 transition-colors z-10 focus-visible:ring-2 focus-visible:ring-[#D4FF00]"
+              className="fixed top-6 right-6 p-3 rounded-full bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 transition-colors z-10 focus-visible:ring-2 focus-visible:ring-[#D4FF00]"
               aria-label="Close image lightbox"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div
-              className="relative max-w-2xl max-h-[85vh] w-full h-full rounded-2xl overflow-hidden border border-zinc-800"
-              onClick={(e) => e.stopPropagation()}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+              className="relative w-[min(42rem,calc(100vw-2rem))] h-[85vh] rounded-2xl overflow-hidden border border-zinc-800"
             >
               <img
                 src={activePhoto}
                 alt={`${member.name} full high-resolution portrait view`}
                 className="w-full h-full object-contain"
               />
-            </div>
-          </motion.div>
+            </motion.div>
+          </dialog>
         )}
       </AnimatePresence>
     </div>

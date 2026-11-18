@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence, useReducedMotion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 import { Menu, X, Home, Users, Info, Heart, Disc3, Layers, Boxes } from "lucide-react"
 import AnimatedLogo from "./animated-logo"
 import { ThemeToggle, ThemePillToggle } from "./theme-toggle"
 import WavDoodle from "./wav-doodle"
-import { useDialogA11y } from "@/lib/a11y"
+import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
 
 const NAV_LINKS = [
   { name: "Members", href: "/members", icon: Users },
@@ -24,8 +24,8 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const pathname = usePathname()
-  const drawerRef = useRef<HTMLElement>(null)
-  const shouldReduceMotion = useReducedMotion()
+  const drawerRef = useRef<HTMLDialogElement>(null)
+  const shouldReduceMotion = useSafeReducedMotion()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -199,6 +199,7 @@ export default function Navigation() {
 
             {/* Mobile / Tablet Menu Trigger (< lg) */}
             <button
+              type="button"
               onClick={toggleMenu}
               suppressHydrationWarning
               aria-expanded={isOpen}
@@ -219,24 +220,15 @@ export default function Navigation() {
       {/* ── 3. Mobile Navigation Drawer ── */}
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Backdrop to close on tap */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
-              onClick={closeMenu}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-              aria-hidden="true"
-            />
+          <dialog
+            ref={drawerRef}
+            id="mobile-nav-drawer"
+            closedby="any"
+            aria-label="Mobile Navigation Menu"
+            className="open:my-0 open:mr-0 open:ml-auto open:p-0 open:max-w-none open:max-h-none open:bg-transparent open:border-0 open:flex open:flex-col fixed inset-y-0 right-0 left-auto h-dvh w-80 max-w-[85vw] open:overscroll-contain backdrop:bg-black/60 backdrop:backdrop-blur-sm backdrop:overflow-hidden backdrop:overscroll-contain lg:hidden focus:outline-none"
+          >
             <motion.nav
-              ref={drawerRef}
-              id="mobile-nav-drawer"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mobile Navigation Menu"
-              tabIndex={-1}
+              aria-label="Mobile Navigation"
               initial={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
               animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
               exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
@@ -245,9 +237,12 @@ export default function Navigation() {
                   ? { duration: 0.01 }
                   : { type: "spring", damping: 24, stiffness: 140 }
               }
-              className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-[#07070a]/95 border-l border-zinc-200 dark:border-white/10 shadow-2xl backdrop-blur-2xl lg:hidden focus:outline-none"
+              className="h-full w-full bg-white/95 dark:bg-[#07070a]/95 border-l border-zinc-200 dark:border-white/10 shadow-2xl backdrop-blur-2xl"
             >
-              <div className="flex flex-col h-full py-8 px-6 justify-between overflow-y-auto">
+              <div
+                data-lenis-prevent
+                className="flex flex-col h-full py-8 px-6 justify-between overflow-y-auto overscroll-contain"
+              >
                 <div>
                   <div className="flex items-center justify-between mb-8 pb-5 border-b border-zinc-200 dark:border-white/10">
                     <div className="flex items-center gap-3">
@@ -265,10 +260,11 @@ export default function Navigation() {
                         <p className="text-lg font-bold tracking-tight text-zinc-950 dark:text-white font-display">
                           tripleS
                         </p>
-                        <p className="text-[11px] font-mono text-zinc-500">The Idol of All Possibilities</p>
+                        <p className="text-[0.6875rem] font-mono text-zinc-500">The Idol of All Possibilities</p>
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={closeMenu}
                       className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-[#D4FF00]"
                       aria-label="Close navigation menu"
@@ -346,7 +342,7 @@ export default function Navigation() {
                 </div>
               </div>
             </motion.nav>
-          </>
+          </dialog>
         )}
       </AnimatePresence>
     </>
