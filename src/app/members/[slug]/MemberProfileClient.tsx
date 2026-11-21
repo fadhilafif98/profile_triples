@@ -11,12 +11,17 @@ import {
   Play,
   ArrowUpRight,
   Maximize2,
+  Crown,
 } from "lucide-react"
 import TriplesLogo from "@/components/triples-logo"
+import ObjektImage from "@/components/objekt-image"
 import { Member } from "@/types/member"
+import { Objekt } from "@/types/objekt"
 import { members, getMemberBySlug, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members"
-import { getAllSubUnits } from "@/lib/sub-units"
+import { fetchLatestObjektForMember } from "@/lib/objekts"
+import { getSubUnitsForMember } from "@/lib/sub-units"
 import Breadcrumb from "@/components/breadcrumb"
+import ThemeImage from "@/components/theme-image"
 import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
 import { useIsDarkMode } from "@/lib/theme"
 
@@ -314,18 +319,25 @@ function parseCareerEntry(entry: string): { date: string; content: string } {
 
 interface MemberProfileClientProps {
   slug: string
+  initialLatestObjekt?: Objekt | null
 }
 
-export default function MemberProfileClient({ slug }: MemberProfileClientProps) {
+export default function MemberProfileClient({
+  slug,
+  initialLatestObjekt = null,
+}: MemberProfileClientProps) {
   const member = getMemberBySlug(slug)
   const [gifActivated, setGifActivated] = useState(false)
+  const [latestObjekt, setLatestObjekt] = useState<Objekt | null>(initialLatestObjekt)
+  const [isLoadingObjekt, setIsLoadingObjekt] = useState<boolean>(!initialLatestObjekt)
   const [prevMemberId, setPrevMemberId] = useState(member?.id)
   if (member?.id !== prevMemberId) {
     setPrevMemberId(member?.id)
     setGifActivated(false)
+    setLatestObjekt(initialLatestObjekt)
+    setIsLoadingObjekt(!initialLatestObjekt)
   }
   const [activePhoto, setActivePhoto] = useState<string | null>(null)
-  const [dimensionPage, setDimensionPage] = useState(0)
   const shouldReduceMotion = useSafeReducedMotion()
   const isDark = useIsDarkMode()
 
@@ -341,6 +353,24 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" })
   }, [member?.id])
+
+  // Client fallback when SSR snapshot timed out
+  useEffect(() => {
+    if (!member || initialLatestObjekt) return
+    let active = true
+    fetchLatestObjektForMember(member.name)
+      .then((objekt) => {
+        if (!active) return
+        setLatestObjekt(objekt)
+        setIsLoadingObjekt(false)
+      })
+      .catch(() => {
+        if (active) setIsLoadingObjekt(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [member, initialLatestObjekt])
 
   // Auto-center active member in slider horizontally without window jump
   useEffect(() => {
@@ -362,23 +392,9 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   useDialogA11y(Boolean(activePhoto), lightboxRef, closeLightbox)
 
   // Matched sub-units resolved from single source of truth
-  const matchedUnits = useMemo(() => {
+  const memberDimensions = useMemo(() => {
     if (!member) return []
-    const allUnits = getAllSubUnits()
-    return allUnits.filter((su) => {
-      const inUnitMembers = su.members.some(
-        (m) =>
-          m.toLowerCase().includes(member.name.toLowerCase()) ||
-          m.startsWith(`S${member.id} `)
-      )
-      const inMemberSubUnits = (member.subUnits || []).some((u) => {
-        const cU = u.toLowerCase()
-        const cName = su.name.toLowerCase()
-        const cSlug = su.slug.toLowerCase()
-        return cName.includes(cU) || cU.includes(cSlug) || cSlug.includes(cU)
-      })
-      return inUnitMembers || inMemberSubUnits
-    })
+    return getSubUnitsForMember(member.id)
   }, [member])
 
   if (!member) return null
@@ -391,13 +407,6 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
     currentIdx < allMembersList.length - 1 ? allMembersList[currentIdx + 1] : allMembersList[0]
   const memberColor = getMemberColor(member.id)
   const careerList = careerMap[member.id] || []
-
-  const dimensionPageSize = 3
-  const totalDimensionPages = Math.max(1, Math.ceil(matchedUnits.length / dimensionPageSize))
-  const currentDimensionUnits = matchedUnits.slice(
-    dimensionPage * dimensionPageSize,
-    (dimensionPage + 1) * dimensionPageSize
-  )
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch" || !memberSliderRef.current) return
@@ -435,7 +444,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-950 dark:text-zinc-100 selection:bg-[#D4FF00] selection:text-black transition-colors pt-20 sm:pt-24 lg:pt-28 pb-24 sm:pb-32">
+    <div className="min-h-dvh bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-950 dark:text-zinc-100 selection:bg-[#D4FF00] selection:text-black transition-colors pt-20 sm:pt-24 lg:pt-28">
       {/* ── 1. Top Breadcrumb & Prev/Next Switcher ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb
@@ -447,14 +456,14 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             <div className="flex items-center justify-between w-full sm:w-auto gap-2">
               <Link
                 href={`/members/${prevMember.slug}`}
-                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm"
+                className="btn-magnetic flex items-center gap-1.5 min-h-8 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
                 title={`Previous: S${prevMember.id} ${prevMember.name}`}
               >
-                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>S{prevMember.id < 10 ? `0${prevMember.id}` : prevMember.id}</span>
               </Link>
 
-              <span className="flex items-center gap-1.5 text-xs font-mono text-zinc-800 dark:text-zinc-200 font-bold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 whitespace-nowrap">
+              <span className="flex items-center gap-1.5 min-h-8 text-xs font-mono text-zinc-800 dark:text-zinc-200 font-bold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 whitespace-nowrap">
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: memberColor }}
@@ -466,11 +475,11 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
               <Link
                 href={`/members/${nextMember.slug}`}
-                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm"
+                className="btn-magnetic flex items-center gap-1.5 min-h-8 px-3 py-1.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
                 title={`Next: S${nextMember.id} ${nextMember.name}`}
               >
                 <span>S{nextMember.id < 10 ? `0${nextMember.id}` : nextMember.id}</span>
-                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </div>
           }
@@ -529,9 +538,10 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                 </span>
 
                 {/* Portrait Image */}
-                <Image
+                <ThemeImage
                   src={getMemberImageUrl(member, isDark)}
                   alt={`${member.name} (${member.birthName || member.name}) official profile portrait`}
+                  variant="curtain"
                   fill
                   preload
                   fetchPriority="high"
@@ -685,16 +695,17 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-semibold">
-                    Dimensions &bull; {matchedUnits.length} Units
+                    Dimensions &bull; {memberDimensions.length} {memberDimensions.length === 1 ? "Unit" : "Units"}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {matchedUnits.length > 0 ? (
-                    matchedUnits.map((u) => (
+                  {memberDimensions.length > 0 ? (
+                    memberDimensions.map(({ unit: u, isLeader }) => (
                       <Link
                         key={u.slug}
                         href={`/sub-units/${u.slug}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#0D0D12] hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-xs font-mono font-medium text-zinc-800 dark:text-zinc-200 transition-colors shadow-sm"
+                        className="inline-flex items-center gap-1.5 min-h-8 px-3 py-1.5 rounded-lg bg-white dark:bg-[#0D0D12] hover:bg-zinc-100 dark:hover:bg-white/10 border border-zinc-200/80 dark:border-white/10 text-xs font-mono font-medium text-zinc-800 dark:text-zinc-200 transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
+                        title={isLeader ? `${u.name} (Official Leader)` : u.name}
                       >
                         <span
                           className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -702,6 +713,12 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                           aria-hidden="true"
                         />
                         <span>{u.name.replace(/\s*\([^)]*\)/, "")}</span>
+                        {isLeader && (
+                          <Crown
+                            className="w-3 h-3 text-amber-500 dark:text-[#D4FF00] shrink-0"
+                            aria-hidden="true"
+                          />
+                        )}
                       </Link>
                     ))
                   ) : (
@@ -845,9 +862,9 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
       </section>
 
       {/* ── 4. Visual & Motion Archive (Act 3) ── */}
-      <section className="py-14 md:py-20 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/70 dark:bg-[#07070a]">
+      <section className="py-10 sm:py-14 md:py-20 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/70 dark:bg-[#07070a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
+          <div className="mb-5 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">
               Visual Archive
             </h2>
@@ -856,45 +873,40 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {/* 1. Official Concept Portrait */}
             <button
               type="button"
               onClick={() => setActivePhoto(getMemberImageUrl(member, isDark))}
-              className="spotlight-card relative block w-full text-left aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+              className="spotlight-card relative block w-full text-left aspect-3/4 rounded-xl sm:rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
               aria-label={`Enlarge official concept photo of ${member.name}`}
             >
-              <Image
+              <ThemeImage
                 src={getMemberImageUrl(member, isDark)}
                 alt={`${member.name} official concept portrait`}
                 fill
                 loading="lazy"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                sizes="(max-width: 1024px) 50vw, 33vw"
                 className="object-cover object-top transition-transform duration-500 [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
               />
+              <span className="block absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/75 via-black/25 to-transparent pointer-events-none" />
               <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center motion-reduce:transition-none">
                 <span className="inline-flex items-center gap-1.5 text-xs font-mono px-3.5 py-1.5 rounded-full bg-black/80 border border-white/20 text-white">
                   <Maximize2 className="h-3 w-3" aria-hidden="true" />
                   <span>Inspect View</span>
                 </span>
               </span>
-              <span className="block absolute bottom-3.5 left-4 text-[11px] font-mono text-white drop-shadow-md">
+              <span className="block absolute bottom-2.5 left-3 right-3 sm:bottom-3.5 sm:left-4 text-[10px] sm:text-[11px] font-mono text-white drop-shadow-md truncate">
                 Official Concept Photo
               </span>
             </button>
 
             {/* 2. Live SIGNAL Moment (GIF) */}
             {member.gif ? (
-              <div
+              <button
+                type="button"
                 onClick={() => setActivePhoto(`https://i.giphy.com/media/v1.${member.gif}`)}
-                className="spotlight-card relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    setActivePhoto(`https://i.giphy.com/media/v1.${member.gif}`)
-                  }
-                }}
+                className="spotlight-card relative block w-full text-left aspect-3/4 rounded-xl sm:rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 aria-label={`Enlarge signal moment animation for ${member.name}`}
               >
                 <img
@@ -902,201 +914,205 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                   alt={`${member.name} daily SIGNAL clip`}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
                 />
-                <div className="absolute top-3.5 left-3.5">
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-sm border border-white/20 text-white flex items-center gap-1.5 shadow-sm">
-                    <Play className="h-2.5 w-2.5 fill-current text-[#D4FF00]" />
-                    <span>SIGNAL MOMENT</span>
+                <span className="block absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/75 via-black/25 to-transparent pointer-events-none" />
+                <span className="block absolute top-2.5 left-2.5 sm:top-3.5 sm:left-3.5">
+                  <span className="text-[9px] sm:text-[10px] font-mono font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-black/75 backdrop-blur-sm border border-white/20 text-white inline-flex items-center gap-1 sm:gap-1.5 shadow-sm">
+                    <Play className="h-2.5 w-2.5 fill-current text-[#D4FF00]" aria-hidden="true" />
+                    <span>SIGNAL</span>
+                    <span className="hidden sm:inline">MOMENT</span>
                   </span>
-                </div>
-                <div className="absolute bottom-3.5 left-4 text-[11px] font-mono text-white drop-shadow-md">
+                </span>
+                <span className="block absolute bottom-2.5 left-3 right-3 sm:bottom-3.5 sm:left-4 text-[10px] sm:text-[11px] font-mono text-white drop-shadow-md truncate">
                   Daily SIGNAL Moment
-                </div>
-              </div>
+                </span>
+              </button>
             ) : null}
 
-            {/* 3. Authentic First Class Digital Objekt Collectible Card */}
+            {/* 3. Latest COSMO Objekt Showcase & Member Vault Link */}
             <Link
               href={`/objekts?member=${encodeURIComponent(member.name)}`}
-              className="spotlight-card group relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] p-6 flex flex-col justify-between shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-[border-color,box-shadow]"
+              className={`spotlight-card group relative block rounded-xl sm:rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#0D0D12] shadow-sm hover:border-zinc-400 dark:hover:border-white/30 transition-[border-color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] ${
+                member.gif ? "col-span-2 lg:col-span-1 lg:aspect-3/4" : "aspect-3/4"
+              }`}
             >
-              <div
-                className="absolute left-0 top-0 bottom-0 w-1.5 z-20"
-                style={{ backgroundColor: memberColor }}
-                aria-hidden="true"
-              />
+              <article className="relative h-full p-4 sm:p-5 flex flex-col justify-between gap-3.5">
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1.5 z-20"
+                  style={{ backgroundColor: memberColor }}
+                  aria-hidden="true"
+                />
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <TriplesLogo width={16} height={16} strokeWidth={200} className="text-zinc-900 dark:text-white" />
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-semibold">
-                      COSMO Objekts
+                {/* Top Meta Header */}
+                <div className="flex items-center justify-between gap-2 pl-1.5 shrink-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <TriplesLogo
+                      width={15}
+                      height={15}
+                      strokeWidth={200}
+                      decorative
+                      className="text-zinc-900 dark:text-white shrink-0"
+                    />
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-semibold truncate">
+                      Latest Objekt
                     </span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-zinc-400">
-                    S{member.id < 10 ? `0${member.id}` : member.id}
+                  <span className="text-[11px] font-mono font-bold text-zinc-500 dark:text-zinc-400 shrink-0">
+                    {latestObjekt
+                      ? `${latestObjekt.season} · ${latestObjekt.collectionNo}`
+                      : `S${member.id < 10 ? `0${member.id}` : member.id}`}
                   </span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold font-display text-zinc-950 dark:text-white">
-                  {member.name} Digital Vault
-                </h3>
+                {/* Center Showcase: Horizontal on Mobile/Tablet, Full Photocard Stage on Desktop */}
+                <div className="flex lg:flex-col items-center lg:justify-center gap-4 lg:gap-2.5 pl-1.5 flex-1 min-h-0">
+                  {latestObjekt ? (
+                    <div className="relative shrink-0 w-24 sm:w-28 lg:w-auto lg:h-full lg:max-h-[290px] aspect-[1/1.55] rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-white/10 shadow-md transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none">
+                      <ObjektImage
+                        season={latestObjekt.season}
+                        member={latestObjekt.member}
+                        slug={latestObjekt.slug}
+                        side="front"
+                        fallbackSrc={latestObjekt.frontImage || latestObjekt.thumbnailImage}
+                        alt={`${member.name} latest Objekt ${latestObjekt.season} ${latestObjekt.collectionNo}`}
+                        sizes="(max-width: 1024px) 120px, 240px"
+                        className="w-full h-full object-cover"
+                      />
+                      {latestObjekt.collectionNo && (
+                        <div
+                          className="absolute right-0 top-0 bottom-0 w-[11.2%] flex items-center justify-center pointer-events-none select-none z-10"
+                          aria-hidden="true"
+                        >
+                          <span
+                            className="font-bold text-[7px] sm:text-[8px] lg:text-[9.5px] tracking-wider whitespace-nowrap rotate-90 leading-none uppercase font-display"
+                            style={{ color: latestObjekt.textColor || "#000000" }}
+                          >
+                            {latestObjekt.collectionNo}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : isLoadingObjekt ? (
+                    <div className="shrink-0 w-24 sm:w-28 lg:w-auto lg:h-full lg:max-h-[290px] aspect-[1/1.55] rounded-xl bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 animate-pulse" />
+                  ) : null}
 
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-sans">
-                  Browse {member.name}&apos;s official First Class, Special Class, and Double Class Objekts across all COSMO seasons.
-                </p>
-              </div>
+                  {/* Compact details beside Objekt on mobile/tablet (hidden on desktop where photocard fills the stage) */}
+                  <div className={`min-w-0 space-y-1.5 ${latestObjekt ? "lg:hidden" : ""}`}>
+                    <h3 className="text-lg sm:text-xl font-bold font-display text-zinc-950 dark:text-white tracking-tight text-balance leading-snug">
+                      {latestObjekt
+                        ? `${latestObjekt.season} ${latestObjekt.class}`
+                        : `${member.name} Digital Vault`}
+                    </h3>
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-sans text-pretty line-clamp-3">
+                      {latestObjekt?.description
+                        ? latestObjekt.description
+                        : `Browse ${member.name}'s official First Class, Special Class, and Double Class Objekts across all COSMO seasons.`}
+                    </p>
+                  </div>
+                </div>
 
-              <div className="pt-4 border-t border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-zinc-950 dark:text-white group-hover:underline flex items-center gap-1.5">
-                  <TriplesLogo width={13} height={13} strokeWidth={220} className="text-zinc-900 dark:text-white" />
-                  <span>Open Member Vault</span>
-                </span>
-                <ArrowUpRight className="btn-arrow h-4 w-4 text-zinc-950 dark:text-white" />
-              </div>
+                {/* Footer CTA */}
+                <div className="pt-3 pl-1.5 border-t border-zinc-200/80 dark:border-white/10 flex items-center justify-between shrink-0">
+                  <span className="text-xs font-mono font-bold text-zinc-950 dark:text-white group-hover:underline flex items-center gap-1.5">
+                    <TriplesLogo
+                      width={13}
+                      height={13}
+                      strokeWidth={220}
+                      decorative
+                      className="text-zinc-900 dark:text-white"
+                    />
+                    <span>Open {member.name} Vault</span>
+                  </span>
+                  <ArrowUpRight className="btn-arrow h-4 w-4 text-zinc-950 dark:text-white" aria-hidden="true" />
+                </div>
+              </article>
             </Link>
           </div>
         </div>
       </section>
 
       {/* ── 5. Dimensions Formations Section (Act 4) ── */}
-      {matchedUnits.length > 0 && (
-        <section className="py-14 md:py-20 border-b border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#08080A]">
+      {memberDimensions.length > 0 && (
+        <section className="py-10 sm:py-14 md:py-20 border-b border-zinc-200/80 dark:border-white/10 bg-white dark:bg-[#08080A]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8 md:mb-10">
+            <div className="flex items-end justify-between gap-4 mb-5 sm:mb-8 md:mb-10">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight flex items-baseline gap-2">
-                  <span>Dimensions</span>
-                  <span className="font-accent text-xl sm:text-2xl font-normal text-zinc-500 dark:text-zinc-400">
-                    formations
-                  </span>
+                <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight text-balance">
+                  Dimensions
                 </h2>
-                <p className="text-xs font-mono text-zinc-500 mt-1 uppercase tracking-wider">
-                  {matchedUnits.length} Official Formations
+                <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1 uppercase tracking-wider">
+                  {memberDimensions.length} Official {memberDimensions.length === 1 ? "Formation" : "Formations"}
                 </p>
               </div>
 
-              {/* Slider Controls (if > 3 units) */}
-              {totalDimensionPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400 mr-1.5 hidden sm:inline">
-                    {dimensionPage + 1} / {totalDimensionPages}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setDimensionPage((prev) => (prev > 0 ? prev - 1 : totalDimensionPages - 1))
-                    }
-                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
-                    aria-label="Previous Dimension page"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setDimensionPage((prev) => (prev < totalDimensionPages - 1 ? prev + 1 : 0))
-                    }
-                    className="p-2.5 rounded-full bg-zinc-100 dark:bg-[#14141B] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
-                    aria-label="Next Dimension page"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
+              <Link
+                href="/sub-units"
+                className="nav-draw-link group/all text-xs font-mono uppercase tracking-[0.16em] font-bold text-zinc-950 dark:text-[#D4FF00] pb-0.5 inline-flex items-center gap-1.5 shrink-0 min-h-8 [@media(pointer:coarse)]:min-h-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
+              >
+                <span>All Dimensions</span>
+                <ArrowUpRight
+                  className="h-3.5 w-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:translate-x-0.5 [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:-translate-y-0.5 motion-reduce:transition-none"
+                  aria-hidden="true"
+                />
+              </Link>
             </div>
 
-            {/* Dimension Cards */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={dimensionPage}
-                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 16 }}
-                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -16 }}
-                transition={{ duration: shouldReduceMotion ? 0.01 : 0.35, ease: "easeInOut" }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {currentDimensionUnits.map((unit) => (
-                  <div
-                    key={unit.slug}
-                    className="spotlight-card group rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-white/10 bg-zinc-50 dark:bg-[#0D0D12] transition-[border-color,box-shadow] flex flex-col justify-between shadow-sm"
+            <ul role="list" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-7">
+              {memberDimensions.map(({ unit, isLeader }) => (
+                <li key={unit.slug}>
+                  <Link
+                    href={`/sub-units/${unit.slug}`}
+                    className="group block rounded-xl sm:rounded-2xl active:scale-[0.99] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                   >
-                    <div className="relative aspect-video w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
-                      <Image
-                        src={unit.image}
-                        alt={unit.name}
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
-                      
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                        <span className="text-[10px] font-mono uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white border border-white/20">
-                          {unit.category}
-                        </span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white">
-                          {unit.era}
-                        </span>
+                    <article>
+                      <div className="relative aspect-3/2 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900">
+                        <Image
+                          src={unit.image || "/placeholder.svg"}
+                          alt={`${unit.name} concept photo`}
+                          fill
+                          loading="lazy"
+                          sizes="(max-width: 1024px) 50vw, 25vw"
+                          className="object-cover object-center transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
+                        />
                       </div>
-                    </div>
 
-                    <div className="p-5 sm:p-6 space-y-3 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="text-xl font-bold font-display text-zinc-950 dark:text-white">
-                          {unit.name}
+                      <div className="mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-zinc-200/80 dark:border-white/10 space-y-1 sm:space-y-1.5">
+                        <h3 className="flex items-start gap-1 sm:gap-1.5 font-display font-bold text-sm sm:text-base lg:text-lg tracking-tight leading-snug text-balance text-zinc-950 dark:text-white transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-zinc-600 dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:text-[#D4FF00]">
+                          <span>{unit.name}</span>
+                          {isLeader && (
+                            <>
+                              <Crown
+                                className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-1 text-amber-500 dark:text-amber-400 shrink-0"
+                                aria-hidden="true"
+                              />
+                              <span className="sr-only">(Leader)</span>
+                            </>
+                          )}
                         </h3>
-                        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-2 leading-relaxed line-clamp-3 font-sans">
-                          {unit.description}
+                        <p className="text-[10px] sm:text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between gap-1.5 sm:gap-2">
+                          <span className="truncate">{unit.era}</span>
+                          <span className="tabular-nums shrink-0">{unit.members.length}M</span>
                         </p>
                       </div>
-
-                      <div className="pt-3 border-t border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
-                        <Link
-                          href={`/sub-units/${unit.slug}`}
-                          className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200 hover:text-black dark:hover:text-white transition-colors"
-                        >
-                          <span>Explore Dimension</span>
-                          <ArrowUpRight className="h-3.5 w-3.5" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Pagination Indicator Dots */}
-            {totalDimensionPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-8">
-                {Array.from({ length: totalDimensionPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setDimensionPage(i)}
-                    className={`h-1.5 rounded-full transition-[width,background-color] ${
-                      dimensionPage === i
-                        ? "w-8 bg-zinc-950 dark:bg-white"
-                        : "w-2 bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-500"
-                    }`}
-                    aria-label={`Go to Dimension page ${i + 1}`}
-                  />
-                ))}
-              </div>
-            )}
+                    </article>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
 
       {/* ── 6. More tripleS Member Slider (Act 5: OT24 Ribbon) ── */}
-      <section className="py-14 md:py-20 border-b border-zinc-200/80 dark:border-white/10 bg-zinc-50/50 dark:bg-[#08080A]">
+      <section className="pt-14 pb-12 md:pt-16 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
               <h2 className="text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight">
                 More tripleS
               </h2>
-              <p className="text-xs font-mono text-zinc-500 mt-1 uppercase tracking-wider">
+              <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1 uppercase tracking-wider">
                 OT24 Full Roster &bull; S1 to S24
               </p>
             </div>
@@ -1104,18 +1120,20 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             {/* Slider Arrow Controls */}
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => scrollMemberSlider("left")}
-                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
+                className="p-2.5 min-w-9 min-h-9 inline-flex items-center justify-center rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 aria-label="Previous members"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </button>
               <button
+                type="button"
                 onClick={() => scrollMemberSlider("right")}
-                className="p-2.5 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95"
+                className="p-2.5 min-w-9 min-h-9 inline-flex items-center justify-center rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-[color,border-color,transform] shadow-sm active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 aria-label="Next members"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -1157,7 +1175,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       style={{ backgroundColor: mColor }}
                       aria-hidden="true"
                     />
-                    <Image
+                    <ThemeImage
                       src={getMemberImageUrl(m, isDark)}
                       alt={`${m.name} (S${m.id}) profile photo`}
                       fill
@@ -1219,7 +1237,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
-              className="relative w-[min(42rem,calc(100vw-2rem))] h-[85vh] rounded-2xl overflow-hidden border border-zinc-800"
+              className="relative w-[min(42rem,calc(100vw-2rem))] h-[85dvh] rounded-2xl overflow-hidden border border-zinc-800"
             >
               <img
                 src={activePhoto}

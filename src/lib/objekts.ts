@@ -260,7 +260,20 @@ export interface ObjektsInitialSnapshot {
 
 const SNAPSHOT_TTL_MS = 24 * 60 * 60 * 1000;
 let cachedSnapshot: (ObjektsInitialSnapshot & { expiresAt: number }) | null = null;
+let cachedLatestByMember: { map: Record<string, Objekt>; expiresAt: number } | null = null;
 let snapshotInFlight: Promise<ObjektsInitialSnapshot> | null = null;
+let clientLatestByMemberPromise: Promise<Record<string, Objekt>> | null = null;
+
+function buildLatestObjektsByMember(groupedNewest: GroupedObjekt[]): Record<string, Objekt> {
+  const latestByMember: Record<string, Objekt> = {};
+  for (const group of groupedNewest) {
+    const key = (group.primary.member || "").trim().toLowerCase();
+    if (key && !latestByMember[key]) {
+      latestByMember[key] = group.primary;
+    }
+  }
+  return latestByMember;
+}
 
 /**
  * Fetches a compact SSR preview slice (first 30 newest Objekts + facet counts)
@@ -292,6 +305,11 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
         const sortedNewest = sortObjekts(data, "newest");
         const groupedNewest = groupObjektVariants(sortedNewest);
         const previewGroups = groupedNewest.slice(0, 30);
+        const expiresAt = Date.now() + SNAPSHOT_TTL_MS;
+        cachedLatestByMember = {
+          map: buildLatestObjektsByMember(groupedNewest),
+          expiresAt,
+        };
         const snapshot: ObjektsInitialSnapshot = {
           objekts: previewGroups.map((g) => g.primary),
           groups: previewGroups,
@@ -302,7 +320,7 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
         };
         cachedSnapshot = {
           ...snapshot,
-          expiresAt: Date.now() + SNAPSHOT_TTL_MS,
+          expiresAt,
         };
         return snapshot;
       })
@@ -320,6 +338,45 @@ export async function getInitialObjektsSnapshot(): Promise<ObjektsInitialSnapsho
   }
 
   return snapshotInFlight;
+}
+
+/**
+ * Returns the newest Objekt for a given member (server-side 24h in-memory cache).
+ */
+export async function getLatestObjektForMember(memberName: string): Promise<Objekt | null> {
+  const key = memberName.trim().toLowerCase();
+  if (!key) return null;
+
+  const now = Date.now();
+  if (!cachedLatestByMember || now >= cachedLatestByMember.expiresAt) {
+    await getInitialObjektsSnapshot();
+  }
+
+  return cachedLatestByMember?.map[key] ?? null;
+}
+
+/**
+ * Client-side cached lookup for a member's latest Objekt (fallback when SSR snapshot timed out).
+ */
+export async function fetchLatestObjektForMember(memberName: string): Promise<Objekt | null> {
+  const key = memberName.trim().toLowerCase();
+  if (!key) return null;
+
+  if (!clientLatestByMemberPromise) {
+    clientLatestByMemberPromise = fetchAllObjekts()
+      .then((data) => {
+        const sortedNewest = sortObjekts(data, "newest");
+        const groupedNewest = groupObjektVariants(sortedNewest);
+        return buildLatestObjektsByMember(groupedNewest);
+      })
+      .catch(() => {
+        clientLatestByMemberPromise = null;
+        return {};
+      });
+  }
+
+  const map = await clientLatestByMemberPromise;
+  return map[key] ?? null;
 }
 
 /**

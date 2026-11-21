@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import ThemeImage from "@/components/theme-image";
 import {
   ArrowUpRight,
   Cake,
@@ -439,9 +439,10 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                 aria-label={`View ${sCode} ${activeMember.name} profile`}
                 className="relative block w-full h-full rounded-2xl overflow-hidden shadow-[0_24px_48px_-14px_rgba(9,9,11,0.18)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
               >
-                <Image
+                <ThemeImage
                   src={getMemberImageUrl(activeMember, isDark)}
                   alt={`${sCode} ${activeMember.name} First Class Objekt portrait`}
+                  variant="curtain"
                   fill
                   sizes="(max-width: 640px) 260px, (max-width: 1024px) 300px, 320px"
                   className="object-cover object-top origin-top scale-[1.05] group-hover:scale-[1.07] transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
@@ -674,7 +675,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                         className="relative w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden shrink-0 border-[1.5px] bg-zinc-900"
                         style={{ borderColor: mRing }}
                       >
-                        <Image
+                        <ThemeImage
                           src={getMemberImageUrl(m, isDark)}
                           alt=""
                           fill

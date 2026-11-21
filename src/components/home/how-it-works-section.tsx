@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import ThemeImage from "@/components/theme-image";
 import WavWordmark from "@/components/wav-wordmark";
 import { OFFICIAL_MEMBER_COLORS, getMemberImageUrl } from "@/lib/members";
 import { useIsDarkMode } from "@/lib/theme";
@@ -220,7 +220,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                     key={member.id}
                     className="group relative shrink-0 w-13 lg:w-14 hover:w-15.5 h-full overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-900 transition-[width] duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none"
                   >
-                    <Image
+                    <ThemeImage
                       src={getMemberImageUrl(member, isDark)}
                       alt={`${sCode} ${member.name}`}
                       fill
@@ -270,7 +270,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                     aria-label={`View ${sCode} ${member.name} profile`}
                     className="block relative w-full h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D4FF00]"
                   >
-                    <Image
+                    <ThemeImage
                       src={getMemberImageUrl(member, isDark)}
                       alt={`${sCode} ${member.name} First Class Objekt portrait`}
                       fill
@@ -345,7 +345,7 @@ export default function HowItWorksSection({ members }: HowItWorksSectionProps) {
                   aria-label={`View ${sCode} ${member.name} profile`}
                   className="group relative block w-[76vw] max-w-70 aspect-3/4 snap-center shrink-0 rounded-2xl overflow-hidden bg-zinc-900 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
                 >
-                  <Image
+                  <ThemeImage
                     src={getMemberImageUrl(member, isDark)}
                     alt={`${sCode} ${member.name} First Class Objekt portrait`}
                     fill

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, type CSSProperties, type MouseEvent } from "react"
+import { useEffect, useLayoutEffect, useRef, type CSSProperties, type MouseEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import WavWordmark from "@/components/wav-wordmark"
@@ -10,6 +10,8 @@ import { useIsDarkMode } from "@/lib/theme"
 export default function HeroSection() {
   const isDark = useIsDarkMode()
   const imageRef = useRef<HTMLDivElement>(null)
+  const darkLayerRef = useRef<HTMLDivElement>(null)
+  const prevDarkRef = useRef<boolean | null>(null)
   const reduceMotionRef = useRef(false)
 
   useEffect(() => {
@@ -22,6 +24,69 @@ export default function HeroSection() {
     query.addEventListener("change", handleChange)
     return () => query.removeEventListener("change", handleChange)
   }, [])
+
+  // Editorial focal-plane shutter reveal on theme toggle using WAAPI so it stays
+  // immune to next-themes' `disableTransitionOnChange` CSS reset while keeping
+  // initial SSR/hydration instant via CSS `.dark` opacity classes.
+  useLayoutEffect(() => {
+    if (prevDarkRef.current === null) {
+      prevDarkRef.current = isDark
+      return
+    }
+    if (prevDarkRef.current === isDark) return
+    prevDarkRef.current = isDark
+
+    const el = darkLayerRef.current
+    if (!el || typeof el.animate !== "function") return
+
+    for (const anim of el.getAnimations()) {
+      anim.cancel()
+    }
+
+    if (reduceMotionRef.current) {
+      el.animate(
+        [{ opacity: isDark ? 0 : 1 }, { opacity: isDark ? 1 : 0 }],
+        {
+          duration: 160,
+          easing: "ease-out",
+        }
+      )
+      return
+    }
+
+    // Ascending editorial curtain: Light -> Dark sweeps in from bottom;
+    // Dark -> Light retracts upward so both directions share one physical gesture.
+    const keyframes: Keyframe[] = isDark
+      ? [
+          {
+            opacity: 0.85,
+            clipPath: "inset(100% 0% 0% 0%)",
+            transform: "scale(1.035)",
+          },
+          {
+            opacity: 1,
+            clipPath: "inset(0% 0% 0% 0%)",
+            transform: "scale(1)",
+          },
+        ]
+      : [
+          {
+            opacity: 1,
+            clipPath: "inset(0% 0% 0% 0%)",
+            transform: "scale(1)",
+          },
+          {
+            opacity: 0.9,
+            clipPath: "inset(0% 0% 100% 0%)",
+            transform: "scale(1.025)",
+          },
+        ]
+
+    el.animate(keyframes, {
+      duration: 680,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    })
+  }, [isDark])
 
   // Subtle natural mouse movement for photographic depth (disabled on reduced motion & touch)
   const handleMouseMove = (e: MouseEvent<HTMLElement>) => {
@@ -50,20 +115,34 @@ export default function HeroSection() {
         aria-hidden="true"
         className="absolute inset-0 z-0 scale-[1.01] origin-center transition-transform duration-700 ease-out motion-reduce:transition-none"
       >
+        {/* Light mode full-group portrait (LCP candidate, stays opaque underneath) */}
         <Image
-          src={getHeroCoverImageUrl(isDark)}
+          src={getHeroCoverImageUrl(false)}
           alt="tripleS 24-member full group assemble portrait"
           fill
           preload
           fetchPriority="high"
           sizes="100vw"
           quality={90}
-          className={`object-cover brightness-[1.02] contrast-[1.04] ${
-            isDark
-              ? "object-[center_58%] sm:object-[center_56%] lg:object-[center_55%] scale-[1.06]"
-              : "object-[center_28%] sm:object-[center_28%] lg:object-[center_25%]"
-          }`}
+          className="object-cover brightness-[1.02] contrast-[1.04] object-[center_28%] sm:object-[center_28%] lg:object-[center_25%]"
         />
+
+        {/* Dark mode full-group portrait (fades 0 <-> 1 on top for 100% opaque crossfade) */}
+        <div
+          ref={darkLayerRef}
+          aria-hidden="true"
+          className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none"
+        >
+          <Image
+            src={getHeroCoverImageUrl(true)}
+            alt=""
+            fill
+            fetchPriority="low"
+            sizes="100vw"
+            quality={90}
+            className="object-cover brightness-[1.02] contrast-[1.04] object-[center_58%] sm:object-[center_56%] lg:object-[center_55%] scale-[1.06]"
+          />
+        </div>
 
         {/* Top Vignette: Preserves fixed navbar legibility */}
         <div className="absolute inset-x-0 top-0 h-36 sm:h-44 bg-linear-to-b from-black/85 via-black/40 to-transparent pointer-events-none" />

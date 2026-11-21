@@ -758,11 +758,15 @@ export default function AboutClient() {
                 >
                   {/* Col 1: Icon + Title + Handle (4 cols) */}
                   <div className="md:col-span-4 flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200/80 dark:border-white/15 flex items-center justify-center shrink-0">
+                    <div
+                      className={`w-10 h-10 rounded-xl border border-zinc-200/80 dark:border-white/15 flex items-center justify-center shrink-0 ${
+                        portal.isCustomIcon ? "bg-white" : "bg-white dark:bg-[#14141B]"
+                      }`}
+                    >
                       {portal.isCustomIcon ? (
                         <Image
                           src="/icons/cosmo-logo.png"
-                          alt="COSMO"
+                          alt=""
                           width={22}
                           height={22}
                           loading="eager"
@@ -770,7 +774,10 @@ export default function AboutClient() {
                           className="w-5.5 h-5.5 object-contain"
                         />
                       ) : IconComponent ? (
-                        <IconComponent className={`w-5 h-5 ${portal.colorClass || "text-zinc-950"}`} />
+                        <IconComponent
+                          aria-hidden="true"
+                          className={`w-5 h-5 ${portal.colorClass || "text-zinc-950 dark:text-white"}`}
+                        />
                       ) : null}
                     </div>
                     <div className="min-w-0">

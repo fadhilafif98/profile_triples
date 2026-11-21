@@ -182,12 +182,12 @@ export default function AlbumsClient() {
   const featuredEmbedUrl = getSpotifyEmbedUrl(featuredAlbum.spotifyLink)
 
   return (
-    <div className="bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-900 dark:text-[#F4F4F6] pt-20 sm:pt-24 lg:pt-28 pb-28 sm:pb-36 selection:bg-[#D4FF00] selection:text-black min-h-screen transition-colors">
+    <div className="bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-900 dark:text-[#F4F4F6] pt-18 sm:pt-24 lg:pt-28 pb-20 sm:pb-36 selection:bg-[#D4FF00] selection:text-black min-h-dvh transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb items={[{ label: "Discography" }]} />
 
         {/* ── 1. Unboxed Editorial Header (Pure Typography & Breathing Room) ── */}
-        <header ref={headerRef} className="pt-2 pb-8 sm:pb-12 border-b border-zinc-200/70 dark:border-white/10">
+        <header ref={headerRef} className="pt-2 pb-6 sm:pb-12 border-b border-zinc-200/70 dark:border-white/10">
           <div className="space-y-3">
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] sm:whitespace-nowrap">
               <span className="gsap-title-word inline-block mr-2 sm:mr-3">Official</span>
@@ -210,56 +210,59 @@ export default function AlbumsClient() {
         <section
           id="featured-record-section"
           aria-labelledby="featured-record-title"
-          className="py-12 sm:py-16 lg:py-20 border-b border-zinc-200/70 dark:border-white/10 relative scroll-mt-24"
+          className="py-8 sm:py-16 lg:py-20 border-b border-zinc-200/70 dark:border-white/10 relative scroll-mt-24"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-16 items-center">
             {/* Left: The Physical Vinyl Record (Unboxed, Floating with Ambient Glow) */}
             <div className="lg:col-span-6 flex justify-center lg:justify-start">
-              <div
-                className="group relative w-full max-w-70 sm:max-w-95 md:max-w-110 aspect-square select-none cursor-pointer"
+              <button
+                type="button"
+                className="group relative w-full max-w-56 sm:max-w-95 md:max-w-110 aspect-square select-none cursor-pointer text-left block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 onClick={() => {
                   const el = document.getElementById(featuredAlbum.id)
-                  if (el) el.scrollIntoView({ behavior: "smooth" })
+                  if (el) el.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth" })
                 }}
-                title="Click to view release in catalog"
+                aria-label={`View ${featuredAlbum.title} in catalog`}
               >
                 {/* Ambient artwork light blur */}
-                <div className="absolute -inset-10 pointer-events-none" aria-hidden="true">
+                <span className="block absolute -inset-10 pointer-events-none" aria-hidden="true">
                   <Image
                     src={featuredAlbum.cover}
                     alt=""
                     fill
+                    fetchPriority="low"
                     sizes="(max-width: 640px) 280px, (max-width: 1024px) 380px, 440px"
                     className="object-cover blur-3xl scale-110 opacity-40 dark:opacity-35 saturate-150 transition-opacity duration-700"
                   />
-                </div>
+                </span>
 
                 {/* Tactile Vinyl Disc sliding out */}
-                <div
+                <span
                   aria-hidden="true"
-                  className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[8%] group-hover:translate-x-[16%] transition-transform duration-700 ease-out-expo shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] z-0"
+                  className="block absolute top-[3%] h-[78%] aspect-square rounded-full left-[8%] group-hover:translate-x-[16%] transition-transform duration-700 ease-out-expo motion-reduce:transition-none motion-reduce:transform-none shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] z-0"
                   style={{
                     background: "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
                   }}
                 >
-                  <div className="absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
-                    <Image src={featuredAlbum.cover} alt="" fill sizes="120px" className="object-cover" />
-                  </div>
-                  <div className="absolute inset-[48.5%] rounded-full bg-zinc-100 dark:bg-[#08080A] border border-white/20" />
-                </div>
+                  <span className="block absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
+                    <Image src={featuredAlbum.cover} alt="" fill fetchPriority="low" sizes="120px" className="object-cover" />
+                  </span>
+                  <span className="block absolute inset-[48.5%] rounded-full bg-zinc-100 dark:bg-[#08080A] border border-white/20" />
+                </span>
 
                 {/* Jacket Sleeve (84% width & height, z-10) */}
-                <div className="relative z-10 w-[84%] aspect-square rounded-2xl overflow-hidden bg-zinc-200 dark:bg-[#14141B] border border-zinc-200/80 dark:border-white/10 shadow-[0_30px_60px_-24px_rgba(9,9,11,0.45)] transition-transform duration-500 group-hover:scale-102">
+                <span className="block relative z-10 w-[84%] aspect-square rounded-2xl overflow-hidden bg-zinc-200 dark:bg-[#14141B] border border-zinc-200/80 dark:border-white/10 shadow-[0_30px_60px_-24px_rgba(9,9,11,0.45)] transition-transform duration-500 group-hover:scale-102 motion-reduce:transition-none motion-reduce:transform-none">
                   <Image
                     src={featuredAlbum.cover}
                     alt={`${featuredAlbum.title} album cover`}
                     fill
-                    sizes="(max-width: 640px) 250px, (max-width: 1024px) 350px, 400px"
+                    sizes="(max-width: 640px) 224px, (max-width: 1024px) 350px, 400px"
                     preload
+                    fetchPriority="high"
                     className="object-cover"
                   />
-                </div>
-              </div>
+                </span>
+              </button>
             </div>
 
             {/* Right: Unboxed Editorial Typography & Controls */}
@@ -288,7 +291,7 @@ export default function AlbumsClient() {
                     className="font-semibold text-zinc-950 dark:text-[#D4FF00] hover:underline inline-flex items-center gap-1"
                   >
                     <span>{featuredAlbum.unit}</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3 h-3" aria-hidden="true" />
                   </Link>
                 ) : (
                   <span className="font-semibold">{featuredAlbum.unit ?? "tripleS"}</span>
@@ -299,7 +302,7 @@ export default function AlbumsClient() {
                 </span>
               </div>
 
-              <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[52ch]">
+              <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed text-pretty max-w-[52ch]">
                 {featuredAlbum.description}
               </p>
 
@@ -308,11 +311,11 @@ export default function AlbumsClient() {
                   href={featuredAlbum.spotifyLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-6 py-3 text-sm font-bold hover:bg-zinc-800 dark:hover:bg-[#E2FF33] active:scale-[0.98] transition-[background-color,transform] shadow-sm"
+                  className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-6 py-3 [@media(pointer:coarse)]:min-h-11 text-sm font-bold hover:bg-zinc-800 dark:hover:bg-[#E2FF33] active:scale-[0.98] transition-[background-color,transform] shadow-sm"
                 >
-                  <FaSpotify className="w-4 h-4 text-[#1DB954] dark:text-black" />
+                  <FaSpotify className="w-4 h-4 text-[#1DB954] dark:text-black" aria-hidden="true" />
                   <span>Stream on Spotify</span>
-                  <ArrowUpRight className="btn-arrow w-4 h-4" />
+                  <ArrowUpRight className="btn-arrow w-4 h-4" aria-hidden="true" />
                 </a>
               </div>
 
@@ -324,11 +327,10 @@ export default function AlbumsClient() {
                       src={featuredEmbedUrl}
                       width="100%"
                       height="152"
-                      frameBorder="0"
                       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                       loading="lazy"
                       title={`${featuredAlbum.title} Spotify player`}
-                      className="w-full"
+                      className="w-full border-0"
                     />
                   </div>
                 </div>
@@ -338,16 +340,18 @@ export default function AlbumsClient() {
         </section>
 
         {/* ── 3. Focused Filter & Search Bar (1:1 with Dimensions) ── */}
-        <div className="py-6 sm:py-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200/70 dark:border-white/10 mb-8 sm:mb-12">
+        <div className="py-4 sm:py-8 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-zinc-200/70 dark:border-white/10 mb-6 sm:mb-12">
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
             {CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat.value
               return (
                 <button
+                  type="button"
                   key={cat.value}
+                  aria-pressed={isActive}
                   onClick={() => setSelectedCategory(cat.value)}
-                  className={`px-4 py-2 rounded-full text-xs font-mono transition-[background-color,color] shrink-0 cursor-pointer ${
+                  className={`px-3.5 sm:px-4 py-2 [@media(pointer:coarse)]:min-h-11 rounded-full text-xs font-mono transition-[background-color,color] shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] ${
                     isActive
                       ? "bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-bold shadow-xs"
                       : "text-zinc-500 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5"
@@ -360,21 +364,23 @@ export default function AlbumsClient() {
           </div>
 
           {/* Right Controls: Search, Sort, View Toggle */}
-          <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-2.5 sm:gap-3 w-full md:w-auto">
             {/* Live Search */}
             <div className="relative grow md:w-64">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
               <input
-                type="text"
+                type="search"
                 placeholder="Search album or song..."
+                aria-label="Search album or song"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-[#D4FF00] font-mono transition-[box-shadow,background-color]"
+                className="w-full pl-9 pr-10 py-2 [@media(pointer:coarse)]:min-h-11 rounded-full bg-zinc-100 dark:bg-white/5 text-xs text-zinc-950 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] font-mono transition-[box-shadow,background-color]"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-400 hover:text-zinc-950 dark:hover:text-white cursor-pointer"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 min-h-7 min-w-7 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11 inline-flex items-center justify-center rounded-full text-xs font-mono text-zinc-500 hover:text-zinc-950 dark:hover:text-white cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                   aria-label="Clear search"
                 >
                   &times;
@@ -384,9 +390,10 @@ export default function AlbumsClient() {
 
             {/* Sort Toggle */}
             <button
+              type="button"
               onClick={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
-              className="px-3.5 py-2 rounded-full bg-zinc-100 dark:bg-white/5 text-xs font-mono text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors shrink-0 cursor-pointer"
-              title="Toggle release sort order"
+              className="px-3.5 py-2 [@media(pointer:coarse)]:min-h-11 rounded-full bg-zinc-100 dark:bg-white/5 text-xs font-mono text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+              aria-label={`Sort releases: currently ${sortOrder === "newest" ? "Newest" : "Oldest"}`}
             >
               {sortOrder === "newest" ? "Newest" : "Oldest"}
             </button>
@@ -394,34 +401,37 @@ export default function AlbumsClient() {
             {/* View Mode Toggle: Desktop & Tablet Only (Hidden on Mobile) */}
             <div className="hidden sm:inline-flex items-center p-1 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/60 dark:border-white/10 shrink-0">
               <button
+                type="button"
+                aria-pressed={viewMode === "crate"}
                 onClick={() => setViewMode("crate")}
                 aria-label="Vinyl crate grid view"
-                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                className={`p-1.5 rounded-full transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] ${
                   viewMode === "crate"
                     ? "bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs"
                     : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
-                title="Vinyl crate view"
               >
-                <LayoutGrid className="w-4 h-4" />
+                <LayoutGrid className="w-4 h-4" aria-hidden="true" />
               </button>
               <button
+                type="button"
+                aria-pressed={viewMode === "spreads"}
                 onClick={() => setViewMode("spreads")}
                 aria-label="Editorial spreads view"
-                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                className={`p-1.5 rounded-full transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] ${
                   viewMode === "spreads"
                     ? "bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs"
                     : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
                 }`}
-                title="Editorial spreads view"
               >
-                <LayoutList className="w-4 h-4" />
+                <LayoutList className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
         </div>
 
         {/* ── 4. The Complete Unboxed Discography (No Boxes, Pure Music) ── */}
+        <h2 className="sr-only">Discography Catalog</h2>
         <AnimatePresence mode="popLayout">
           {filteredAlbums.length === 0 ? (
             /* Clean Empty State */
@@ -430,28 +440,30 @@ export default function AlbumsClient() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
-              className="text-center py-24"
+              className="text-center py-16 sm:py-24"
             >
-              <Disc3 className="w-8 h-8 text-zinc-400 mx-auto mb-3 opacity-60" />
+              <Disc3 className="w-8 h-8 text-zinc-400 mx-auto mb-3 opacity-60" aria-hidden="true" />
               <p className="text-zinc-500 font-mono text-sm">
                 No releases found matching &ldquo;{searchQuery}&rdquo;.
               </p>
               <button
+                type="button"
                 onClick={() => {
                   setSelectedCategory("All")
                   setSearchQuery("")
                   setSortOrder("newest")
                 }}
-                className="mt-4 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] underline cursor-pointer"
+                className="mt-4 [@media(pointer:coarse)]:min-h-11 px-4 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] underline cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
               >
                 Reset filters
               </button>
             </motion.div>
           ) : viewMode === "crate" ? (
-            /* ── A. Pure Vinyl Crate Archive (Unboxed 3-Column Luxury Grid) ── */
-            <motion.div
+            /* ── A. Pure Vinyl Crate Archive (2-col mobile, 3-col desktop) ── */
+            <motion.ul
+              role="list"
               layout={!shouldReduceMotion}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 sm:gap-x-14 lg:gap-x-16 xl:gap-x-20 gap-y-14 sm:gap-y-18 lg:gap-y-20"
+              className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-14 lg:gap-x-16 xl:gap-x-20 sm:gap-y-18 lg:gap-y-20"
             >
               {filteredAlbums.map((album, index) => {
                 const catNo = getCatalogNo(album.id)
@@ -459,7 +471,7 @@ export default function AlbumsClient() {
                 const isSelected = featuredAlbum.id === album.id
 
                 return (
-                  <motion.article
+                  <motion.li
                     layout={!shouldReduceMotion}
                     key={album.id}
                     id={album.id}
@@ -469,133 +481,144 @@ export default function AlbumsClient() {
                       duration: shouldReduceMotion ? 0.01 : 0.4,
                       delay: shouldReduceMotion ? 0 : index * 0.02,
                     }}
-                    className="group scroll-mt-28 max-w-[320px] xs:max-w-90 sm:max-w-none mx-auto sm:mx-0 w-full"
+                    className="group scroll-mt-28 w-full"
                   >
-                    {/* The Vinyl Sleeve (No Card Box, Floating Pure Physical Record) */}
-                    <div
-                      onClick={() => inspectOnDeck(album)}
-                      className="group/vinyl relative aspect-square w-full mb-5 select-none cursor-pointer"
-                      title={`Inspect ${album.title} on deck`}
-                    >
-                      {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
-                      <div
-                        aria-hidden="true"
-                        className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-500 ease-out-expo shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)] z-0"
-                        style={{
-                          background:
-                            "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
-                        }}
+                    <article className="h-full flex flex-col">
+                      {/* The Vinyl Sleeve (No Card Box, Floating Pure Physical Record) */}
+                      <button
+                        type="button"
+                        onClick={() => inspectOnDeck(album)}
+                        className="group/vinyl relative aspect-square w-full mb-3 sm:mb-5 select-none cursor-pointer text-left block rounded-xl sm:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+                        aria-label={`Inspect ${album.title} on deck`}
                       >
-                        <div className="absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
+                        {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
+                        <span
+                          aria-hidden="true"
+                          className="block absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-500 ease-out-expo motion-reduce:transition-none motion-reduce:transform-none shadow-[0_16px_36px_-12px_rgba(0,0,0,0.55)] z-0"
+                          style={{
+                            background:
+                              "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
+                          }}
+                        >
+                          <span className="block absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
+                            <Image
+                              src={album.cover}
+                              alt=""
+                              fill
+                              loading="lazy"
+                              sizes="100px"
+                              className="object-cover"
+                            />
+                          </span>
+                          <span className="block absolute inset-[48.5%] rounded-full bg-[#FAFAFA] dark:bg-[#08080A] border border-white/20" />
+                        </span>
+
+                        {/* Front Sleeve Jacket (84% width & height, z-10) */}
+                        <span
+                          className={`block relative z-10 w-[84%] aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border ${
+                            isSelected
+                              ? "border-zinc-950 dark:border-[#D4FF00] shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)]"
+                              : "border-zinc-200/80 dark:border-white/10 shadow-xl"
+                          } transition-transform duration-500 group-hover/vinyl:scale-102 motion-reduce:transition-none motion-reduce:transform-none`}
+                        >
                           <Image
                             src={album.cover}
-                            alt=""
+                            alt={`${album.title} album cover`}
                             fill
-                            preload={album.id === featuredAlbum.id}
-                            sizes="100px"
+                            loading="lazy"
+                            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 50vw, 33vw"
                             className="object-cover"
                           />
-                        </div>
-                        <div className="absolute inset-[48.5%] rounded-full bg-[#FAFAFA] dark:bg-[#08080A] border border-white/20" />
-                      </div>
+                        </span>
+                      </button>
 
-                      {/* Front Sleeve Jacket (84% width & height, z-10) */}
-                      <div
-                        className={`relative z-10 w-[84%] aspect-square rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border ${
-                          isSelected
-                            ? "border-zinc-950 dark:border-[#D4FF00] shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)]"
-                            : "border-zinc-200/80 dark:border-white/10 shadow-xl"
-                        } transition-transform duration-500 group-hover/vinyl:scale-102`}
-                      >
-                        <Image
-                          src={album.cover}
-                          alt={`${album.title} album cover`}
-                          fill
-                          preload={album.id === featuredAlbum.id}
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
+                      {/* Unboxed Editorial Typography Beneath */}
+                      <div className="space-y-1.5 sm:space-y-2 flex-1 flex flex-col">
+                        {/* Kicker: Catalog Index + Release Date + Type + Active On Deck Pill */}
+                        <div className="flex items-center justify-between gap-1 text-[11px] sm:text-xs font-mono text-zinc-500">
+                          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                            <span className="font-bold text-zinc-950 dark:text-[#D4FF00] shrink-0">
+                              #{String(catNo).padStart(2, "0")}
+                            </span>
+                            <span aria-hidden="true">&bull;</span>
+                            <span className="shrink-0">{album.releaseDate.slice(-4)}</span>
+                            <span className="hidden sm:inline" aria-hidden="true">&bull;</span>
+                            <span className="hidden sm:inline uppercase text-[11px] tracking-wider">{album.type}</span>
+                          </div>
 
-                    {/* Unboxed Editorial Typography Beneath */}
-                    <div className="space-y-2">
-                      {/* Kicker: Catalog Index + Release Date + Type + Active On Deck Pill */}
-                      <div className="flex items-center justify-between text-xs font-mono text-zinc-500">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span className="font-bold text-zinc-950 dark:text-[#D4FF00]">
-                            #{String(catNo).padStart(2, "0")}
-                          </span>
-                          <span>&bull;</span>
-                          <span>{album.releaseDate.slice(-4)}</span>
-                          <span>&bull;</span>
-                          <span className="uppercase text-[11px] tracking-wider truncate">{album.type}</span>
+                          {isSelected && (
+                            <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shrink-0">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] dark:bg-black animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                              On Deck
+                            </span>
+                          )}
                         </div>
 
-                        {isSelected && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-mono text-[10px] font-bold uppercase tracking-wider shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] dark:bg-black animate-pulse" />
-                            On Deck
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h3
-                        onClick={() => inspectOnDeck(album)}
-                        className="font-display font-black text-xl sm:text-2xl text-zinc-950 dark:text-white tracking-tight cursor-pointer hover:opacity-80 transition-opacity truncate"
-                      >
-                        {album.title}
-                      </h3>
-
-                      {/* Unit */}
-                      <div className="text-xs font-mono truncate">
-                        {unitLink ? (
-                          <Link
-                            href={unitLink.href}
-                            className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-[#D4FF00] hover:underline"
+                        {/* Title */}
+                        <h3 className="font-display font-black text-base sm:text-xl md:text-2xl text-zinc-950 dark:text-white tracking-tight text-balance leading-snug">
+                          <button
+                            type="button"
+                            onClick={() => inspectOnDeck(album)}
+                            className="text-left hover:opacity-80 transition-opacity cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
                           >
-                            {album.unit}
-                          </Link>
-                        ) : (
-                          <span className="text-zinc-500">{album.unit ?? "tripleS"}</span>
-                        )}
+                            {album.title}
+                          </button>
+                        </h3>
+
+                        {/* Unit */}
+                        <div className="text-[11px] sm:text-xs font-mono">
+                          {unitLink ? (
+                            <Link
+                              href={unitLink.href}
+                              className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-[#D4FF00] hover:underline"
+                            >
+                              {album.unit}
+                            </Link>
+                          ) : (
+                            <span className="text-zinc-500">{album.unit ?? "tripleS"}</span>
+                          )}
+                        </div>
+
+                        {/* Description (Consistent height for aligned action buttons) */}
+                        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed text-pretty min-h-9 sm:min-h-11">
+                          {album.description}
+                        </p>
+
+                        {/* Direct Actions: Unified buttons */}
+                        <div className="mt-auto pt-2 flex items-center justify-between gap-2 text-xs font-mono border-t border-zinc-200/50 dark:border-white/5">
+                          <button
+                            type="button"
+                            onClick={() => inspectOnDeck(album)}
+                            className="inline-flex items-center gap-1.5 [@media(pointer:coarse)]:min-h-11 text-zinc-950 dark:text-[#D4FF00] font-bold hover:underline cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
+                          >
+                            <Disc3 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                            <span className="sm:hidden">Inspect</span>
+                            <span className="hidden sm:inline">Inspect on Deck</span>
+                            <span className="sr-only"> {album.title}</span>
+                          </button>
+
+                          <a
+                            href={album.spotifyLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 [@media(pointer:coarse)]:min-h-11 text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
+                          >
+                            <FaSpotify className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>Spotify</span>
+                            <span className="sr-only"> {album.title}</span>
+                            <ArrowUpRight className="w-3 h-3" aria-hidden="true" />
+                          </a>
+                        </div>
                       </div>
-
-                      {/* Description (Consistent height for aligned action buttons) */}
-                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed min-h-10 sm:min-h-11">
-                        {album.description}
-                      </p>
-
-                      {/* Direct Actions: Unified buttons */}
-                      <div className="pt-2 flex items-center justify-between text-xs font-mono border-t border-zinc-200/50 dark:border-white/5">
-                        <button
-                          onClick={() => inspectOnDeck(album)}
-                          className="inline-flex items-center gap-1.5 text-zinc-950 dark:text-[#D4FF00] font-bold hover:underline cursor-pointer"
-                        >
-                          <Disc3 className="w-3.5 h-3.5" />
-                          <span>Inspect on Deck</span>
-                        </button>
-
-                        <a
-                          href={album.spotifyLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline"
-                        >
-                          <FaSpotify className="w-3.5 h-3.5" />
-                          <span>Spotify</span>
-                          <ArrowUpRight className="w-3 h-3" />
-                        </a>
-                      </div>
-                    </div>
-                  </motion.article>
+                    </article>
+                  </motion.li>
                 )
               })}
-            </motion.div>
+            </motion.ul>
           ) : (
             /* ── B. Unboxed Lookbook Spreads (1:1 with Dimensions) ── */
-            <motion.div
+            <motion.ul
+              role="list"
               layout={!shouldReduceMotion}
               className="divide-y divide-zinc-200/70 dark:divide-white/10"
             >
@@ -606,7 +629,7 @@ export default function AlbumsClient() {
                 const isSelected = featuredAlbum.id === album.id
 
                 return (
-                  <motion.article
+                  <motion.li
                     layout={!shouldReduceMotion}
                     key={album.id}
                     id={album.id}
@@ -616,74 +639,76 @@ export default function AlbumsClient() {
                       duration: shouldReduceMotion ? 0.01 : 0.4,
                       delay: shouldReduceMotion ? 0 : index * 0.02,
                     }}
-                    className="py-12 sm:py-16 lg:py-20 first:pt-4 last:pb-12 scroll-mt-28"
+                    className="py-10 sm:py-16 lg:py-20 first:pt-4 last:pb-12 scroll-mt-28"
                   >
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
+                    <article className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 lg:gap-16 items-center">
                       {/* Column 1: Unboxed Vinyl Jacket Sleeve */}
                       <div className={`lg:col-span-5 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
-                        <div
+                        <button
+                          type="button"
                           onClick={() => inspectOnDeck(album)}
-                          className="group/vinyl relative aspect-square w-full max-w-70 sm:max-w-85 md:max-w-95 mx-auto select-none cursor-pointer"
+                          className="group/vinyl relative aspect-square w-full max-w-60 sm:max-w-85 md:max-w-95 mx-auto select-none cursor-pointer text-left block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+                          aria-label={`Inspect ${album.title} on deck`}
                         >
                           {/* Vinyl disc (78% diameter, tucked inside 84% sleeve at rest, slides out on hover) */}
-                          <div
+                          <span
                             aria-hidden="true"
-                            className="absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-700 ease-out-expo shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] z-0"
+                            className="block absolute top-[3%] h-[78%] aspect-square rounded-full left-[4%] group-hover/vinyl:translate-x-[16%] transition-transform duration-700 ease-out-expo motion-reduce:transition-none motion-reduce:transform-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] z-0"
                             style={{
                               background:
                                 "repeating-radial-gradient(circle, #09090B 0 2px, #1C1C21 2px 3px)",
                             }}
                           >
-                            <div className="absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
+                            <span className="block absolute inset-[33%] rounded-full overflow-hidden border border-white/20">
                               <Image
                                 src={album.cover}
                                 alt=""
                                 fill
-                                preload={album.id === featuredAlbum.id}
+                                loading="lazy"
                                 sizes="120px"
                                 className="object-cover"
                               />
-                            </div>
-                            <div className="absolute inset-[48.5%] rounded-full bg-[#FAFAFA] dark:bg-[#08080A] border border-white/20" />
-                          </div>
+                            </span>
+                            <span className="block absolute inset-[48.5%] rounded-full bg-[#FAFAFA] dark:bg-[#08080A] border border-white/20" />
+                          </span>
 
                           {/* Front Sleeve Jacket (84% width & height) */}
-                          <div
-                            className={`relative z-10 w-[84%] aspect-square rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border ${
+                          <span
+                            className={`block relative z-10 w-[84%] aspect-square rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-900 border ${
                               isSelected
                                 ? "border-zinc-950 dark:border-[#D4FF00] shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)]"
                                 : "border-zinc-200/80 dark:border-white/10 shadow-2xl"
-                            } transition-transform duration-500 group-hover/vinyl:scale-102`}
+                            } transition-transform duration-500 group-hover/vinyl:scale-102 motion-reduce:transition-none motion-reduce:transform-none`}
                           >
                             <Image
                               src={album.cover}
                               alt={`${album.title} album cover`}
                               fill
-                              preload={album.id === featuredAlbum.id}
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
+                              loading="lazy"
+                              sizes="(max-width: 640px) 240px, (max-width: 1024px) 50vw, 380px"
                               className="object-cover"
                             />
-                          </div>
-                        </div>
+                          </span>
+                        </button>
                       </div>
 
                       {/* Column 2: Unboxed Typography & Lore */}
                       <div className={`lg:col-span-7 space-y-4 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
                         {/* Kicker */}
-                        <div className="flex items-center gap-2.5 text-xs font-mono text-zinc-500">
+                        <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono text-zinc-500">
                           <span className="font-display font-black text-sm text-zinc-950 dark:text-[#D4FF00]">
                             #{String(catNo).padStart(2, "0")}
                           </span>
-                          <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
+                          <span className="text-zinc-300 dark:text-zinc-700" aria-hidden="true">&bull;</span>
                           <span className="uppercase tracking-wider font-semibold text-zinc-700 dark:text-zinc-300">
                             {album.releaseDate}
                           </span>
-                          <span className="text-zinc-300 dark:text-zinc-700">&bull;</span>
+                          <span className="text-zinc-300 dark:text-zinc-700" aria-hidden="true">&bull;</span>
                           <span className="text-zinc-500 uppercase tracking-wider">{album.type}</span>
 
                           {isSelected && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black font-mono text-[10px] font-bold uppercase tracking-wider shrink-0 ml-auto">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] dark:bg-black animate-pulse" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#D4FF00] dark:bg-black animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                               On Deck
                             </span>
                           )}
@@ -691,12 +716,15 @@ export default function AlbumsClient() {
 
                         {/* Title */}
                         <div>
-                          <h2
-                            onClick={() => inspectOnDeck(album)}
-                            className="text-3xl sm:text-4xl md:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] cursor-pointer hover:opacity-80 transition-opacity"
-                          >
-                            {album.title}
-                          </h2>
+                          <h3 className="text-3xl sm:text-4xl md:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white text-balance leading-snug">
+                            <button
+                              type="button"
+                              onClick={() => inspectOnDeck(album)}
+                              className="text-left hover:opacity-80 transition-opacity cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
+                            >
+                              {album.title}
+                            </button>
+                          </h3>
                           <div className="flex items-center gap-2 text-xs font-mono mt-2">
                             <span className="text-zinc-400">Unit:</span>
                             {unitLink ? (
@@ -705,7 +733,7 @@ export default function AlbumsClient() {
                                 className="font-semibold text-zinc-950 dark:text-[#D4FF00] hover:underline underline-offset-2 inline-flex items-center gap-1"
                               >
                                 <span>{album.unit}</span>
-                                <ArrowRight className="w-3 h-3" />
+                                <ArrowRight className="w-3 h-3" aria-hidden="true" />
                               </Link>
                             ) : (
                               <span className="font-semibold text-zinc-800 dark:text-zinc-200">
@@ -716,7 +744,7 @@ export default function AlbumsClient() {
                         </div>
 
                         {/* Description Lore */}
-                        <p className="text-zinc-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed max-w-xl">
+                        <p className="text-zinc-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed text-pretty max-w-xl">
                           {album.description}
                         </p>
 
@@ -726,27 +754,30 @@ export default function AlbumsClient() {
                             href={album.spotifyLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider hover:bg-zinc-800 dark:hover:bg-[#E2FF33] transition-colors shadow-xs"
+                            className="btn-magnetic inline-flex items-center gap-2 rounded-full bg-zinc-950 text-white dark:bg-[#D4FF00] dark:text-black px-5 py-2.5 [@media(pointer:coarse)]:min-h-11 text-xs font-mono font-bold uppercase tracking-wider hover:bg-zinc-800 dark:hover:bg-[#E2FF33] transition-colors shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                           >
-                            <FaSpotify className="w-4 h-4 text-[#1DB954] dark:text-black" />
+                            <FaSpotify className="w-4 h-4 text-[#1DB954] dark:text-black" aria-hidden="true" />
                             <span>Stream on Spotify</span>
-                            <ArrowUpRight className="btn-arrow w-3.5 h-3.5" />
+                            <span className="sr-only"> {album.title}</span>
+                            <ArrowUpRight className="btn-arrow w-3.5 h-3.5" aria-hidden="true" />
                           </a>
 
                           <button
+                            type="button"
                             onClick={() => inspectOnDeck(album)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-mono font-medium text-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 [@media(pointer:coarse)]:min-h-11 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-mono font-medium text-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                           >
-                            <Disc3 className="w-3.5 h-3.5" />
+                            <Disc3 className="w-3.5 h-3.5" aria-hidden="true" />
                             <span>Inspect on Deck</span>
+                            <span className="sr-only"> {album.title}</span>
                           </button>
                         </div>
                       </div>
-                    </div>
-                  </motion.article>
+                    </article>
+                  </motion.li>
                 )
               })}
-            </motion.div>
+            </motion.ul>
           )}
         </AnimatePresence>
       </div>

@@ -1,4 +1,6 @@
+import { Album } from "@/types/album"
 import { SubUnit } from "@/types/sub-unit"
+import { getAllAlbums } from "@/lib/albums"
 
 import u01 from "@/data/sub-units/01-acid-angel-from-asia.json"
 import u02 from "@/data/sub-units/02-krystal-eyes.json"
@@ -31,4 +33,58 @@ export function getSubUnitBySlug(slug: string): SubUnit | undefined {
 
 export function getSubUnitsByCategory(category: SubUnit["category"]): SubUnit[] {
   return subUnits.filter((u) => u.category === category)
+}
+
+/**
+ * Resolves all Dimensions a member belongs to by parsing `S{id}` (and `(Leader)`)
+ * directly from `src/data/sub-units/*.json` as the single source of truth.
+ */
+export function getSubUnitsForMember(
+  memberId: number
+): { unit: SubUnit; isLeader: boolean }[] {
+  const results: { unit: SubUnit; isLeader: boolean }[] = []
+
+  for (const unit of subUnits) {
+    for (const entry of unit.members) {
+      const match = entry.match(/^S(\d+)\b/)
+      if (match && Number(match[1]) === memberId) {
+        results.push({
+          unit,
+          isLeader: entry.includes("(Leader)"),
+        })
+        break
+      }
+    }
+  }
+
+  return results
+}
+
+const SUBUNIT_ALBUM_IDS: Record<string, string[]> = {
+  "acid-angel-from-asia": ["access"],
+  "krystal-eyes": ["aesthetic", "touch"],
+  "acid-eyes": ["cherry-gene"],
+  lovelution: ["muhan"],
+  evolution: ["mujuk"],
+  nxt: ["just-do-it"],
+  aria: ["structure-of-sadness"],
+  glow: ["inner-dance"],
+  "visionary-vision": ["performante"],
+  hatchi: ["untitled", "secrethimitsubimil"],
+  alphie: [],
+  moon: ["beyond-beauty", "dream-dress"],
+  sun: ["beyond-beauty", "dna"],
+  neptune: ["beyond-beauty", "welcome-to-heaven"],
+  zenith: ["beyond-beauty", "see-you"],
+}
+
+/**
+ * Resolves all official releases for a given Dimension, preserving
+ * `getAllAlbums()` order.
+ */
+export function getAlbumsForSubUnit(unit: SubUnit): Album[] {
+  const albumIds = SUBUNIT_ALBUM_IDS[unit.slug] ?? []
+  if (albumIds.length === 0) return []
+  const idSet = new Set(albumIds)
+  return getAllAlbums().filter((album) => idSet.has(album.id))
 }
