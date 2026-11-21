@@ -1,19 +1,16 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useReducedMotion } from "motion/react"
+import { ArrowUpRight } from "lucide-react"
+import ScrollExpand from "@/components/scroll-expand"
+import { useSafeReducedMotion } from "@/lib/a11y"
 
 export default function VideoShowreelSection() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const videoCardRef = useRef<HTMLDivElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const controlsRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const [isMuted, setIsMuted] = useState(true)
-  const shouldReduceMotion = useReducedMotion()
+  const shouldReduceMotion = useSafeReducedMotion()
 
   const toggleSound = () => {
     if (!videoRef.current) return
@@ -69,118 +66,61 @@ export default function VideoShowreelSection() {
     }
   }, [shouldReduceMotion])
 
-  // GPU-accelerated clip-path expansion (zero DOM reflow)
-  useEffect(() => {
-    if (shouldReduceMotion || !sectionRef.current || !videoCardRef.current) {
-      return
-    }
-
-    gsap.registerPlugin(ScrollTrigger)
-
-    const ctx = gsap.context(() => {
-      const isMobile = window.innerWidth < 768
-
-      const initialInset = isMobile
-        ? "inset(24vh 6vw 24vh 6vw round 1.5rem)"
-        : "inset(16vh 25vw 16vh 25vw round 2.5rem)"
-
-      const finalInset = "inset(0vh 0vw 0vh 0vw round 0rem)"
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=100vh",
-          scrub: 0.3,
-        },
-      })
-
-      tl.fromTo(
-        videoCardRef.current,
-        { clipPath: initialInset },
-        {
-          clipPath: finalInset,
-          ease: "power2.inOut",
-          duration: 1,
-        },
-        0
-      )
-
-      if (overlayRef.current) {
-        tl.fromTo(
-          overlayRef.current,
-          { opacity: 0.2 },
-          { opacity: 0.65, ease: "power1.inOut", duration: 0.8 },
-          0.2
-        )
-      }
-
-      if (controlsRef.current) {
-        tl.fromTo(
-          controlsRef.current,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, ease: "power2.out", duration: 0.6 },
-          0.3
-        )
-      }
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [shouldReduceMotion])
-
   return (
     <section
       ref={sectionRef}
-      aria-labelledby="showreel-heading"
       className="video-scroll_wrap relative w-full bg-[#08080A] text-white overflow-x-clip"
     >
-      <h2 id="showreel-heading" className="sr-only">
-        tripleS &apos;Andless&apos; Music Video Showcase
+      <h2 className="sr-only">
+        The Idol Of All Possibilities, tripleS Showreel
       </h2>
 
-      {/* Sticky Viewport: Expanding Video Showreel */}
-      <div className="sticky top-0 h-dvh w-full overflow-hidden flex items-center justify-center z-0">
-        <div
-          ref={videoCardRef}
-          className="absolute inset-0 w-full h-full overflow-hidden bg-[#08080A] will-change-[clip-path]"
-        >
-          <video
-            ref={videoRef}
-            loop
-            muted
-            playsInline
-            preload="none"
-            poster="/home/andless_showreel_poster.jpg"
-            aria-hidden="true"
-            className="w-full h-full object-cover brightness-[0.9] contrast-[1.05]"
-          >
-            <source src="/home/andless_showreel.webm" type="video/webm" />
-            <source src="/home/andless_showreel.mp4" type="video/mp4" />
-          </video>
-
-          <div
-            ref={overlayRef}
-            className="absolute inset-0 bg-black/60 pointer-events-none z-10"
-          />
-
-          <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-t from-[#08080A] via-[#08080A]/60 to-transparent pointer-events-none z-10" />
+      <ScrollExpand
+        mediaType="video"
+        sources={[
+          { src: "/home/andless_showreel.webm", type: "video/webm" },
+          { src: "/home/andless_showreel.mp4", type: "video/mp4" },
+        ]}
+        poster="/home/andless_showreel_poster.jpg"
+        width={1920}
+        height={1080}
+        loading="lazy"
+        videoRef={videoRef}
+        autoPlayVideo={false}
+        preload="none"
+        title={
+          <span className="flex flex-col items-center text-center select-none">
+            <span className="font-display font-medium text-[clamp(1.125rem,2.2vw,2rem)] tracking-[-0.025em] leading-[1.15] text-white/80 mb-[clamp(0.3rem,0.6vw,0.55rem)]">
+              The Idol Of
+            </span>
+            <span className="font-display font-extrabold text-[clamp(2.35rem,6.2vw,5.85rem)] tracking-[-0.04em] leading-[1.02] text-white whitespace-nowrap">
+              All Possibilities
+            </span>
+          </span>
+        }
+        useWindowScroll
+        enabled={!shouldReduceMotion}
+      >
+        <div className="w-full max-w-2xl mx-auto text-center text-white select-none pointer-events-none flex flex-col items-center">
+          <h3 className="font-display font-extrabold tracking-[-0.035em] leading-[1.05] text-white text-[clamp(2rem,4.5vw,4.25rem)] max-w-[16ch] mb-5 [text-shadow:0_4px_24px_rgba(0,0,0,0.85)]">
+            We are one, and also twenty-four.
+          </h3>
+          <p className="font-sans text-sm sm:text-base md:text-lg text-zinc-200/90 max-w-[44ch] leading-relaxed [text-shadow:0_2px_18px_rgba(0,0,0,0.9)]">
+            Twenty-four members assemble across fan-voted Dimensions, where WAV shape every unit, title track, and era.
+          </p>
         </div>
 
         {/* Compact Utility Controls */}
-        <div
-          ref={controlsRef}
-          className="absolute bottom-5 sm:bottom-8 inset-x-0 z-30 flex items-center justify-center gap-2 sm:gap-2.5 px-3 pointer-events-none"
-        >
+        <div className="absolute bottom-5 sm:bottom-8 inset-x-0 z-30 flex items-center justify-center gap-2 sm:gap-2.5 px-3 pointer-events-none">
           <button
             type="button"
             role="switch"
             aria-checked={!isMuted}
             onClick={toggleSound}
-            className="group pointer-events-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/85 backdrop-blur-md border border-white/20 hover:border-white/40 transition-[background-color,border-color,transform] duration-200 text-[10px] sm:text-[11px] font-mono font-medium uppercase tracking-wider text-white shadow-xl cursor-pointer active:scale-95"
+            className="group pointer-events-auto inline-flex items-center gap-2 min-h-8 [@media(pointer:coarse)]:min-h-11 px-3.5 [@media(pointer:coarse)]:px-4 py-1.5 rounded-full bg-black/70 hover:bg-black/85 backdrop-blur-md border border-white/20 hover:border-white/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4FF00] transition-[background-color,border-color,transform] duration-200 text-[10px] sm:text-[11px] font-mono font-medium uppercase tracking-wider text-white shadow-xl cursor-pointer active:scale-95"
           >
             <span className="text-zinc-300 group-hover:text-white transition-colors">
-              Sound {isMuted ? "Off" : "On"}
+              Sound
             </span>
             <span
               aria-hidden="true"
@@ -203,30 +143,17 @@ export default function VideoShowreelSection() {
             href="https://www.youtube.com/watch?v=uqJ6GDJSyfY"
             target="_blank"
             rel="noopener noreferrer"
-            className="group pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/85 backdrop-blur-md border border-white/20 hover:border-white/40 text-zinc-300 hover:text-white font-mono text-[10px] sm:text-[11px] uppercase tracking-wider transition-[background-color,border-color,color,transform] duration-200 shadow-xl active:scale-95"
+            className="group pointer-events-auto inline-flex items-center gap-1.5 min-h-8 [@media(pointer:coarse)]:min-h-11 px-3.5 [@media(pointer:coarse)]:px-4 py-1.5 rounded-full bg-black/70 hover:bg-black/85 backdrop-blur-md border border-white/20 hover:border-white/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4FF00] text-zinc-300 hover:text-white font-mono text-[10px] sm:text-[11px] uppercase tracking-wider transition-[background-color,border-color,color,transform] duration-200 shadow-xl active:scale-95"
           >
             <span>Watch MV</span>
-            <span className="text-[11px] text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true">↗</span>
+            <ArrowUpRight
+              className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
           </a>
         </div>
-      </div>
-
-      {/* Scrolling Editorial Statement Over Pinned Video */}
-      <div className="relative z-20 min-h-[220vh] flex flex-col items-center justify-start px-4 sm:px-6 pointer-events-none mt-[-100dvh] pt-[105vh] sm:pt-[110vh] pb-[50vh]">
-        <div className="w-full max-w-4xl mx-auto text-center text-white select-none">
-          <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-[2.35rem] xl:text-[2.55rem] font-display font-extrabold uppercase tracking-tight leading-[1.12] sm:leading-[1.08] lg:leading-[1.06] text-[#F8F8FA] [text-shadow:0_4px_24px_rgba(0,0,0,0.95)]">
-            tripleS is the K-pop girl group of{" "}
-            <span className="font-accent lowercase font-normal text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[3.85rem] text-[#D4FF00] inline-block px-1 align-baseline">
-              all
-            </span>{" "}
-            possibilities. With 24 members assembling across dynamic{" "}
-            <span className="font-accent lowercase font-normal text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[3.85rem] text-[#D4FF00] inline-block px-1 align-baseline">
-              dimensions,
-            </span>{" "}
-            WAV shape every unit, title track, and era.
-          </p>
-        </div>
-      </div>
+      </ScrollExpand>
     </section>
   )
 }

@@ -6,7 +6,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { motion } from "motion/react"
 import {
-  ArrowRight,
+  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   Crown,
@@ -20,7 +20,9 @@ import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
+import DimensionWordmark from "@/components/dimension-wordmark"
 import { useSafeReducedMotion } from "@/lib/a11y"
+import { useIsDarkMode } from "@/lib/theme"
 
 interface SubUnitDetailClientProps {
   slug: string
@@ -142,6 +144,7 @@ const UNIT_STORIES: Record<string, UnitStory> = {
 
 export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) {
   const shouldReduceMotion = useSafeReducedMotion()
+  const isDark = useIsDarkMode()
   const unit = getSubUnitBySlug(slug)
   const allUnits = getAllSubUnits()
   const allAlbums = getAllAlbums()
@@ -248,20 +251,20 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             <div className="flex items-center gap-3 text-xs font-mono text-zinc-500">
               <Link
                 href={`/sub-units/${prevUnit.slug}`}
-                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center gap-1"
-                title={`Previous: ${prevUnit.name}`}
+                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center justify-center gap-1 min-w-6 min-h-6"
+                aria-label={`Prev Dimension: ${prevUnit.name}`}
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">Prev Dimension</span>
               </Link>
-              <span>/</span>
+              <span aria-hidden="true">/</span>
               <Link
                 href={`/sub-units/${nextUnit.slug}`}
-                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center gap-1"
-                title={`Next: ${nextUnit.name}`}
+                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center justify-center gap-1 min-w-6 min-h-6"
+                aria-label={`Next Dimension: ${nextUnit.name}`}
               >
                 <span className="hidden sm:inline">Next Dimension</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
           }
@@ -271,47 +274,64 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
         <section className="pt-4 pb-16 sm:pb-24 border-b border-zinc-200/70 dark:border-white/10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
             
-            {/* Left: Pure Concept Photography (No Overlaid Badges or Widgets) */}
-            <div className="lg:col-span-7 relative aspect-4/3 rounded-3xl overflow-hidden bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-white/10 group">
+            {/* Left: Pure 3:2 Concept Photography Plate */}
+            <div className="lg:col-span-7 relative aspect-3/2 rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900 group">
               <Image
                 src={unit.image || "/placeholder.svg"}
                 alt={`${unit.name} concept photo`}
                 fill
                 preload
+                fetchPriority="high"
                 sizes="(max-width: 1024px) 100vw, 58vw"
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-102"
+                className="object-cover object-center transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
               />
             </div>
 
-            {/* Right: Typography & Editorial Specification */}
+            {/* Right: Official Logo Hero & Editorial Specification */}
             <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : { opacity: 0, transform: "translate3d(0, 14px, 0)" }
+              }
+              animate={{ opacity: 1, transform: "translate3d(0, 0, 0)" }}
               transition={{
-                duration: shouldReduceMotion ? 0.01 : 0.5,
-                delay: shouldReduceMotion ? 0 : 0.1,
+                duration: shouldReduceMotion ? 0 : 0.35,
+                ease: [0.23, 1, 0.32, 1],
               }}
-              className="lg:col-span-5 space-y-6"
+              className="lg:col-span-5 space-y-6 min-w-0"
             >
               {/* Context Tag */}
-              <div className="flex items-center gap-2.5 text-xs font-mono text-zinc-500">
-                <span className="font-bold text-zinc-950 dark:text-[#D4FF00] uppercase tracking-wider">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-mono text-zinc-600 dark:text-zinc-400">
+                <span className="font-bold text-zinc-950 dark:text-[#D4FF00] uppercase tracking-[0.14em]">
                   {unit.era}
                 </span>
-                <span>&bull;</span>
-                <span className="inline-flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                <span aria-hidden="true">/</span>
+                <span className="inline-flex items-center gap-1">
                   Voted by{" "}
                   <WavWordmark className="h-[0.8em] inline-block align-baseline text-zinc-950 dark:text-[#D4FF00]" />
                 </span>
               </div>
 
-              {/* Title & Hangul */}
-              <div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]">
-                  {unit.name}
+              {/* Official Dimension Logo, Name & Hangul */}
+              <div className="space-y-3 pt-1">
+                <h1 className="text-zinc-950 dark:text-white">
+                  <DimensionWordmark
+                    slug={unit.slug}
+                    name={unit.name}
+                    size="hero"
+                  />
                 </h1>
-                <p className="text-base sm:text-lg font-mono text-zinc-500 dark:text-zinc-400 mt-1">
-                  {unit.hangul}
+                <p className="text-sm sm:text-base font-mono text-zinc-600 dark:text-zinc-400 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
+                  <span className="font-semibold text-zinc-950 dark:text-zinc-200">
+                    {unit.name}
+                  </span>
+                  {unit.hangul && (
+                    <>
+                      <span aria-hidden="true">/</span>
+                      <span lang="ko">{unit.hangul}</span>
+                    </>
+                  )}
                 </p>
               </div>
 
@@ -411,24 +431,29 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             {taggedMembers.map(({ member, isLeader, color }, index) => (
               <motion.div
                 key={member.id}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={
+                  shouldReduceMotion
+                    ? false
+                    : { opacity: 0, transform: "translate3d(0, 14px, 0)" }
+                }
+                animate={{ opacity: 1, transform: "translate3d(0, 0, 0)" }}
                 transition={{
-                  duration: shouldReduceMotion ? 0.01 : 0.4,
-                  delay: shouldReduceMotion ? 0 : index * 0.04,
+                  duration: shouldReduceMotion ? 0 : 0.3,
+                  delay: shouldReduceMotion ? 0 : index * 0.03,
+                  ease: [0.23, 1, 0.32, 1],
                 }}
               >
                 <Link
                   href={`/members/${member.slug}`}
-                  className="group block relative aspect-3/4.25 rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 shadow-md hover:shadow-2xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1.5 border border-zinc-200/50 dark:border-white/5"
+                  className="group block relative aspect-3/4.25 rounded-2xl overflow-hidden bg-zinc-950 active:scale-[0.98] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 >
                   {/* Portrait Photograph */}
                   <Image
-                    src={getMemberImageUrl(member)}
+                    src={getMemberImageUrl(member, isDark)}
                     alt={`${member.name} (${member.birthName || member.name}) photocard`}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-104"
+                    className="object-cover object-top transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
@@ -448,7 +473,12 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                       <h3 className="text-base sm:text-lg font-display font-black tracking-tight text-white leading-tight">
                         {member.name}
                       </h3>
-                      {isLeader && <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                      {isLeader && (
+                        <>
+                          <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
+                          <span className="sr-only"> (Leader)</span>
+                        </>
+                      )}
                     </div>
 
                     <p className="text-[11px] font-mono text-zinc-300 truncate mt-0.5">
@@ -487,7 +517,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                       alt={`${album.title} album cover`}
                       fill
                       sizes="(max-width: 640px) 100vw, 176px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
                     />
                   </div>
 
@@ -532,48 +562,53 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
 
         {/* ── 6. Other Dimensions ── */}
         <section className="pt-14 sm:pt-20">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
-                Other Dimensions
-              </h2>
-            </div>
+          <div className="flex items-end justify-between gap-4 mb-8 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
+              Other Dimensions
+            </h2>
             <Link
               href="/sub-units"
-              className="text-xs font-mono uppercase tracking-wider font-bold text-zinc-950 dark:text-[#D4FF00] hover:underline inline-flex items-center gap-1"
+              className="nav-draw-link group/all text-xs font-mono uppercase tracking-[0.16em] font-bold text-zinc-950 dark:text-[#D4FF00] pb-0.5 inline-flex items-center gap-1.5 shrink-0"
             >
-              <span>All 15 Units</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <span>All {allUnits.length} Dimensions</span>
+              <ArrowUpRight
+                className="h-3.5 w-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:translate-x-0.5 [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:-translate-y-0.5 motion-reduce:transition-none"
+                aria-hidden="true"
+              />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
             {otherUnits.slice(0, 4).map((other) => (
               <Link
                 key={other.id}
                 href={`/sub-units/${other.slug}`}
-                className="group block relative aspect-4/5 rounded-2xl overflow-hidden bg-zinc-900 shadow-md hover:shadow-xl transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1 border border-zinc-200/50 dark:border-white/5"
+                className="group block rounded-2xl active:scale-[0.99] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
               >
-                <Image
-                  src={other.image || "/placeholder.svg"}
-                  alt={`${other.name} concept photo`}
-                  fill
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
-
-                <div className="absolute top-3 left-3 z-10 text-white font-mono text-xs font-bold">
-                  #{String(other.id).padStart(2, "0")}
+                <div className="relative aspect-3/2 rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900">
+                  <Image
+                    src={other.image || "/placeholder.svg"}
+                    alt={`${other.name} concept photo`}
+                    fill
+                    loading="lazy"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover object-center transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
+                  />
                 </div>
 
-                <div className="absolute bottom-3 left-3 right-3 text-white z-10 space-y-0.5">
-                  <span className="text-[10px] font-mono text-zinc-300 uppercase block">
-                    {other.category}
-                  </span>
-                  <h3 className="text-sm font-display font-black truncate">
-                    {other.name}
+                <div className="mt-3 pt-2.5 border-t border-zinc-200/80 dark:border-white/10 space-y-1.5">
+                  <h3 className="min-h-10 flex items-center text-zinc-950 dark:text-white transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-zinc-600 dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:text-[#D4FF00]">
+                    <DimensionWordmark
+                      slug={other.slug}
+                      name={other.name}
+                      size="mini"
+                      className="w-full"
+                    />
                   </h3>
+                  <p className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between gap-2">
+                    <span className="truncate">{other.era}</span>
+                    <span className="tabular-nums shrink-0">{other.members.length}M</span>
+                  </p>
                 </div>
               </Link>
             ))}

@@ -25,6 +25,7 @@
     --input: 240 5.9% 90%;
     --ring: 263 90% 66%;
     --radius: 0.75rem;
+    --font-display: "Pretendard Variable";
   }
 
   .dark {
@@ -59,7 +60,8 @@
     @apply bg-background text-foreground font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display), system-ui, sans-serif;
+    font-family: var(--font-display), Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif;
+    font-size-adjust: from-font;
   }
   h1, h2, h3 {
     text-wrap: balance;
@@ -432,10 +434,67 @@
   }
 }
 
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes reveal-fade-start {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes hide-fade-end {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+@layer components {
+  /* Edge fade scrollability hint for horizontal scroll strips with hidden scrollbars */
+  .horizontal-scroll-fade {
+    --fade-size: 2.5rem;
+    scroll-padding-inline: var(--fade-size);
+    mask:
+      linear-gradient(black, black) no-clip subtract,
+      linear-gradient(to right, black, transparent) 0 0 / var(--fade-start) 100% no-repeat no-clip,
+      linear-gradient(to right, transparent, black) 100% 0 / var(--fade-end) 100% no-repeat no-clip;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .horizontal-scroll-fade {
+      animation: reveal-fade-start linear both, hide-fade-end linear both;
+      animation-timeline: scroll(self inline);
+      animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+    }
+  }
+
+  @supports not (animation-timeline: scroll()) {
+    .horizontal-scroll-fade {
+      transition: --fade-start 0.2s ease, --fade-end 0.2s ease;
+    }
+    .horizontal-scroll-fade.more-start {
+      --fade-start: var(--fade-size);
+    }
+    .horizontal-scroll-fade.more-end {
+      --fade-end: var(--fade-size);
+    }
+  }
+}
+
 @layer utilities {
   /* Calligraphic Luxury Flourish (Pinyon Script) */
   .font-accent {
     font-family: var(--font-accent), cursive;
+    font-size-adjust: none;
   }
 
   /* Hollow Outline Text Utility */

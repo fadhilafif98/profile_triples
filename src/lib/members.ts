@@ -134,29 +134,63 @@ export function getReadableMemberColor(hex: string, onDark = true): string {
   return hex
 }
 
+// Bump when replacing member portrait/cover files under the same filename to bust /_next/image + CDN cache.
+const MEMBER_IMAGE_VERSION = "2"
+
 /**
- * Resolves official member portrait image URL using local Andless assets in public/members/.
+ * Resolves official hero OT24 group cover URL for light or dark mode.
+ */
+export function getHeroCoverImageUrl(dark = false): string {
+  return dark
+    ? `/members/dark/00-cover.jpg?v=${MEMBER_IMAGE_VERSION}`
+    : "/home/triples_hero.jpg"
+}
+
+/**
+ * Resolves official member portrait image URL using local Andless assets
+ * in public/members/light/ (light) and public/members/dark/ (dark).
  */
 export function getMemberImageUrl(
-  memberOrImage?: { id?: number; image?: string; slug?: string } | string | null
+  memberOrImage?: { id?: number; image?: string; slug?: string } | string | null,
+  dark = false
 ): string {
   if (!memberOrImage) return ""
 
+  const variant = dark ? "dark" : "light"
+
+  const withVersion = (url: string): string => {
+    if (!url.startsWith("/members/") || url.includes("?")) return url
+    return `${url}?v=${MEMBER_IMAGE_VERSION}`
+  }
+
+  const resolveVariantPath = (url: string): string => {
+    if (url.startsWith("/members/light/")) {
+      return withVersion(dark ? url.replace("/members/light/", "/members/dark/") : url)
+    }
+    if (url.startsWith("/members/dark/")) {
+      return withVersion(dark ? url : url.replace("/members/dark/", "/members/light/"))
+    }
+    if (url.startsWith("/members/")) {
+      return withVersion(url.replace("/members/", `/members/${variant}/`))
+    }
+    return url
+  }
+
   if (typeof memberOrImage === "string") {
     if (memberOrImage.startsWith("/") || memberOrImage.startsWith("http")) {
-      return memberOrImage
+      return resolveVariantPath(memberOrImage)
     }
     return ""
   }
 
   if (memberOrImage.image) {
     if (memberOrImage.image.startsWith("/") || memberOrImage.image.startsWith("http")) {
-      return memberOrImage.image
+      return resolveVariantPath(memberOrImage.image)
     }
   }
 
   if (memberOrImage.id) {
-    return `/members/s${String(memberOrImage.id).padStart(2, "0")}.jpg`
+    return `/members/${variant}/s${String(memberOrImage.id).padStart(2, "0")}.jpg?v=${MEMBER_IMAGE_VERSION}`
   }
 
   return ""

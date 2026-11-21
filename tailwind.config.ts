@@ -27,7 +27,7 @@ const config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-body)", "system-ui", "-apple-system", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Pretendard", "-apple-system", "BlinkMacSystemFont", "Apple SD Gothic Neo", "system-ui", "sans-serif"],
         accent: ["var(--font-accent)", "cursive"],
         mono: ["var(--font-mono)", "monospace"],
       },

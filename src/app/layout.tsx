@@ -1,7 +1,7 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata, Viewport } from "next"
-import { Syne, Manrope, Pinyon_Script, JetBrains_Mono } from "next/font/google"
+import { Manrope, Pinyon_Script, JetBrains_Mono } from "next/font/google"
 import SmoothScroll from "@/components/smooth-scroll"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
@@ -10,12 +10,6 @@ import BackToTop from "@/components/back-to-top"
 import PageTransition from "@/components/page-transition"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
-
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-})
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -44,6 +38,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://profile-triples.vercel.app"),
   title: "tripleS | Fanmade Website",
   description: "The fanmade website of triples, a 24-member girl group “the idol of all possibilities“. ",
+  referrer: "strict-origin-when-cross-origin",
 }
 
 export default function RootLayout({
@@ -53,7 +48,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light" suppressHydrationWarning>
-      <body className={`${manrope.variable} ${syne.variable} ${pinyonScript.variable} ${jetbrainsMono.variable} font-sans antialiased selection:bg-[#D4FF00] selection:text-black`}>
+      <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
+          integrity="sha384-uR1wgObmx89ZQ4VVXHdzjbDJZ1PvBK01K+E3GebmaBKdZ87qRJvBWPoPbzWeEd5T"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
+      <body className={`${manrope.variable} ${pinyonScript.variable} ${jetbrainsMono.variable} font-sans antialiased selection:bg-[#D4FF00] selection:text-black`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           {/* Skip to Main Content Link for Keyboard / Screen Reader Accessibility (WCAG 2.4.1) */}
           <a
