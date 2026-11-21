@@ -15,7 +15,8 @@ import {
 } from "lucide-react"
 import { FaSpotify } from "react-icons/fa"
 import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"
-import { getMemberById, getMemberColor, getContrastingInk, getMemberImageUrl } from "@/lib/members"
+import { getMemberById, getMemberColor, getContrastingInk } from "@/lib/members"
+import { getSubUnitMemberImageUrl } from "@/lib/sub-unit-member-images"
 import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
 import Breadcrumb from "@/components/breadcrumb"
@@ -449,7 +450,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 >
                   {/* Portrait Photograph */}
                   <Image
-                    src={getMemberImageUrl(member, isDark)}
+                    src={getSubUnitMemberImageUrl(unit.slug, member, isDark)}
                     alt={`${member.name} (${member.birthName || member.name}) photocard`}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
