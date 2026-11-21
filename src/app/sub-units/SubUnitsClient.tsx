@@ -10,6 +10,7 @@ import { getMemberById, getMemberColor, getMemberImageUrl } from "@/lib/members"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
 import DimensionWordmark from "@/components/dimension-wordmark"
+import ThemeImage from "@/components/theme-image"
 import { useSafeReducedMotion } from "@/lib/a11y"
 import { useIsDarkMode } from "@/lib/theme"
 
@@ -278,7 +279,7 @@ export default function SubUnitsClient() {
                                   }}
                                 >
                                   {m.image ? (
-                                    <Image
+                                    <ThemeImage
                                       src={getMemberImageUrl(m, isDark)}
                                       alt=""
                                       fill

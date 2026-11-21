@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo, useRef, useDeferredValue, useCallback, startTransition } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import ThemeImage from "@/components/theme-image";
 import {
   Search,
   SearchX,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
-  Layers,
 } from "lucide-react";
 import { GroupedObjekt, Objekt } from "@/types/objekt";
 import { membersList, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members";
@@ -480,7 +480,7 @@ export default function ObjektsClient({
                     }}
                   >
                     <div className="relative w-full h-full rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10">
-                      <Image
+                      <ThemeImage
                         src={getMemberImageUrl(m, isDark)}
                         alt={`${m.name} (S${m.id}) avatar`}
                         fill
@@ -578,36 +578,54 @@ export default function ObjektsClient({
                 type="button"
                 role="switch"
                 aria-checked={effectiveGrouping}
-                disabled={selectedOnOffline !== "All"}
-                onClick={() => setGroupVariants((prev) => !prev)}
-                className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border transition-colors ${
+                aria-disabled={selectedOnOffline !== "All" || undefined}
+                onClick={() => {
+                  if (selectedOnOffline !== "All") return;
+                  setGroupVariants((prev) => !prev);
+                }}
+                className={`inline-flex items-center gap-2 min-h-8 pl-2 pr-2.5 py-1 rounded-full border transition-[background-color,border-color,color,transform] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] ${
                   selectedOnOffline !== "All"
-                    ? "opacity-50 cursor-not-allowed bg-zinc-100 dark:bg-white/5 border-zinc-200/60 dark:border-white/10 text-zinc-500"
-                    : effectiveGrouping
-                    ? "bg-zinc-950 text-white border-zinc-950 dark:bg-[#D4FF00]/15 dark:text-[#D4FF00] dark:border-[#D4FF00]/40"
-                    : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-white/30"
+                    ? "opacity-55 cursor-not-allowed bg-zinc-100/80 dark:bg-white/[0.03] border-zinc-200/70 dark:border-white/10 text-zinc-500 dark:text-zinc-400"
+                    : "cursor-pointer active:scale-[0.98] motion-reduce:active:scale-100 bg-zinc-50 dark:bg-white/[0.04] border-zinc-200/90 dark:border-white/12 text-zinc-900 dark:text-zinc-100 hover:border-zinc-400 dark:hover:border-white/25"
                 }`}
-                title="Merge matching Online (Z) and Offline (A) photocards into a single card"
+                title="Group matching Offline (A) and Online (Z) photocards into one card"
               >
-                <Layers className="h-3.5 w-3.5 shrink-0" />
-                <span className="font-semibold">Merge A / Z Pairs</span>
                 <span
-                  className={`px-1.5 py-0.2 rounded text-[0.625rem] font-bold uppercase ${
+                  aria-hidden="true"
+                  className={`relative inline-flex h-4 w-7 shrink-0 items-center rounded-full transition-colors duration-200 ${
                     effectiveGrouping
-                      ? "bg-white/20 dark:bg-[#D4FF00] dark:text-black"
-                      : "bg-zinc-200/80 dark:bg-white/10 text-zinc-700 dark:text-zinc-300"
+                      ? "bg-zinc-950 dark:bg-[#D4FF00]"
+                      : "bg-zinc-300 dark:bg-zinc-700"
                   }`}
                 >
-                  {selectedOnOffline !== "All" ? "N/A" : effectiveGrouping ? "ON" : "OFF"}
+                  <span
+                    className={`inline-block h-3 w-3 rounded-full shadow-xs transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                      effectiveGrouping
+                        ? "translate-x-3.5 bg-white dark:bg-zinc-950"
+                        : "translate-x-0.5 bg-white dark:bg-zinc-200"
+                    }`}
+                  />
+                </span>
+
+                <span className="font-semibold tracking-tight whitespace-nowrap">
+                  Group A·Z
+                </span>
+
+                <span
+                  aria-hidden="true"
+                  className="h-3 w-px bg-zinc-200 dark:bg-white/12 shrink-0"
+                />
+
+                <span className="text-[0.6875rem] tabular-nums whitespace-nowrap text-zinc-500 dark:text-zinc-400">
+                  {selectedOnOffline !== "All"
+                    ? `${selectedOnOffline} only`
+                    : effectiveGrouping
+                    ? mergedDuplicateCount > 0
+                      ? `${mergedDuplicateCount.toLocaleString("en-US")} pairs`
+                      : "Offline + Online"
+                    : "Split A & Z"}
                 </span>
               </button>
-
-              {mergedDuplicateCount > 0 && (
-                <span className="text-[0.6875rem] text-zinc-500 dark:text-zinc-400">
-                  {mergedDuplicateCount.toLocaleString("en-US")} duplicate{" "}
-                  {mergedDuplicateCount === 1 ? "pair" : "pairs"} combined
-                </span>
-              )}
             </div>
 
             {hasActiveFilters && (
@@ -692,10 +710,10 @@ export default function ObjektsClient({
                 )}
                 {!groupVariants && (
                   <span className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-md bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200">
-                    Show A/Z Separately
+                    Split A &amp; Z
                     <button
                       type="button"
-                      aria-label="Re-enable Merge A / Z Pairs"
+                      aria-label="Re-enable Group A·Z"
                       onClick={() => setGroupVariants(true)}
                       className="min-w-6 min-h-6 inline-flex items-center justify-center rounded hover:text-black dark:hover:text-white"
                     >

@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useCallback, useRef } from "react"
-import Image from "next/image"
 import Link from "next/link"
+import ThemeImage from "@/components/theme-image"
 import { motion, AnimatePresence } from "motion/react"
 import { X, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { Member } from "@/types/member"
@@ -45,7 +45,7 @@ const MemberCard = React.memo(({ member, isDark, onSelect }: { member: Member; i
       />
 
       {/* Main portrait image */}
-      <Image
+      <ThemeImage
         src={getMemberImageUrl(member, isDark)}
         alt={`${member.name} (${member.birthName || member.name}) portrait`}
         fill
@@ -199,7 +199,7 @@ export default function MemberGrid() {
               />
 
               {/* Full Portrait Photo */}
-              <Image
+              <ThemeImage
                 src={getMemberImageUrl(selectedMember, isDark)}
                 alt={`${selectedMember.name} (${selectedMember.birthName || selectedMember.name}) photocard portrait`}
                 fill

@@ -6,6 +6,7 @@ interface TriplesLogoProps {
   className?: string;
   strokeWidth?: number;
   strokeColor?: string;
+  decorative?: boolean;
 }
 
 /**
@@ -18,6 +19,7 @@ export default function TriplesLogo({
   className = "",
   strokeWidth = 180,
   strokeColor = "currentColor",
+  decorative = false,
 }: TriplesLogoProps) {
   return (
     <svg
@@ -25,7 +27,9 @@ export default function TriplesLogo({
       height={height}
       viewBox="0 0 800 800"
       className={`shrink-0 ${className}`}
-      aria-label="tripleS Logo"
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : "tripleS Logo"}
+      aria-hidden={decorative ? true : undefined}
     >
       <g
         transform="translate(0.000000,800.000000) scale(0.100000,-0.100000)"

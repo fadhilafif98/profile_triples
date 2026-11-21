@@ -14,14 +14,14 @@ import {
   ExternalLink,
 } from "lucide-react"
 import { FaSpotify } from "react-icons/fa"
-import { getSubUnitBySlug, getAllSubUnits } from "@/lib/sub-units"
+import { getSubUnitBySlug, getAllSubUnits, getAlbumsForSubUnit } from "@/lib/sub-units"
 import { getMemberById, getMemberColor, getContrastingInk } from "@/lib/members"
 import { getSubUnitMemberImageUrl } from "@/lib/sub-unit-member-images"
-import { getAllAlbums } from "@/lib/albums"
 import { Member } from "@/types/member"
 import Breadcrumb from "@/components/breadcrumb"
 import WavWordmark from "@/components/wav-wordmark"
 import DimensionWordmark from "@/components/dimension-wordmark"
+import ThemeImage from "@/components/theme-image"
 import { useSafeReducedMotion } from "@/lib/a11y"
 import { useIsDarkMode } from "@/lib/theme"
 
@@ -148,7 +148,6 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
   const isDark = useIsDarkMode()
   const unit = getSubUnitBySlug(slug)
   const allUnits = getAllSubUnits()
-  const allAlbums = getAllAlbums()
 
   if (!unit) {
     notFound()
@@ -208,30 +207,8 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
   // Resolve related album releases
   const relatedReleases = useMemo(() => {
     if (!unit) return []
-    const unitNameClean = unit.name.toLowerCase().split(" (")[0]
-    return allAlbums.filter((album) => {
-      const aUnit = (album.unit || "").toLowerCase()
-      if (unit.slug === "acid-angel-from-asia") return aUnit.includes("acid angel") || album.id === "01-access"
-      if (unit.slug === "krystal-eyes") return aUnit.includes("krystal") || album.id === "03-aesthetic" || album.id === "04-touch"
-      if (unit.slug === "acid-eyes") return aUnit.includes("acid eyes") || album.id === "05-cherry-gene"
-      if (unit.slug === "lovelution") return aUnit.includes("lovelution") || album.id === "06-muhan"
-      if (unit.slug === "evolution") return aUnit.includes("evolution") || album.id === "07-mujuk"
-      if (unit.slug === "nxt") return aUnit.includes("nxt") || album.id === "08-just-do-it"
-      if (unit.slug === "aria") return aUnit.includes("aria") || album.id === "09-structure-of-sadness"
-      if (unit.slug === "glow") return aUnit.includes("glow") || album.id === "11-inner-dance"
-      if (unit.slug === "visionary-vision") return aUnit.includes("visionary") || aUnit.includes("vv") || album.id === "13-performante"
-      if (unit.slug === "hatchi") return aUnit.includes("hatchi") || aUnit.includes("∞!") || album.id === "14-untitled" || album.id === "16-secrethimitsubimil"
-      if (unit.category === "msnz Project") {
-        return (
-          aUnit.includes(unit.slug) ||
-          album.id === "17-beyond-beauty" ||
-          album.id === "beyond-beauty" ||
-          (aUnit.includes("msnz") && !aUnit.includes("moon") && !aUnit.includes("sun") && !aUnit.includes("neptune") && !aUnit.includes("zenith"))
-        )
-      }
-      return aUnit.includes(unitNameClean) || aUnit.includes(unit.slug)
-    })
-  }, [unit, allAlbums])
+    return getAlbumsForSubUnit(unit)
+  }, [unit])
 
   // Other sub-units for discovery
   const otherUnits = useMemo(() => {
@@ -239,7 +216,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
   }, [allUnits, unit.slug])
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-900 dark:text-[#F4F4F6] pt-20 sm:pt-24 lg:pt-28 pb-28 sm:pb-36 selection:bg-[#D4FF00] selection:text-black transition-colors">
+    <div className="min-h-dvh bg-[#FAFAFA] dark:bg-[#08080A] text-zinc-900 dark:text-[#F4F4F6] pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-20 selection:bg-[#D4FF00] selection:text-black transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* ── 1. Clean Navigation Bar with Prev/Next Switcher ── */}
@@ -249,22 +226,29 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             { label: unit.name },
           ]}
           action={
-            <div className="flex items-center gap-3 text-xs font-mono text-zinc-500">
+            <div className="flex items-center justify-between w-full sm:w-auto gap-2">
               <Link
                 href={`/sub-units/${prevUnit.slug}`}
-                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center justify-center gap-1 min-w-6 min-h-6"
+                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 min-h-8 [@media(pointer:coarse)]:min-h-10 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 aria-label={`Prev Dimension: ${prevUnit.name}`}
               >
                 <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
-                <span className="hidden sm:inline">Prev Dimension</span>
+                <span>Prev</span>
+                <span className="hidden sm:inline">Dimension</span>
               </Link>
-              <span aria-hidden="true">/</span>
+
+              <span className="sm:hidden inline-flex items-center gap-1 min-h-8 text-xs font-mono text-zinc-800 dark:text-zinc-200 font-bold px-3 py-1 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200/80 dark:border-white/10 tabular-nums whitespace-nowrap">
+                <span>{String(currentIndex + 1).padStart(2, "0")}</span>
+                <span className="text-zinc-400 dark:text-zinc-500 font-normal">/ {allUnits.length}</span>
+              </span>
+
               <Link
                 href={`/sub-units/${nextUnit.slug}`}
-                className="hover:text-zinc-950 dark:hover:text-[#D4FF00] transition-colors inline-flex items-center justify-center gap-1 min-w-6 min-h-6"
+                className="btn-magnetic flex items-center gap-1.5 px-3 py-1.5 min-h-8 [@media(pointer:coarse)]:min-h-10 rounded-full bg-white dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 hover:border-zinc-400 dark:hover:border-white/30 text-xs font-mono text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 aria-label={`Next Dimension: ${nextUnit.name}`}
               >
-                <span className="hidden sm:inline">Next Dimension</span>
+                <span>Next</span>
+                <span className="hidden sm:inline">Dimension</span>
                 <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
@@ -272,11 +256,11 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
         />
 
         {/* ── 2. Editorial Hero Feature (Clean, Focused, Unboxed) ── */}
-        <section className="pt-4 pb-16 sm:pb-24 border-b border-zinc-200/70 dark:border-white/10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
+        <section className="pt-2 sm:pt-4 pb-10 sm:pb-16 lg:pb-24 border-b border-zinc-200/70 dark:border-white/10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-10 lg:gap-16 items-start">
             
             {/* Left: Pure 3:2 Concept Photography Plate */}
-            <div className="lg:col-span-7 relative aspect-3/2 rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900 group">
+            <div className="lg:col-span-7 relative aspect-3/2 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900 group">
               <Image
                 src={unit.image || "/placeholder.svg"}
                 alt={`${unit.name} concept photo`}
@@ -300,7 +284,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
                 duration: shouldReduceMotion ? 0 : 0.35,
                 ease: [0.23, 1, 0.32, 1],
               }}
-              className="lg:col-span-5 space-y-6 min-w-0"
+              className="lg:col-span-5 space-y-4 sm:space-y-6 min-w-0"
             >
               {/* Context Tag */}
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-mono text-zinc-600 dark:text-zinc-400">
@@ -315,7 +299,7 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               </div>
 
               {/* Official Dimension Logo, Name & Hangul */}
-              <div className="space-y-3 pt-1">
+              <div className="space-y-2 sm:space-y-3 pt-0.5">
                 <h1 className="text-zinc-950 dark:text-white">
                   <DimensionWordmark
                     slug={unit.slug}
@@ -337,36 +321,36 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               </div>
 
               {/* Narrative Summary */}
-              <p className="text-zinc-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed">
+              <p className="text-zinc-600 dark:text-zinc-300 text-sm sm:text-base leading-relaxed text-pretty max-w-[65ch]">
                 {unit.description}
               </p>
 
               {/* Editorial Specification (Clean Definition List, No Card Chrome) */}
-              <dl className="grid grid-cols-2 gap-y-3.5 gap-x-6 pt-5 border-t border-zinc-200/70 dark:border-white/10 text-xs font-mono">
-                <div>
+              <dl className="grid grid-cols-2 gap-y-3 gap-x-4 sm:gap-y-3.5 sm:gap-x-6 pt-4 sm:pt-5 border-t border-zinc-200/70 dark:border-white/10 text-xs font-mono">
+                <div className="min-w-0">
                   <dt className="text-zinc-500 dark:text-zinc-400">Formation</dt>
-                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
+                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5 break-words">
                     {taggedMembers.length} Members {leaderName ? `(Leader: ${leaderName})` : ""}
                   </dd>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <dt className="text-zinc-500 dark:text-zinc-400">Debut Release</dt>
-                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
+                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5 break-words">
                     {unit.debutRelease}
                   </dd>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <dt className="text-zinc-500 dark:text-zinc-400">Signature Track</dt>
-                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
+                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5 break-words">
                     &ldquo;{story.leadSingle}&rdquo;
                   </dd>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <dt className="text-zinc-500 dark:text-zinc-400">Sound Concept</dt>
-                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5">
+                  <dd className="font-medium text-zinc-950 dark:text-white mt-0.5 break-words">
                     {unit.concept}
                   </dd>
                 </div>
@@ -374,16 +358,16 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
 
               {/* Direct Spotify Action */}
               {relatedReleases[0]?.spotifyLink && (
-                <div className="pt-2">
+                <div className="pt-1 sm:pt-2">
                   <a
                     href={relatedReleases[0].spotifyLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] hover:underline"
+                    className="inline-flex items-center gap-2 min-h-8 [@media(pointer:coarse)]:min-h-11 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
                   >
-                    <FaSpotify className="w-4 h-4 text-[#1DB954]" />
+                    <FaSpotify className="w-4 h-4 text-[#1DB954] shrink-0" aria-hidden="true" />
                     <span>Listen to &ldquo;{story.leadSingle}&rdquo; on Spotify</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3 h-3 shrink-0" aria-hidden="true" />
                   </a>
                 </div>
               )}
@@ -392,45 +376,43 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
         </section>
 
         {/* ── 3. Editorial Story Feature (Immersive Journalistic Narrative) ── */}
-        <section className="py-14 sm:py-20 border-b border-zinc-200/70 dark:border-white/10">
-          <div className="max-w-3xl mb-8 sm:mb-10">
-            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
+        <section className="py-10 sm:py-16 lg:py-20 border-b border-zinc-200/70 dark:border-white/10">
+          <div className="max-w-3xl mb-5 sm:mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white text-balance">
               The Genesis of {unit.name}
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-14 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 lg:gap-14 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-300">
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold mb-2.5">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold mb-2">
                 Grand Gravity Formation
               </h3>
-              <p>{story.formationStory}</p>
+              <p className="text-pretty max-w-[65ch]">{story.formationStory}</p>
             </div>
             <div>
-              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold mb-2.5">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold mb-2">
                 Sound &amp; Impact
               </h3>
-              <p>{story.legacyStory}</p>
+              <p className="text-pretty max-w-[65ch]">{story.legacyStory}</p>
             </div>
           </div>
         </section>
 
         {/* ── 4. Collectible Member Lineup (Clean Photocards) ── */}
-        <section className="py-14 sm:py-20 border-b border-zinc-200/70 dark:border-white/10">
-          <div className="flex items-baseline justify-between mb-8 sm:mb-10">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
-                Lineup ({taggedMembers.length})
-              </h2>
-            </div>
-            <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+        <section className="py-10 sm:py-16 lg:py-20 border-b border-zinc-200/70 dark:border-white/10">
+          <div className="mb-5 sm:mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white text-balance">
+              Lineup ({taggedMembers.length})
+            </h2>
+            <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1 uppercase tracking-wider">
               Official formation members
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <ul role="list" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
             {taggedMembers.map(({ member, isLeader, color }, index) => (
-              <motion.div
+              <motion.li
                 key={member.id}
                 initial={
                   shouldReduceMotion
@@ -446,132 +428,133 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
               >
                 <Link
                   href={`/members/${member.slug}`}
-                  className="group block relative aspect-3/4.25 rounded-2xl overflow-hidden bg-zinc-950 active:scale-[0.98] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+                  className="group block relative aspect-3/4.25 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-950 active:scale-[0.98] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
                 >
-                  {/* Portrait Photograph */}
-                  <Image
-                    src={getSubUnitMemberImageUrl(unit.slug, member, isDark)}
-                    alt={`${member.name} (${member.birthName || member.name}) photocard`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover object-top transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+                  <article className="relative w-full h-full">
+                    {/* Portrait Photograph */}
+                    <ThemeImage
+                      src={getSubUnitMemberImageUrl(unit.slug, member, isDark)}
+                      alt={`${member.name} (${member.birthName || member.name}) photocard`}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover object-top transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
-                  {/* S-Number Badge */}
-                  <div className="absolute top-3 left-3 z-10 pointer-events-none">
-                    <span
-                      className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded shadow-xs"
-                      style={{ backgroundColor: color, color: getContrastingInk(color) }}
-                    >
-                      S{String(member.id).padStart(2, "0")}
-                    </span>
-                  </div>
-
-                  {/* Member Identity */}
-                  <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white z-10 pointer-events-none">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-base sm:text-lg font-display font-black tracking-tight text-white leading-tight">
-                        {member.name}
-                      </h3>
-                      {isLeader && (
-                        <>
-                          <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
-                          <span className="sr-only"> (Leader)</span>
-                        </>
-                      )}
+                    {/* S-Number Badge */}
+                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 pointer-events-none">
+                      <span
+                        className="text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-0.5 rounded shadow-xs"
+                        style={{ backgroundColor: color, color: getContrastingInk(color) }}
+                      >
+                        S{String(member.id).padStart(2, "0")}
+                      </span>
                     </div>
 
-                    <p className="text-[11px] font-mono text-zinc-300 truncate mt-0.5">
-                      {member.birthName || member.name} &bull; {member.role}
-                    </p>
-                  </div>
+                    {/* Member Identity */}
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-3.5 sm:left-3.5 sm:right-3.5 text-white z-10 pointer-events-none">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-sm sm:text-base lg:text-lg font-display font-black tracking-tight text-white leading-tight">
+                          {member.name}
+                        </h3>
+                        {isLeader && (
+                          <>
+                            <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" aria-hidden="true" />
+                            <span className="sr-only"> (Leader)</span>
+                          </>
+                        )}
+                      </div>
+
+                      <p className="text-[10px] sm:text-[11px] font-mono text-zinc-300 truncate mt-0.5">
+                        {member.birthName || member.name} &bull; {member.role}
+                      </p>
+                    </div>
+                  </article>
                 </Link>
-              </motion.div>
+              </motion.li>
             ))}
-          </div>
+          </ul>
         </section>
 
         {/* ── 5. Discography Feature ── */}
         {relatedReleases.length > 0 && (
-          <section className="py-14 sm:py-20 border-b border-zinc-200/70 dark:border-white/10">
-            <div className="mb-8 sm:mb-10">
-              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-1 flex items-center gap-1.5">
-                <Disc3 className="w-3.5 h-3.5" />
-                <span>Discography</span>
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
-                Release ({relatedReleases.length})
+          <section className="py-10 sm:py-16 lg:py-20 border-b border-zinc-200/70 dark:border-white/10">
+            <div className="mb-5 sm:mb-8 lg:mb-10">
+              <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white flex items-center gap-2.5 text-balance">
+                <Disc3 className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-400 dark:text-zinc-500 shrink-0" aria-hidden="true" />
+                <span>Discography ({relatedReleases.length})</span>
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+            <ul role="list" className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 lg:gap-12">
               {relatedReleases.map((album) => (
-                <div
-                  key={album.id}
-                  className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start sm:items-center"
-                >
-                  {/* Vinyl Jacket */}
-                  <div className="relative aspect-square w-full sm:w-44 shrink-0 rounded-2xl overflow-hidden shadow-xl bg-zinc-900 group">
-                    <Image
-                      src={album.cover || "/placeholder.svg"}
-                      alt={`${album.title} album cover`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 176px"
-                      className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
-                    />
-                  </div>
-
-                  {/* Album Info */}
-                  <div className="space-y-2.5 min-w-0">
-                    <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-500">
-                      <span className="uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold">
-                        {album.type}
-                      </span>
-                      <span>&bull;</span>
-                      <span>{album.releaseDate}</span>
+                <li key={album.id}>
+                  <article className="flex flex-row gap-4 sm:gap-6 lg:gap-8 items-start sm:items-center">
+                    {/* Vinyl Jacket */}
+                    <div className="relative aspect-square w-24 sm:w-40 lg:w-44 shrink-0 rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-xl bg-zinc-900 group">
+                      <Image
+                        src={album.cover || "/placeholder.svg"}
+                        alt={`${album.title} album cover`}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 640px) 96px, 176px"
+                        className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
+                      />
                     </div>
 
-                    <h3 className="text-xl sm:text-2xl font-display font-black text-zinc-950 dark:text-white leading-tight">
-                      {album.title}
-                    </h3>
-
-                    <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
-                      {album.description}
-                    </p>
-
-                    {album.spotifyLink && (
-                      <div className="pt-2">
-                        <a
-                          href={album.spotifyLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] hover:underline"
-                        >
-                          <FaSpotify className="h-4 w-4 text-[#1DB954]" />
-                          <span>Stream on Spotify</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+                    {/* Album Info */}
+                    <div className="space-y-1.5 sm:space-y-2.5 min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] sm:text-[11px] font-mono text-zinc-500">
+                        <span className="uppercase tracking-wider text-zinc-950 dark:text-[#D4FF00] font-bold">
+                          {album.type}
+                        </span>
+                        <span aria-hidden="true">&bull;</span>
+                        <span>{album.releaseDate}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
+
+                      <h3 className="text-base sm:text-xl lg:text-2xl font-display font-black text-zinc-950 dark:text-white leading-snug text-balance">
+                        {album.title}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed text-pretty line-clamp-2">
+                        {album.description}
+                      </p>
+
+                      {album.spotifyLink && (
+                        <div className="pt-1 sm:pt-2">
+                          <a
+                            href={album.spotifyLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 sm:gap-2 min-h-8 [@media(pointer:coarse)]:min-h-10 text-xs font-mono font-bold text-zinc-950 dark:text-[#D4FF00] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
+                          >
+                            <FaSpotify className="h-4 w-4 text-[#1DB954] shrink-0" aria-hidden="true" />
+                            <span>Stream on Spotify</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         )}
 
         {/* ── 6. Other Dimensions ── */}
-        <section className="pt-14 sm:pt-20">
-          <div className="flex items-end justify-between gap-4 mb-8 sm:mb-10">
-            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white">
+        <section className="pt-10 sm:pt-16 lg:pt-20">
+          <div className="flex items-end justify-between gap-4 mb-5 sm:mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-zinc-950 dark:text-white text-balance">
               Other Dimensions
             </h2>
             <Link
               href="/sub-units"
-              className="nav-draw-link group/all text-xs font-mono uppercase tracking-[0.16em] font-bold text-zinc-950 dark:text-[#D4FF00] pb-0.5 inline-flex items-center gap-1.5 shrink-0"
+              className="nav-draw-link group/all text-xs font-mono uppercase tracking-[0.16em] font-bold text-zinc-950 dark:text-[#D4FF00] pb-0.5 inline-flex items-center gap-1.5 min-h-8 [@media(pointer:coarse)]:min-h-11 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00] rounded-sm"
             >
-              <span>All {allUnits.length} Dimensions</span>
+              <span>All {allUnits.length}</span>
+              <span className="hidden sm:inline">Dimensions</span>
               <ArrowUpRight
                 className="h-3.5 w-3.5 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:translate-x-0.5 [@media(hover:hover)_and_(pointer:fine)]:group-hover/all:-translate-y-0.5 motion-reduce:transition-none"
                 aria-hidden="true"
@@ -579,41 +562,39 @@ export default function SubUnitDetailClient({ slug }: SubUnitDetailClientProps) 
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+          <ul role="list" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-7">
             {otherUnits.slice(0, 4).map((other) => (
-              <Link
-                key={other.id}
-                href={`/sub-units/${other.slug}`}
-                className="group block rounded-2xl active:scale-[0.99] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
-              >
-                <div className="relative aspect-3/2 rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900">
-                  <Image
-                    src={other.image || "/placeholder.svg"}
-                    alt={`${other.name} concept photo`}
-                    fill
-                    loading="lazy"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover object-center transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
-                  />
-                </div>
+              <li key={other.id}>
+                <Link
+                  href={`/sub-units/${other.slug}`}
+                  className="group block rounded-xl sm:rounded-2xl active:scale-[0.99] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
+                >
+                  <article>
+                    <div className="relative aspect-3/2 rounded-xl sm:rounded-2xl overflow-hidden bg-zinc-200/70 dark:bg-zinc-900">
+                      <Image
+                        src={other.image || "/placeholder.svg"}
+                        alt={`${other.name} concept photo`}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        className="object-cover object-center transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none"
+                      />
+                    </div>
 
-                <div className="mt-3 pt-2.5 border-t border-zinc-200/80 dark:border-white/10 space-y-1.5">
-                  <h3 className="min-h-10 flex items-center text-zinc-950 dark:text-white transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-zinc-600 dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:text-[#D4FF00]">
-                    <DimensionWordmark
-                      slug={other.slug}
-                      name={other.name}
-                      size="mini"
-                      className="w-full"
-                    />
-                  </h3>
-                  <p className="text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between gap-2">
-                    <span className="truncate">{other.era}</span>
-                    <span className="tabular-nums shrink-0">{other.members.length}M</span>
-                  </p>
-                </div>
-              </Link>
+                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-zinc-200/80 dark:border-white/10 space-y-1 sm:space-y-1.5">
+                      <h3 className="font-display font-bold text-sm sm:text-base lg:text-lg tracking-tight leading-snug text-balance text-zinc-950 dark:text-white transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-zinc-600 dark:[@media(hover:hover)_and_(pointer:fine)]:group-hover:text-[#D4FF00]">
+                        {other.name}
+                      </h3>
+                      <p className="text-[10px] sm:text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between gap-1.5 sm:gap-2">
+                        <span className="truncate">{other.era}</span>
+                        <span className="tabular-nums shrink-0">{other.members.length}M</span>
+                      </p>
+                    </div>
+                  </article>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
       </div>

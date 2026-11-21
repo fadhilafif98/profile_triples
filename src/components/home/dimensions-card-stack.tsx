@@ -23,6 +23,7 @@ import {
 import type { Member } from "@/types/member"
 import type { SubUnit } from "@/types/sub-unit"
 import DimensionWordmark from "@/components/dimension-wordmark"
+import ThemeImage from "@/components/theme-image"
 import {
   OFFICIAL_MEMBER_COLORS,
   getMemberImageUrl,
@@ -361,7 +362,7 @@ export default function DimensionsCardStack({
                         className="relative block w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 border-2"
                         style={{ borderColor: ringColor }}
                       >
-                        <Image
+                        <ThemeImage
                           src={imgSrc}
                           alt=""
                           fill

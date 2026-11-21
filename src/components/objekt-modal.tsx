@@ -17,6 +17,7 @@ import ObjektImage from "./objekt-image";
 import CosmoLogo from "./cosmo-logo";
 import { getClassBadgeStyle, getObjektCollectionSuffix } from "@/lib/objekts";
 import { getAllMembers, getMemberColor } from "@/lib/members";
+import { useObjektTilt } from "@/lib/objekt-tilt";
 import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y";
 
 interface ObjektModalProps {
@@ -41,6 +42,11 @@ export default function ObjektModal({
   const frontVideoRef = useRef<HTMLVideoElement>(null);
   const backVideoRef = useRef<HTMLVideoElement>(null);
   const shouldReduceMotion = useSafeReducedMotion();
+  const { ref: tiltRef, handlers: tiltHandlers } = useObjektTilt<HTMLDivElement>({
+    maxTilt: 11,
+    holoOpacity: 0.28,
+    allowTouch: true,
+  });
 
   // Reset states when selected objekt changes
   if (objekt?.id !== prevObjektId) {
@@ -154,88 +160,51 @@ export default function ObjektModal({
               aria-hidden="true"
             />
 
-            {/* 3D Flip Card Frame */}
-            <div className="group relative w-full max-w-65 sm:max-w-72.5 md:max-w-77.5 aspect-[1/1.55] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-black/10 dark:border-white/10 bg-zinc-100 dark:bg-zinc-900 select-none transition-transform hover:scale-[1.015] z-10 perspective-distant">
+            {/* 3D Tilt + Flip Card Frame */}
+            <div
+              ref={tiltRef}
+              {...tiltHandlers}
+              className="objekt-tilt-stage group relative w-full max-w-65 sm:max-w-72.5 md:max-w-77.5 aspect-[1/1.55] select-none touch-pan-y z-10"
+            >
+              {/* Primary click-to-flip button sits in 2D stage layer so it never intersects 3D faces */}
               <button
                 type="button"
                 onClick={toggleFlip}
                 aria-pressed={activeSide === "back"}
                 aria-label={`Flip ${activeObjekt.member} photocard to ${activeSide === "front" ? "back" : "front"} side`}
                 title="Click photo to flip front/back"
-                className="absolute inset-0 z-30 cursor-pointer rounded-[inherit] bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
-              />
-              {/* Member Color Top Foil Line */}
-              <div
-                className="absolute top-0 inset-x-0 h-1 z-30 shadow-sm pointer-events-none"
-                style={{ backgroundColor: memberColor }}
-                aria-hidden="true"
+                className="absolute inset-0 z-30 cursor-pointer rounded-2xl sm:rounded-3xl bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#08080A]"
               />
 
-              <div
-                className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d pointer-events-none"
-                style={{
-                  transform: activeSide === "front" ? "rotateY(0deg)" : "rotateY(180deg)",
-                }}
-              >
-                {/* Front Side */}
+              {/* Pure 3D transform pivot: NO background/border here so nothing at Z=0 slices the rotating card */}
+              <div className="objekt-tilt-body relative w-full h-full pointer-events-none">
                 <div
-                  className="absolute inset-0 w-full h-full"
-                  style={{ backfaceVisibility: "hidden" }}
-                >
-                  {activeObjekt.frontMedia ? (
-                    <video
-                      ref={frontVideoRef}
-                      src={activeObjekt.frontMedia}
-                      poster={activeObjekt.frontImage || activeObjekt.thumbnailImage}
-                      autoPlay={!shouldReduceMotion}
-                      loop={!shouldReduceMotion}
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <ObjektImage
-                      season={activeObjekt.season}
-                      member={activeObjekt.member}
-                      slug={activeObjekt.slug}
-                      side="front"
-                      fallbackSrc={activeObjekt.frontImage || activeObjekt.thumbnailImage}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-
-                  {/* Official COSMO Collection Code Overlay (Vertical Right Tab) */}
-                  {activeObjekt.collectionNo && (
-                    <div
-                      className="absolute right-0 top-0 bottom-0 w-[11.2%] flex items-center justify-center pointer-events-none select-none z-10"
-                      aria-hidden="true"
-                    >
-                      <span
-                        className="font-bold text-xs sm:text-sm md:text-[15px] tracking-[0.06em] whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
-                        style={{
-                          color: activeObjekt.textColor || "#000000",
-                        }}
-                      >
-                        {activeObjekt.collectionNo}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Back Side (Lazy mounted on first flip to prevent open-time blitz) */}
-                <div
-                  className="absolute inset-0 w-full h-full"
+                  className="w-full h-full relative transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none transform-3d"
                   style={{
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
+                    transform: activeSide === "front" ? "rotateY(0deg)" : "rotateY(180deg)",
                   }}
                 >
-                  {hasFlipped || activeSide === "back" ? (
-                    activeObjekt.backMedia ? (
+                  {/* Front Side */}
+                  <div
+                    className="absolute inset-0 w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] isolate"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      WebkitBackfaceVisibility: "hidden",
+                      transform: "rotateY(0deg) translateZ(1px)",
+                    }}
+                  >
+                    {/* Member Color Top Foil Line */}
+                    <div
+                      className="absolute top-0 inset-x-0 h-1 z-20 shadow-sm pointer-events-none"
+                      style={{ backgroundColor: memberColor }}
+                      aria-hidden="true"
+                    />
+
+                    {activeObjekt.frontMedia ? (
                       <video
-                        ref={backVideoRef}
-                        src={activeObjekt.backMedia}
-                        poster={activeObjekt.backImage}
+                        ref={frontVideoRef}
+                        src={activeObjekt.frontMedia}
+                        poster={activeObjekt.frontImage || activeObjekt.thumbnailImage}
                         autoPlay={!shouldReduceMotion}
                         loop={!shouldReduceMotion}
                         muted
@@ -247,24 +216,114 @@ export default function ObjektModal({
                         season={activeObjekt.season}
                         member={activeObjekt.member}
                         slug={activeObjekt.slug}
-                        side="back"
-                        fallbackSrc={activeObjekt.backImage}
+                        side="front"
+                        fallbackSrc={activeObjekt.frontImage || activeObjekt.thumbnailImage}
                         className="w-full h-full object-cover"
                       />
-                    )
-                  ) : (
-                    <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900" />
-                  )}
+                    )}
+
+                    {/* Holographic Photocard Foil Overlay (active face only to preserve backface culling) */}
+                    {activeSide === "front" && (
+                      <div className="objekt-holo absolute inset-0 z-10" aria-hidden="true" />
+                    )}
+
+                    {/* Official COSMO Collection Code Overlay (Vertical Right Tab) */}
+                    {activeObjekt.collectionNo && (
+                      <div
+                        className="absolute right-0 top-0 bottom-0 w-[11.2%] flex items-center justify-center pointer-events-none select-none z-10"
+                        aria-hidden="true"
+                      >
+                        <span
+                          className="font-bold text-xs sm:text-sm md:text-[15px] tracking-[0.06em] whitespace-nowrap rotate-90 leading-none select-none uppercase font-display"
+                          style={{
+                            color: activeObjekt.textColor || "#000000",
+                          }}
+                        >
+                          {activeObjekt.collectionNo}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Motion Badge Indicator */}
+                    {activeObjekt.frontMedia && (
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 border border-white/20 text-[0.6875rem] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20 pointer-events-none">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Motion MP4</span>
+                      </div>
+                    )}
+
+                    {/* Subtle Polished Bevel Rim */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.32),inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                    />
+                  </div>
+
+                  {/* Back Side (Lazy mounted on first flip; never reuses front photo if back is missing) */}
+                  <div
+                    className="absolute inset-0 w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden bg-[#08080A] border border-black/10 dark:border-white/10 shadow-xl shadow-zinc-950/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.9)] isolate"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      WebkitBackfaceVisibility: "hidden",
+                      transform: "rotateY(180deg) translateZ(1px)",
+                    }}
+                  >
+                    {/* Member Color Top Foil Line */}
+                    <div
+                      className="absolute top-0 inset-x-0 h-1 z-20 shadow-sm pointer-events-none"
+                      style={{ backgroundColor: memberColor }}
+                      aria-hidden="true"
+                    />
+
+                    {hasFlipped || activeSide === "back" ? (
+                      activeObjekt.backMedia && activeObjekt.backMedia !== activeObjekt.frontMedia ? (
+                        <video
+                          ref={backVideoRef}
+                          src={activeObjekt.backMedia}
+                          poster={
+                            activeObjekt.backImage && activeObjekt.backImage !== activeObjekt.frontImage
+                              ? activeObjekt.backImage
+                              : undefined
+                          }
+                          autoPlay={!shouldReduceMotion}
+                          loop={!shouldReduceMotion}
+                          muted
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ObjektImage
+                          season={activeObjekt.season}
+                          member={activeObjekt.member}
+                          slug={activeObjekt.slug}
+                          side="back"
+                          fallbackSrc={
+                            activeObjekt.backImage &&
+                            activeObjekt.backImage !== activeObjekt.frontImage &&
+                            activeObjekt.backImage !== activeObjekt.thumbnailImage
+                              ? activeObjekt.backImage
+                              : undefined
+                          }
+                          className="w-full h-full object-cover"
+                        />
+                      )
+                    ) : (
+                      <div className="w-full h-full bg-[#08080A]" />
+                    )}
+
+                    {/* Holographic Photocard Foil Overlay (active face only) */}
+                    {activeSide === "back" && (
+                      <div className="objekt-holo absolute inset-0 z-10" aria-hidden="true" />
+                    )}
+
+                    {/* Subtle Polished Bevel Rim */}
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 z-20 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.32),inset_0_0_0_1px_rgba(255,255,255,0.1)]"
+                    />
+                  </div>
                 </div>
               </div>
-
-              {/* Motion Badge Indicator */}
-              {activeObjekt.frontMedia && activeSide === "front" && (
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 border border-white/20 text-[0.6875rem] font-mono font-bold text-white uppercase tracking-wider shadow-md z-20 pointer-events-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Motion MP4</span>
-                </div>
-              )}
             </div>
 
             {/* Showcase Stage Controls: Front/Back Pill + Format Variant Switcher + 3D Flip Hint */}

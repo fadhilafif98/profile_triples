@@ -1,6 +1,6 @@
-import { use } from "react"
 import { notFound } from "next/navigation"
 import { getAllMembers, getMemberBySlug, getMemberImageUrl } from "@/lib/members"
+import { getLatestObjektForMember } from "@/lib/objekts"
 import MemberProfileClient from "./MemberProfileClient"
 import type { Metadata } from "next"
 
@@ -56,11 +56,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function MemberProfilePage({ params }: PageProps) {
-  const { slug } = use(params)
+export default async function MemberProfilePage({ params }: PageProps) {
+  const { slug } = await params
   const member = getMemberBySlug(slug)
 
   if (!member) notFound()
 
-  return <MemberProfileClient slug={slug} />
+  const latestObjekt = await getLatestObjektForMember(member.name)
+
+  return <MemberProfileClient slug={slug} initialLatestObjekt={latestObjekt} />
 }
