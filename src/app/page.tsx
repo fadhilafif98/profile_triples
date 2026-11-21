@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import dynamic from "next/dynamic"
 import HeroSection from "@/components/home/hero-section"
+import DimensionsCardStack from "@/components/home/dimensions-card-stack"
 import { getAllMembers } from "@/lib/members"
 import { getAllAlbums } from "@/lib/albums"
 import { getAllSubUnits } from "@/lib/sub-units"
@@ -8,7 +9,6 @@ import { getAllSubUnits } from "@/lib/sub-units"
 const VideoShowreelSection = dynamic(() => import("@/components/home/video-showreel-section"), { ssr: true })
 const HowItWorksSection = dynamic(() => import("@/components/home/how-it-works-section"), { ssr: true })
 const MusicArchiveSection = dynamic(() => import("@/components/home/music-archive-section"), { ssr: true })
-const DimensionsCardStack = dynamic(() => import("@/components/home/dimensions-card-stack"), { ssr: true })
 const BirthdayCountdown = dynamic(() => import("@/components/birthday-countdown"), { ssr: true })
 
 export const metadata: Metadata = {
@@ -57,8 +57,8 @@ export default function Home() {
       {/* 4. Music Archive (Unboxed Vinyl Sleeve + Spotify + Record Crate) */}
       <MusicArchiveSection albums={allAlbums} />
 
-      {/* 5. Featured Dimensions (Interactive 3D Perspective Card Stack) */}
-      <DimensionsCardStack subUnits={allSubUnits} />
+      {/* 5. Featured Dimensions (24-Matrix Dimension Assembler) */}
+      <DimensionsCardStack subUnits={allSubUnits} members={membersList} />
 
       {/* 6. Upcoming Birthdays */}
       <BirthdayCountdown members={membersList} />

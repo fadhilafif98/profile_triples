@@ -8,8 +8,9 @@ import { X, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { Member } from "@/types/member"
 import { getAllMembers, getMemberColor, getReadableMemberColor, getMemberImageUrl } from "@/lib/members"
 import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
+import { useIsDarkMode } from "@/lib/theme"
 
-const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect: (member: Member) => void }) => {
+const MemberCard = React.memo(({ member, isDark, onSelect }: { member: Member; isDark: boolean; onSelect: (member: Member) => void }) => {
   const memberColor = getMemberColor(member.id)
   const formattedId = member.id < 10 ? `0${member.id}` : `${member.id}`
   const [hoverGifReady, setHoverGifReady] = useState(false)
@@ -33,24 +34,25 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
         if (e.pointerType === "mouse") activateHoverGif()
       }}
       onFocus={activateHoverGif}
-      className="spotlight-card group relative aspect-3/4 w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
+      className="spotlight-card group relative aspect-3/4 w-full rounded-xl overflow-hidden text-left bg-zinc-100 dark:bg-[#0D0D12] border border-zinc-200 dark:border-white/10 shadow-sm transition-[border-color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
       aria-label={`View quick profile for S${member.id} ${member.name}`}
     >
       {/* 4px side-band in official MODHAUS member color */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 z-20 transition-[width] duration-300 group-hover:w-2"
+        className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 z-20 transition-[width] duration-300 [@media(hover:hover)_and_(pointer:fine)]:group-hover:w-2 motion-reduce:transition-none"
         style={{ backgroundColor: memberColor }}
         aria-hidden="true"
       />
 
       {/* Main portrait image */}
       <Image
-        src={getMemberImageUrl(member)}
+        src={getMemberImageUrl(member, isDark)}
         alt={`${member.name} (${member.birthName || member.name}) portrait`}
         fill
-        preload={member.id <= 6}
+        loading={member.id <= 6 ? "eager" : "lazy"}
+        fetchPriority={member.id <= 2 ? "high" : undefined}
         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
-        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        className="object-cover transition-transform duration-500 ease-out [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
       />
 
       {/* SIGNAL highlight GIF preview on hover */}
@@ -60,7 +62,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
           alt=""
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 object-cover w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          className="absolute inset-0 object-cover w-full h-full opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none motion-reduce:hidden"
           aria-hidden="true"
         />
       )}
@@ -95,6 +97,7 @@ const MemberCard = React.memo(({ member, onSelect }: { member: Member; onSelect:
 MemberCard.displayName = "MemberCard"
 
 export default function MemberGrid() {
+  const isDark = useIsDarkMode()
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const allMembers = getAllMembers()
   const modalRef = useRef<HTMLDialogElement>(null)
@@ -133,7 +136,7 @@ export default function MemberGrid() {
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
         {allMembers.map((member) => (
-          <MemberCard key={member.id} member={member} onSelect={setSelectedMember} />
+          <MemberCard key={member.id} member={member} isDark={isDark} onSelect={setSelectedMember} />
         ))}
       </div>
 
@@ -150,30 +153,30 @@ export default function MemberGrid() {
             <button
               type="button"
               onClick={handleClose}
-              className="fixed top-4 right-4 z-40 p-2.5 rounded-full bg-black/70 hover:bg-black text-white border border-white/20 transition-colors shadow-lg"
+              className="fixed top-4 right-4 z-40 p-2.5 rounded-full bg-black/70 hover:bg-black text-white border border-white/20 transition-colors shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4FF00]"
               aria-label="Close card inspect"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
 
             {/* Previous Member Button (Desktop) */}
             <button
               type="button"
               onClick={() => setSelectedMember(prevMember)}
-              className="hidden sm:flex fixed left-4 lg:left-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
+              className="hidden sm:flex fixed left-4 lg:left-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4FF00]"
               aria-label={`Previous member: S${prevMember.id} ${prevMember.name}`}
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
 
             {/* Next Member Button (Desktop) */}
             <button
               type="button"
               onClick={() => setSelectedMember(nextMember)}
-              className="hidden sm:flex fixed right-4 lg:right-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg"
+              className="hidden sm:flex fixed right-4 lg:right-12 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/15 transition-colors shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4FF00]"
               aria-label={`Next member: S${nextMember.id} ${nextMember.name}`}
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" aria-hidden="true" />
             </button>
 
             {/* Vertical Objekt Photocard */}
@@ -197,7 +200,7 @@ export default function MemberGrid() {
 
               {/* Full Portrait Photo */}
               <Image
-                src={getMemberImageUrl(selectedMember)}
+                src={getMemberImageUrl(selectedMember, isDark)}
                 alt={`${selectedMember.name} (${selectedMember.birthName || selectedMember.name}) photocard portrait`}
                 fill
                 sizes="(max-width: 640px) 360px, 400px"

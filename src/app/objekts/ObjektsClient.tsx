@@ -30,6 +30,7 @@ import SeasonDropdown from "@/components/season-dropdown";
 import Breadcrumb from "@/components/breadcrumb";
 import TriplesLogo from "@/components/triples-logo";
 import { useSafeReducedMotion } from "@/lib/a11y";
+import { useIsDarkMode } from "@/lib/theme";
 
 type SortOption = ObjektSortOption;
 
@@ -63,6 +64,7 @@ export default function ObjektsClient({
 }: ObjektsClientProps) {
   const searchParams = useSearchParams();
   const shouldReduceMotion = useSafeReducedMotion();
+  const isDark = useIsDarkMode();
   const [fullObjekts, setFullObjekts] = useState<Objekt[] | null>(null);
   const [loadingFull, setLoadingFull] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -479,7 +481,7 @@ export default function ObjektsClient({
                   >
                     <div className="relative w-full h-full rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10">
                       <Image
-                        src={getMemberImageUrl(m)}
+                        src={getMemberImageUrl(m, isDark)}
                         alt={`${m.name} (S${m.id}) avatar`}
                         fill
                         sizes="56px"

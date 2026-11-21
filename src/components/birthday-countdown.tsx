@@ -8,6 +8,7 @@ import {
   Cake,
 } from "lucide-react";
 import { OFFICIAL_MEMBER_COLORS, getMemberImageUrl } from "@/lib/members";
+import { useIsDarkMode } from "@/lib/theme";
 import type { Member } from "@/types/member";
 
 interface BirthdayCountdownProps {
@@ -117,6 +118,7 @@ function computeBirthdayMeta(
 }
 
 export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
+  const isDark = useIsDarkMode();
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -438,7 +440,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                 className="relative block w-full h-full rounded-2xl overflow-hidden shadow-[0_24px_48px_-14px_rgba(9,9,11,0.18)] dark:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.85)] bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-[#D4FF00]"
               >
                 <Image
-                  src={getMemberImageUrl(activeMember)}
+                  src={getMemberImageUrl(activeMember, isDark)}
                   alt={`${sCode} ${activeMember.name} First Class Objekt portrait`}
                   fill
                   sizes="(max-width: 640px) 260px, (max-width: 1024px) 300px, 320px"
@@ -673,7 +675,7 @@ export default function BirthdayCountdown({ members }: BirthdayCountdownProps) {
                         style={{ borderColor: mRing }}
                       >
                         <Image
-                          src={getMemberImageUrl(m)}
+                          src={getMemberImageUrl(m, isDark)}
                           alt=""
                           fill
                           sizes="28px"

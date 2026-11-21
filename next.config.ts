@@ -12,7 +12,11 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     qualities: [75, 90],
-    minimumCacheTTL: 2592000, // 30 days (1 month edge cache)
+    minimumCacheTTL: process.env.NODE_ENV === "development" ? 0 : 2592000, // 0 in dev, 30 days on production edge
+    localPatterns: [
+      { pathname: "/members/**" },
+      { pathname: "/**", search: "" },
+    ],
     remotePatterns: [
       {
         protocol: 'https',

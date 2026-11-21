@@ -18,6 +18,7 @@ import { members, getMemberBySlug, getMemberColor, getReadableMemberColor, getMe
 import { getAllSubUnits } from "@/lib/sub-units"
 import Breadcrumb from "@/components/breadcrumb"
 import { useDialogA11y, useSafeReducedMotion } from "@/lib/a11y"
+import { useIsDarkMode } from "@/lib/theme"
 
 // ─── Career Activities Timeline Data ─────────────────────────────────────────
 const careerMap: Record<number, string[]> = {
@@ -326,6 +327,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
   const [activePhoto, setActivePhoto] = useState<string | null>(null)
   const [dimensionPage, setDimensionPage] = useState(0)
   const shouldReduceMotion = useSafeReducedMotion()
+  const isDark = useIsDarkMode()
 
   // More tripleS Slider Drag State & Auto-Center
   const memberSliderRef = useRef<HTMLDivElement>(null)
@@ -484,7 +486,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
             <div className="lg:col-span-5">
               <button
                 type="button"
-                onClick={() => setActivePhoto(getMemberImageUrl(member))}
+                onClick={() => setActivePhoto(getMemberImageUrl(member, isDark))}
                 onPointerEnter={(e) => {
                   if (
                     e.pointerType === "mouse" &&
@@ -528,12 +530,13 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
                 {/* Portrait Image */}
                 <Image
-                  src={getMemberImageUrl(member)}
+                  src={getMemberImageUrl(member, isDark)}
                   alt={`${member.name} (${member.birthName || member.name}) official profile portrait`}
                   fill
                   preload
+                  fetchPriority="high"
                   sizes="(max-width: 1024px) 100vw, 42vw"
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover object-top transition-transform duration-700 [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
                 />
 
                 {/* Silky Crossfade GIF on Hover */}
@@ -855,36 +858,30 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* 1. Official Concept Portrait */}
-            <div
-              onClick={() => setActivePhoto(getMemberImageUrl(member))}
-              className="spotlight-card relative aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm"
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setActivePhoto(getMemberImageUrl(member))
-                }
-              }}
+            <button
+              type="button"
+              onClick={() => setActivePhoto(getMemberImageUrl(member, isDark))}
+              className="spotlight-card relative block w-full text-left aspect-3/4 rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 cursor-zoom-in group shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-950 dark:focus-visible:outline-[#D4FF00]"
               aria-label={`Enlarge official concept photo of ${member.name}`}
             >
               <Image
-                src={getMemberImageUrl(member)}
+                src={getMemberImageUrl(member, isDark)}
                 alt={`${member.name} official concept portrait`}
                 fill
-                preload
+                loading="lazy"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                className="object-cover object-top transition-transform duration-500 [@media(hover:hover)_and_(pointer:fine)]:group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none"
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center motion-reduce:transition-none">
                 <span className="inline-flex items-center gap-1.5 text-xs font-mono px-3.5 py-1.5 rounded-full bg-black/80 border border-white/20 text-white">
-                  <Maximize2 className="h-3 w-3" />
+                  <Maximize2 className="h-3 w-3" aria-hidden="true" />
                   <span>Inspect View</span>
                 </span>
-              </div>
-              <div className="absolute bottom-3.5 left-4 text-[11px] font-mono text-white drop-shadow-md">
+              </span>
+              <span className="block absolute bottom-3.5 left-4 text-[11px] font-mono text-white drop-shadow-md">
                 Official Concept Photo
-              </div>
-            </div>
+              </span>
+            </button>
 
             {/* 2. Live SIGNAL Moment (GIF) */}
             {member.gif ? (
@@ -1161,7 +1158,7 @@ export default function MemberProfileClient({ slug }: MemberProfileClientProps) 
                       aria-hidden="true"
                     />
                     <Image
-                      src={getMemberImageUrl(m)}
+                      src={getMemberImageUrl(m, isDark)}
                       alt={`${m.name} (S${m.id}) profile photo`}
                       fill
                       sizes="(max-width: 640px) 130px, 180px"

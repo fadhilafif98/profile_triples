@@ -15,7 +15,7 @@ colors:
   cosmo-violet: "#7C3AED"
 typography:
   display:
-    fontFamily: "Syne, Pretendard, sans-serif"
+    fontFamily: "Pretendard Variable, Pretendard, sans-serif"
     fontSize: "3rem"
     fontWeight: 900
     lineHeight: 1.05
@@ -138,28 +138,28 @@ The color palette is strictly locked, adapting the creative standards of high-fa
 | Role | Font Family | Variable / Utility | Character & Usage Rules |
 | :--- | :--- | :--- | :--- |
 | **Luxury Monogram & Flourish** | `Pinyon Script` | `var(--font-accent)` / `.font-accent` | Ornate calligraphic flourish, high-fashion contrast, looping vertical swashes. The visual gravity center of the website. Strictly for keyword accents, **never** for body text. |
-| **Display & Headline** | `Syne` | `var(--font-display)` / `font-display` | Parisian art direction, organic artistic curves, tight tracking, weight `font-black` (900) or `font-bold` (700). |
+| **Display & Headline** | `Pretendard Variable` | `var(--font-display)` / `font-display` | Variable weight `45–920`, tight neo-grotesque display geometry with native Latin + Hangul parity matching MODHAUS editorial craft; weight `font-black` (900), `font-extrabold` (800), or `font-bold` (700). |
 | **Body & Navigation** | `Manrope` | `var(--font-body)` / `font-sans` | Clean geometric neo-grotesque, ultra-legible, modern agency standard. Max line-length: `65ch`. |
 | **Technical Metadata & S-Number** | `JetBrains Mono` | `var(--font-mono)` / `font-mono` | Technical stats, countdown timers, S-numbers, release dates. **No surrounding brackets** (`S1`, `2026.08`, never `[ S1 ]`). |
 
-> **BANNED TYPOGRAPHY**: Using `Inter`, `Fraunces`, `font-pretendard` indiscriminately (Pretendard is only a Korean Hangul system fallback), or generic serifs without brand justification is strictly prohibited.
+> **BANNED TYPOGRAPHY**: Using `Inter`, `Fraunces`, or generic serifs without brand justification is strictly prohibited.
 
 ### B. Locked Heading Scale & Hierarchy Architecture
 
 | Level | Token / CSS Classes | Font & Weight | Scope / Purpose |
 | :--- | :--- | :--- | :--- |
-| **`H1 - Main Page Title`** | `text-3xl xs:text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] sm:whitespace-nowrap` | `Syne` (900 `font-black`) | Primary title across all catalog pages (`/members`, `/albums`, `/sub-units`, `/objekts`, `/about`, `/credits`). Locked single-line without wrapping. |
+| **`H1 - Main Page Title`** | `text-3xl xs:text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05] sm:whitespace-nowrap` | `Pretendard Variable` (900 `font-black`) | Primary title across all catalog pages (`/members`, `/albums`, `/sub-units`, `/objekts`, `/about`, `/credits`). Locked single-line without wrapping. |
 | **`H1 - Script Flourish`** | `font-accent text-4xl xs:text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1` | `Pinyon Script` (400) | Calligraphic keyword flourish within H1. |
-| **`H1 - Detail Page`** | `text-4xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]` | `Syne` (900 `font-black`) | Individual name title on profile/detail pages (`/members/[slug]`, `/sub-units/[slug]`). |
-| **`H2 - Major Section`** | `text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]` | `Syne` (900 `font-black`) | Primary section title on pages. |
+| **`H1 - Detail Page`** | `text-4xl sm:text-5xl md:text-6xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]` | `Pretendard Variable` (900 `font-black`) | Individual name title on profile/detail pages (`/members/[slug]`, `/sub-units/[slug]`). |
+| **`H2 - Major Section`** | `text-3xl sm:text-4xl lg:text-5xl font-display font-black tracking-tight text-zinc-950 dark:text-white leading-[1.05]` | `Pretendard Variable` (900 `font-black`) | Primary section title on pages. |
 | **`H2 - Section Flourish`**| `font-accent text-4xl sm:text-5xl lg:text-6xl font-normal text-zinc-950 dark:text-[#D4FF00] inline-block px-1` | `Pinyon Script` (400) | Calligraphic keyword flourish within H2 sections. |
-| **`H2 - Detail Section`** | `text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight` | `Syne` (900 `font-black`) | Sub-sections on detail pages or preview modals (`Trajectory`, `Visual Archive`, `Formations`). |
-| **`H3 - Module / Card`** | `text-xl sm:text-2xl font-display font-black text-zinc-950 dark:text-white tracking-tight` | `Syne` (900 `font-black`) | Architectural module/card titles (e.g. Stage 01–03 on About, Card titles). |
-| **`H4 - Micro Title`** | `text-base sm:text-lg font-display font-bold text-zinc-950 dark:text-white tracking-tight` | `Syne` (700 `font-bold`) | Micro metadata group title or stack item in Credits. |
+| **`H2 - Detail Section`** | `text-2xl sm:text-3xl font-display font-black text-zinc-950 dark:text-white tracking-tight` | `Pretendard Variable` (900 `font-black`) | Sub-sections on detail pages or preview modals (`Trajectory`, `Visual Archive`, `Formations`). |
+| **`H3 - Module / Card`** | `text-xl sm:text-2xl font-display font-black text-zinc-950 dark:text-white tracking-tight` | `Pretendard Variable` (900 `font-black`) | Architectural module/card titles (e.g. Stage 01–03 on About, Card titles). |
+| **`H4 - Micro Title`** | `text-base sm:text-lg font-display font-bold text-zinc-950 dark:text-white tracking-tight` | `Pretendard Variable` (700 `font-bold`) | Micro metadata group title or stack item in Credits. |
 | **`Lead Subtitle`** | `text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed pt-1` | `Manrope` (`font-sans`) | Introductory description directly beneath H1. |
 
 ### Strict Heading Anti-Regression Rules:
-1. **Font Consistency**: All `h1`, `h2`, `h3` elements must use `font-display` (`Syne`) with weight `font-black`.
+1. **Font Consistency**: All `h1`, `h2`, `h3` elements must use `font-display` (`Pretendard Variable`) with weight `font-black`.
 2. **Single-Line H1 Lock**: All catalog page H1 titles must remain on a single line (`sm:whitespace-nowrap`) without awkward multi-line line breaks (`About tripleS`, `Official Discography`, `Sub-Units & Dimensions`, `Twenty-four, in order`, `Objekts Vault`, `Official Credits`). Restricting header wrapper width with `max-w-3xl` that forces vertical text stacking is prohibited.
 3. **No-Pill/Bar Above H1**: Never place status bars, pill chips, or metadata tags above H1 titles. Transition from `<Breadcrumb />` directly to the `<h1>` title must be clean and consistent across all pages.
 4. **Flourish Padding**: Calligraphic `Pinyon Script` accent words in H1/H2 must have horizontal padding `inline-block px-1` to prevent italic/swash glyph clipping at container bounds.
@@ -373,7 +373,7 @@ All button and interactive components are consolidated in official utility class
 ### Pre-Flight Anti-Slop Quality Gate
 
 Before submitting or committing interface changes, verify this checklist:
-- [ ] No unauthorized fonts used (`font-pretendard`, `font-inter`, or generic serifs); only `Syne`, `Manrope`, `Pinyon Script`, and `JetBrains Mono`.
+- [ ] No unauthorized fonts used (`Inter`, `Fraunces`, or unmotivated generic serifs); only `Pretendard Variable`, `Manrope`, `Pinyon Script`, and `JetBrains Mono`.
 - [ ] All `h1`, `h2`, `h3` headings use `font-display` with weight `font-black`.
 - [ ] Catalog H1 titles are locked to a single line (`sm:whitespace-nowrap`) with zero status bars or pills above them.
 - [ ] All `Pinyon Script` calligraphic accents (`.font-accent`) include padding `inline-block px-1`.

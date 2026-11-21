@@ -4,8 +4,11 @@ import { useEffect, useRef, type CSSProperties, type MouseEvent } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import WavWordmark from "@/components/wav-wordmark"
+import { getHeroCoverImageUrl } from "@/lib/members"
+import { useIsDarkMode } from "@/lib/theme"
 
 export default function HeroSection() {
+  const isDark = useIsDarkMode()
   const imageRef = useRef<HTMLDivElement>(null)
   const reduceMotionRef = useRef(false)
 
@@ -45,16 +48,21 @@ export default function HeroSection() {
       <div
         ref={imageRef}
         aria-hidden="true"
-        className="absolute inset-0 z-0 scale-[1.01] origin-center transition-transform duration-700 ease-out"
+        className="absolute inset-0 z-0 scale-[1.01] origin-center transition-transform duration-700 ease-out motion-reduce:transition-none"
       >
         <Image
-          src="/home/triples_hero.jpg"
+          src={getHeroCoverImageUrl(isDark)}
           alt="tripleS 24-member full group assemble portrait"
           fill
           preload
+          fetchPriority="high"
           sizes="100vw"
           quality={90}
-          className="object-cover object-[center_28%] sm:object-[center_28%] lg:object-[center_25%] brightness-[1.02] contrast-[1.04]"
+          className={`object-cover brightness-[1.02] contrast-[1.04] ${
+            isDark
+              ? "object-[center_58%] sm:object-[center_56%] lg:object-[center_55%] scale-[1.06]"
+              : "object-[center_28%] sm:object-[center_28%] lg:object-[center_25%]"
+          }`}
         />
 
         {/* Top Vignette: Preserves fixed navbar legibility */}
@@ -120,11 +128,10 @@ export default function HeroSection() {
             <WavWordmark className="h-3.5 text-white/90 hidden sm:inline-block" />
             <Link
               href="/members"
-              className="group inline-flex items-center gap-2 text-white hover:text-[#D4FF00] focus-visible:text-[#D4FF00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm transition-colors font-medium underline underline-offset-4 pointer-events-auto text-xs"
-              aria-label="Explore all 24 member profiles directory"
+              className="group inline-flex items-center gap-2 text-white hover:text-[#D4FF00] focus-visible:text-[#D4FF00] focus-visible:outline-2 focus-visible:outline-[#D4FF00] focus-visible:outline-offset-2 rounded-sm transition-colors font-medium underline underline-offset-4 pointer-events-auto text-xs"
             >
               <span>Explore All 24 Members</span>
-              <span aria-hidden="true" className="inline-block transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
+              <span aria-hidden="true" className="inline-block transition-transform duration-200 [@media(hover:hover)_and_(pointer:fine)]:group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:transform-none">&rarr;</span>
             </Link>
           </div>
         </nav>
